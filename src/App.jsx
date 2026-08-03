@@ -23,20 +23,33 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // 1. Core Data Stores with LocalStorage Persistence
+  // 1. Core Data Stores with LocalStorage Persistence & Safe Error Handling
   const [smtpConfig, setSmtpConfig] = useState(() => {
-    const saved = localStorage.getItem('skillbridge_smtpConfig');
-    return saved ? JSON.parse(saved) : { mode: 'gmail', user: 'outreach@skillbridge.org', pass: '' };
+    try {
+      const saved = localStorage.getItem('skillbridge_smtpConfig');
+      return saved ? JSON.parse(saved) : { mode: 'gmail', user: 'outreach@skillbridge.org', pass: '' };
+    } catch (e) {
+      return { mode: 'gmail', user: 'outreach@skillbridge.org', pass: '' };
+    }
   });
 
   const [recipients, setRecipients] = useState(() => {
-    const saved = localStorage.getItem('skillbridge_recipients');
-    return saved ? JSON.parse(saved) : INITIAL_RECIPIENTS;
+    try {
+      const saved = localStorage.getItem('skillbridge_recipients');
+      const parsed = saved ? JSON.parse(saved) : null;
+      return (Array.isArray(parsed) && parsed.length > 0) ? parsed : INITIAL_RECIPIENTS;
+    } catch (e) {
+      return INITIAL_RECIPIENTS;
+    }
   });
 
   const [campaignConfig, setCampaignConfig] = useState(() => {
-    const saved = localStorage.getItem('skillbridge_campaignConfig');
-    return saved ? JSON.parse(saved) : INITIAL_CAMPAIGN;
+    try {
+      const saved = localStorage.getItem('skillbridge_campaignConfig');
+      return saved ? JSON.parse(saved) : INITIAL_CAMPAIGN;
+    } catch (e) {
+      return INITIAL_CAMPAIGN;
+    }
   });
 
   // Received Replies Inbox state
