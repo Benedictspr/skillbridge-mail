@@ -305,7 +305,7 @@ export default function App() {
     await fetchSentHistoryFromBackend();
   };
 
-  // Queue Execution Engine Loop with Randomized 5-10 Second Anti-Spam Pacing Delay
+  // Queue Execution Engine Loop with Automatic 1-by-1 Continuous Pacing
   useEffect(() => {
     if (campaignStatus !== 'SENDING') {
       isSendingRef.current = false;
@@ -319,7 +319,7 @@ export default function App() {
 
     if (!nextRecipient) {
       setCampaignStatus('COMPLETED');
-      addLog('Campaign complete. All recipients have received individual messages.', 'success');
+      addLog('Campaign complete! All recipients in roster have received individual emails.', 'success');
       confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
       isSendingRef.current = false;
       return;
@@ -327,14 +327,16 @@ export default function App() {
 
     isSendingRef.current = true;
 
-    // Randomized 5 to 10 second delay between dispatches to protect Gmail reputation
-    const delayMs = Math.floor(Math.random() * 5000) + 5000;
-    const delaySec = (delayMs / 1000).toFixed(1);
+    // Use user-configured intervalSeconds (e.g. 5s, 8s, 10s, 15s)
+    const intervalSec = Math.max(2, campaignConfig?.intervalSeconds || 7);
+    const delayMs = intervalSec * 1000;
 
-    setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === nextRecipient.id ? { ...r, status: 'Sending' } : r));
-    addLog(`Pacing Engine: Waiting ${delaySec}s before sending to ${nextRecipient.firstName || 'Friend'} (${nextRecipient.email}) [5-10s delay protection active]...`, 'sending');
+    addLog(`Pacing Engine: Waiting ${intervalSec}s before sending to ${nextRecipient.firstName || 'Friend'} (${nextRecipient.email})...`, 'sending');
 
     const timer = setTimeout(async () => {
+      // Mark as Sending right when dispatching payload to backend
+      setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === nextRecipient.id ? { ...r, status: 'Sending' } : r));
+
       const success = await dispatchEmailToBackend(nextRecipient);
       setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === nextRecipient.id ? { ...r, status: success ? 'Sent' : 'Failed' } : r));
       await fetchSentHistoryFromBackend();
@@ -342,7 +344,7 @@ export default function App() {
     }, delayMs);
 
     return () => clearTimeout(timer);
-  }, [campaignStatus, recipients, campaignConfig, smtpConfig]);
+  }, [campaignStatus, recipients, campaignConfig?.intervalSeconds]);
 
   return (
     <div className="min-h-screen bg-[#D4F1E8] flex flex-col font-sans">
