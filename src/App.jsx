@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import confetti from 'canvas-confetti';
 import AppHeader from './components/AppHeader';
 import AppSidebar from './components/AppSidebar';
 import AppRightPanel from './components/AppRightPanel';
@@ -13,7 +14,7 @@ import GmailComposeModal from './components/GmailComposeModal';
 import { INITIAL_RECIPIENTS, INITIAL_CAMPAIGN, SKILLBRIDGE_STUDENTS } from './mockData';
 import { extractFirstNameFromEmail } from './utils/nameParser';
 
-const DOODLE_B64_IMAGE = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA1MDAgNDAiIGZpbGw9Im5vbmUiPgogIDwhLS0gTGVmdCBEYXNoZWQgQXhpcyAtLT4KICA8bGluZSB4MT0iMTUiIHkxPSIyMCIgeDI9Ijg1IiB5Mj0iMjAiIHN0cm9rZT0iIzcxODA5NiIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1kYXNoYXJyYXk9IjQgMyIgLz4KICAKICA8IS0tIExlZnQgRmxvdXJpc2ggLS0+CiAgPHBhdGggZD0iTSA4NSAyMCBDIDkyIDE0IDk8IDEyIDEwMiA4IE0gODUgMjAgQyA5MiAyNCA5NiAyMiAxMDIgMjIgTSA5MCAyMCBDIDkz IDE2IDk3IDE0IDEwMCAxMSIgc3Ryb2tlPSIjQTBBRUMwIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiAvPgogIAogIDwhLS0gTW90aWYgMTogSUQgLyBDZXJ0aWZpY2F0ZSBDYXJkICh4PTExNSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1LCA4KSIgc3Ryb2tlPSIjQ0JENUUwIiBzdHJva2Utd2lkdGg9IjEuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxyZWN0IHg9IjIiIHk9IjIiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxOCIgcng9IjMiIC8+CiAgICA8Y2lyY2xlIGN4PSI4IiBjeT0iOSIgcj0iMi41IiAvPgogICAgPHBhdGggZD0iTSA0IDE3IEMgNCAxNCA2 IDEzIDggMTMgQyAxMCAxMyAxMiAxNCAxMiAxNyIgLz4KICAgIDxsaW5lIHgxPSIxMyIgeTE9IjciIHgyPSIyMCIgeTI9IjciIC8+CiAgICA8bGluZSB4MT0iMTMiIHkxPSIxMSIgeDI9IjE5IiB5Mj0iMTEiIC8+CiAgICA8bGluZSB4MT0iMTMiIHkxPSIxNSIgeDI9IjE3IiB5Mj0iMTUiIC8+CiAgPC9nPgoKICA8IS0tIE1vdGlmIDI6IE9wZW4gQm9vayAoeD0xNjUpIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2NSwgOCkiIHN0cm9rZT0iI0UyRThGMCIgc3Ryb2tlLXdpZHRoPSIxLjQiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CiAgICA8cGF0aCBkPSJNIDIgNiBDIDEyIDMgMjAgNSAyMyA3IEMgMjYgNSAzNCAzIDQ0IDYgViAyMCBDIDM0IDE3IDI2IDE5IDIzIDE4IEMgMjAgMTkgMTIgMTcgMiAyMCBaIiAvPgogICAgPGxpbmUgeDE9IjIzIiB5MT0iNyIgeDI9IjIzIiB5Mj0iMTgiIC8+CiAgICA8cGF0aCBkPSJNIDYgMTAgQyAxMSA4IDE2IDkgMTkgMTAgTSA2IDE0IEMgMTEgMTIgMTYgMTMgMTkgMTQgTSAyNyAxMCBDIDMwIDkgMzUgOCA0MCAxMCBNIDI3IDE0IEMgMzAgMTMgMzUgMTIgNDAgMTQiIC8+CiAgPC9nPgoKICA8IS0tIE1vdGlmIDM6IENlbnRlcnBpZWNlIEdyYWR1YXRpb24gQ2FwIHdpdGggVGFzc2VsICh4PTIyNSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjI1LCAyKSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjUsMiA0OCwxMiAyNSwyMiAyLDEyIiBmaWxsPSIjRTJFOEYwIiBmaWxsLW9wYWNpdHk9IjAuMSIgLz4KICAgIDxwYXRoIGQ9Ik0gMTAgMTYgViAyMyBDIDEwIDI2IDQwIDI2IDQwIDIzIFYgMTYiIC8+CiAgICA8Y2lyY2xlIGN4PSIyNSIgY3k9IjEyIiByPSIyIiBmaWxsPSIjRkZGRkZGIiAvPgogICAgPHBhdGggZD0iTSAyNSAxMiBDIDE2IDE0IDkgMjAgNyAyNSIgLz4KICAgIDxwb2x5Z29uIHBvaW50cz0iNSwyNSA5LDMwIDQsMzAiIGZpbGw9IiNGRkZGRkYiIC8+CiAgPC9nPgoKICA8IS0tIE1vdGlmIDQ6IE1pY3Jvc2NvcGUgKHg9Mjk1KSAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyOTUsIDYpIiBzdHJva2U9IiNDQkQ1RTAiIHN0cm9rZS13aWR0aD0iMS40IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPGxpbmUgeDE9IjQiIHkxPSIyNCIgeDI9IjIyIiB5Mj0iMjQiIC8+CiAgICA8bGluZSB4MT0iMTMiIHkxPSIyNCIgeDI9IjEzIiB5Mj0iMTgiIC8+CiAgICA8cGF0aCBkPSJNIDEzIDE0IEMgMTggMTQgMjAgOSAxOCA1IEMgMTYgMiAxMSAyIDkgNSBMIDEzIDE0IiAvPgogICAgPHJlY3QgeD0iOCIgeT0iNyIgd2lkdGg9IjUiIGhlaWghtPSI3IiByeD0iMSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDEwIDEwKSIgLz4KICAgIDxjaXJjbGUgY3g9IjE3IiBjeT0iMTgiIHI9IjEuNSIgLz4KICA8L2c+CgogIDwhLS0gTW90aWYgNTogUXVpbGwgUGVuICYgSW5rcG90ICh4PTM0NSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzQ1LCA2KSIgc3Ryb2tlPSIjRTJFOEYwIiBzdHJva2Utd2lkdGg9IjEuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxwYXRoIGQ9Ik0gMjAgMiBDIDEyIDUgNyAxNCA1IDI0IE0gMjAgMiBDIDE2IDggMTYgMTUgMTggMjEiIC8+CiAgICA8bGluZSB4MT0iMTUiIHkxPSI3IiB4Mj0iMTkiIHkyPSI5IiAvPgogICAgPGxpbmUgeDE9IjE0IiB5MT0iMTEiIHgyPSIxOCIgeTI9IjEzIiAvPgogICAgPGxpbmUgeDE9IjEzIiB5MT0iMTUiIHgyPSIxNyIgeTI9IjE3IiAvPgogICAgPHJlY3QgeD0iMiIgeT0iMTciIHdpZHRoPSI4IiBoZWlnaHQ9IjciIHJ4PSIxIiAvPgogICAgPHBhdGggZD0iTSA0IDE3IFYgMTQgSDggViAxNyIgLz4KICA8L2c+CgogIDwhLS0gUmlnaHQgRmxvdXJpc2ggLS0+CiAgPGcgc3Ryb2tlPSIjQTBBRUMwIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxwYXRoIGQ9Ik0gNDE1IDIwIEMgNDA4IDE0IDQwMiAxMiAzOTggOCBNIDQxNSAyMCBDIDQwOCAyNCA0MDQgMjIgMzk4IDIyIE0gNDEwIDIwIEMgNDA3IDE2IDQwMyAxNCA0MDAgMTEiIC8+CiAgPC9nPgoKICA8IS0tIFJpZ2h0IERhc2hlZCBBeGlzIC0tPgogIDxsaW5lIHgxPSI0MTUiIHkxPSIyMCIgeDI9IjQ4NSIgeTI9IjIwIiBzdHJva2U9IiM3MTgwOTYiIHN0cm9rZS13aWR0aD0iMS4yIiBzdHJva2UtZGFzaGFycmF5PSI0IDMiIC8+Cjwvc3ZnPg==`;
+const DOODLE_B64_IMAGE = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA1MDAgNDAiIGZpbGw9Im5vbmUiPgogIDwhLS0gTGVmdCBEYXNoZWQgQXhpcyAtLT4KICA8bGluZSB4MT0iMTUiIHkxPSIyMCIgeDI9Ijg1IiB5Mj0iMjAiIHN0cm9rZT0iIzcxODA5NiIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1kYXNoYXJyYXk9IjQgMyIgLz4KICAKICA8IS0tIExlZnQgRmxvdXJpc2ggLS0+CiAgPHBhdGggZD0iTSA4NSAyMCBDIDkyIDE0IDk8IDEyIDEwMiA4IE0gODUgMjAgQyA5MiAyNCA5NiAyMiAxMDIgMjIgTSA5MCAyMCBDIDkz IDE2IDk3 IDE0IDEwMCAxMSIgc3Ryb2tlPSIjQTBBRUMwIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiAvPgogIAogIDwhLS0gTW90aWYgMTogSUQgLyBDZXJ0aWZpY2F0ZSBDYXJkICh4PTExNSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1LCA4KSIgc3Ryb2tlPSIjQ0JENUUwIiBzdHJva2Utd2lkdGg9IjEuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxyZWN0IHg9IjIiIHk9IjIiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxOCIgcng9IjMiIC8+CiAgICA8Y2lyY2xlIGN4PSI4IiBjeT0iOSIgcj0iMi41IiAvPgogICAgPHBhdGggZD0iTSA0IDE3IEMgNCAxNCA2 IDEzIDggMTMgQyAxMCAxMyAxMiAxNCAxMiAxNyIgLz4KICAgIDxsaW5lIHgxPSIxMyIgeTE9IjciIHgyPSIyMCIgeTI9IjciIC8+CiAgICA8bGluZSB4MT0iMTMiIHkxPSIxMSIgeDI9IjE5IiB5Mj0iMTEiIC8+CiAgICA8bGluZSB4MT0iMTMiIHkxPSIxNSIgeDI9IjE3IiB5Mj0iMTUiIC8+CiAgPC9nPgoKICA8IS0tIE1vdGlmIDI6IE9wZW4gQm9vayAoeD0xNjUpIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2NSwgOCkiIHN0cm9rZT0iI0UyRThGMCIgc3Ryb2tlLXdpZHRoPSIxLjQiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CiAgICA8cGF0aCBkPSJNIDIgNiBDIDEyIDMgMjAgNSAyMyA3IEMgMjYgNSAzNCAzIDQ0IDYgViAyMCBDIDM0IDE3IDI2IDE5IDIzIDE4IEMgMjAgMTkgMTIgMTcgMiAyMCBaIiAvPgogICAgPGxpbmUgeDE9IjIzIiB5MT0iNyIgeDI9IjIzIiB5Mj0iMTgiIC8+CiAgICA8cGF0aCBkPSJNIDYgMTAgQyAxMSA4IDE2IDkgMTkgMTAgTSA2IDE0IEMgMTEgMTIgMTYgMTMgMTkgMTQgTSAyNyAxMCBDIDMwIDkgMzUgOCA0MCAxMCBNIDI3IDE0IEMgMzAgMTMgMzUgMTIgNDAgMTQiIC8+CiAgPC9nPgoKICA8IS0tIE1vdGlmIDM6IENlbnRlcnBpZWNlIEdyYWR1YXRpb24gQ2FwIHdpdGggVGFzc2VsICh4PTIyNSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjI1LCAyKSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjUsMiA0OCwxMiAyNSwyMiAyLDEyIiBmaWxsPSIjRTJFOEYwIiBmaWxsLW9wYWNpdHk9IjAuMSIgLz4KICAgIDxwYXRoIGQ9Ik0gMTAgMTYgViAyMyBDIDEwIDI2IDQwIDI2IDQwIDIzIFYgMTYiIC8+CiAgICA8Y2lyY2xlIGN4PSIyNSIgY3k9IjEyIiByPSIyIiBmaWxsPSIjRkZGRkZGIiAvPgogICAgPHBhdGggZD0iTSAyNSAxMiBDIDE2IDE0IDkgMjAgNyAyNSIgLz4KICAgIDxwb2x5Z29uIHBvaW50cz0iNSwyNSA5LDMwIDQsMzAiIGZpbGw9IiNGRkZGRkYiIC8+CiAgPC9nPgoKICA8IS0tIE1vdGlmIDQ6IE1pY3Jvc2NvcGUgKHg9Mjk1KSAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyOTUsIDYpIiBzdHJva2U9IiNDQkQ1RTAiIHN0cm9rZS13aWR0aD0iMS40IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPGxpbmUgeDE9IjQiIHkxPSIyNCIgeDI9IjIyIiB5Mj0iMjQiIC8+CiAgICA8bGluZSB4MT0iMTMiIHkxPSIyNCIgeDI9IjEzIiB5Mj0iMTgiIC8+CiAgICA8cGF0aCBkPSJN IDEzIDE0IEMgMTggMTQgMjAgOSAxOCA1IEMgMTYgMiAxMSAyIDkgNSBMIDEzIDE0IiAvPgogICAgPHJlY3QgeD0iOCIgeT0iNyIgd2lkdGg9IjUiIGhlaWghtPSI3IiByeD0iMSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDEwIDEwKSIgLz4KICAgIDxjaXJjbGUgY3g9IjE3IiBjeT0iMTgiIHI9IjEuNSIgLz4KICA8L2c+CgogIDwhLS0gTW90aWYgNTogUXVpbGwgUGVuICYgSW5rcG90ICh4PTM0NSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzQ1LCA2KSIgc3Ryb2tlPSIjRTJFOEYwIiBzdHJva2Utd2lkdGg9IjEuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxwYXRoIGQ9Ik0gMjAgMiBDIDEyIDUgNyAxNCA1IDI0IE0gMjAgMiBDIDE2IDggMTYgMTUgMTggMjEiIC8+CiAgICA8bGluZSB4MT0iMTUiIHkxPSI3IiB4Mj0iMTkiIHkyPSI5IiAvPgogICAgPGxpbmUgeDE9IjE0IiB5MT0iMTEiIHgyPSIxOCIgeTI9IjEzIiAvPgogICAgPGxpbmUgeDE9IjEzIiB5MT0iMTUiIHgyPSIxNyIgeTI9IjE3IiAvPgogICAgPHJlY3QgeD0iMiIgeT0iMTciIHdpZHRoPSI4IiBoZWlnaHQ9IjciIHJ4PSIxIiAvPgogICAgPHBhdGggZD0iTSA0IDE3IFYgMTQgSDggViAxNyIgLz4KICA8L2c+CgogIDwhLS0gUmlnaHQgRmxvdXJpc2ggLS0+CiAgPGcgc3Ryb2tlPSIjQTBBRUMwIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxwYXRoIGQ9Ik0gNDE1IDIwIEMgNDA4IDE0IDQwMiAxMiAzOTggOCBNIDQxNSAyMCBDIDQwOCAyNCA0MDQgMjIgMzk4IDIyIE0gNDEwIDIwIEMgNDA3IDE2IDQwMyAxNCA0MDAgMTEiIC8+CiAgPC9nPgoKICA8IS0tIFJpZ2h0IERhc2hlZCBBeGlzIC0tPgogIDxsaW5lIHgxPSI0MTUiIHkxPSIyMCIgeDI9IjQ4NSIgeTI9IjIwIiBzdHJva2U9IiM3MTgwOTYiIHN0cm9rZS13aWR0aD0iMS4yIiBzdHJva2UtZGFzaGFycmF5PSI0IDMiIC8+Cjwvc3ZnPg==`;
 
 export default function App() {
   // Navigation & View State
@@ -22,9 +23,22 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Core Data Stores
-  const [recipients, setRecipients] = useState(INITIAL_RECIPIENTS);
-  
+  // 1. Core Data Stores with LocalStorage Persistence
+  const [smtpConfig, setSmtpConfig] = useState(() => {
+    const saved = localStorage.getItem('skillbridge_smtpConfig');
+    return saved ? JSON.parse(saved) : { mode: 'gmail', user: 'outreach@skillbridge.org', pass: '' };
+  });
+
+  const [recipients, setRecipients] = useState(() => {
+    const saved = localStorage.getItem('skillbridge_recipients');
+    return saved ? JSON.parse(saved) : INITIAL_RECIPIENTS;
+  });
+
+  const [campaignConfig, setCampaignConfig] = useState(() => {
+    const saved = localStorage.getItem('skillbridge_campaignConfig');
+    return saved ? JSON.parse(saved) : INITIAL_CAMPAIGN;
+  });
+
   // Received Replies Inbox state
   const [replies, setReplies] = useState([
     {
@@ -48,26 +62,32 @@ export default function App() {
       isUnread: false
     }
   ]);
-  
-  const [campaignConfig, setCampaignConfig] = useState(INITIAL_CAMPAIGN);
+
+  const [sentHistoryLog, setSentHistoryLog] = useState([]);
   const [campaignStatus, setCampaignStatus] = useState('IDLE');
   const [logs, setLogs] = useState([]);
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [isSmtpModalOpen, setIsSmtpModalOpen] = useState(false);
-  
+
   // Sidebar collapsed in ICON-ONLY mode by default
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  
+
   const [recipientTracker, setRecipientTracker] = useState({});
-
-  const [smtpConfig, setSmtpConfig] = useState({
-    mode: 'gmail',
-    user: 'outreach@skillbridge.org',
-    pass: ''
-  });
-
   const isSendingRef = useRef(false);
+
+  // Synchronize state with localStorage
+  useEffect(() => {
+    localStorage.setItem('skillbridge_smtpConfig', JSON.stringify(smtpConfig));
+  }, [smtpConfig]);
+
+  useEffect(() => {
+    localStorage.setItem('skillbridge_recipients', JSON.stringify(recipients));
+  }, [recipients]);
+
+  useEffect(() => {
+    localStorage.setItem('skillbridge_campaignConfig', JSON.stringify(campaignConfig));
+  }, [campaignConfig]);
 
   const addLog = (message, type = 'info') => {
     const timeStr = new Date().toLocaleTimeString();
@@ -86,7 +106,7 @@ export default function App() {
       return;
     }
     setCampaignStatus('SENDING');
-    addLog(`Campaign queue initiated. Interval delay: ${campaignConfig.intervalSeconds}s.`, 'info');
+    addLog('Campaign queue initiated with 5–10 second anti-spam delay per email.', 'info');
   };
 
   const handlePauseQueue = () => {
@@ -113,7 +133,19 @@ export default function App() {
     }
   };
 
-  // Poll backend open tracking statuses & incoming replies every 2 seconds
+  const fetchSentHistoryFromBackend = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/sent-history');
+      if (response.ok) {
+        const data = await response.json();
+        setSentHistoryLog(data);
+      }
+    } catch (err) {
+      // Backend starting up
+    }
+  };
+
+  // Poll backend open tracking statuses & incoming replies every 3 seconds
   useEffect(() => {
     const pollInterval = setInterval(async () => {
       try {
@@ -123,10 +155,11 @@ export default function App() {
           setRecipientTracker(data);
         }
         await fetchRepliesFromBackend();
+        await fetchSentHistoryFromBackend();
       } catch (err) {
-        // Backend server starting up
+        // Backend starting up
       }
-    }, 2000);
+    }, 3000);
 
     return () => clearInterval(pollInterval);
   }, []);
@@ -162,8 +195,6 @@ export default function App() {
     .container { max-width: 580px; margin: 0 auto; background: #0D0E16; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
     .header { background: #000000; padding: 32px 24px; text-align: center; color: #ffffff; font-family: 'Cormorant Garamond', Garamond, Georgia, serif; font-weight: 700; font-size: 28px; letter-spacing: 3px; border-bottom: 1px solid rgba(255,255,255,0.12); text-transform: uppercase; }
     .content { padding: 36px; font-size: 15px; line-height: 1.8; color: #E2E8F0; }
-    .btn-wrap { text-align: center; margin: 28px 0; }
-    .btn { background: #111827; color: #ffffff !important; padding: 10px 22px; text-decoration: none; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; border: 1px solid #374151; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
     .signature { margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); font-weight: 600; color: #F1F5F9; font-size: 15px; font-family: 'Plus Jakarta Sans', Arial, sans-serif; }
     .footer { background: #07080D; padding: 18px 36px; text-align: center; font-size: 11px; color: #64748B; border-top: 1px solid rgba(255,255,255,0.06); }
   </style>
@@ -199,6 +230,7 @@ export default function App() {
         body: JSON.stringify({
           recipientId: recipient.id,
           to: recipient.email,
+          recipientName: recipient.firstName ? `${recipient.firstName} ${recipient.lastName || ''}`.trim() : recipient.email,
           subject: campaignConfig.subject.replaceAll('{{first_name}}', recipient.firstName || 'Friend'),
           html: fullHtml,
           smtpUser: smtpConfig.user,
@@ -233,9 +265,10 @@ export default function App() {
 
     const success = await dispatchEmailToBackend(target);
     setRecipients(prev => prev.map(r => r.id === target.id ? { ...r, status: success ? 'Sent' : 'Failed' } : r));
+    await fetchSentHistoryFromBackend();
   };
 
-  // Queue Execution Engine Loop
+  // Queue Execution Engine Loop with Randomized 5-10 Second Anti-Spam Pacing Delay
   useEffect(() => {
     if (campaignStatus !== 'SENDING') {
       isSendingRef.current = false;
@@ -256,18 +289,17 @@ export default function App() {
 
     isSendingRef.current = true;
 
-    let delayMs = campaignConfig.intervalSeconds * 1000;
-    if (campaignConfig.useJitter) {
-      const jitterMs = (Math.random() * 2000) - 1000;
-      delayMs = Math.max(1500, delayMs + jitterMs);
-    }
+    // Randomized 5 to 10 second delay between dispatches to protect Gmail reputation
+    const delayMs = Math.floor(Math.random() * 5000) + 5000;
+    const delaySec = (delayMs / 1000).toFixed(1);
 
     setRecipients(prev => prev.map(r => r.id === nextRecipient.id ? { ...r, status: 'Sending' } : r));
-    addLog(`Dispatching payload to ${nextRecipient.firstName} (${nextRecipient.email})...`, 'sending');
+    addLog(`Pacing Engine: Waiting ${delaySec}s before sending to ${nextRecipient.firstName} (${nextRecipient.email}) [5-10s delay protection active]...`, 'sending');
 
     const timer = setTimeout(async () => {
       const success = await dispatchEmailToBackend(nextRecipient);
       setRecipients(prev => prev.map(r => r.id === nextRecipient.id ? { ...r, status: success ? 'Sent' : 'Failed' } : r));
+      await fetchSentHistoryFromBackend();
       isSendingRef.current = false;
     }, delayMs);
 
@@ -299,33 +331,26 @@ export default function App() {
             if (tab === 'settings') setIsSmtpModalOpen(true);
             else setActiveTab(tab);
           }}
-          onOpenCompose={() => setIsComposeOpen(true)}
-          recipients={recipients}
-          campaignStatus={campaignStatus}
-          onLoadSkillBridgeData={handleLoadSkillBridgeData}
+          unreadRepliesCount={replies.filter(r => r.isUnread).length}
           isCollapsed={isSidebarCollapsed}
-          isOpenMobile={isMobileSidebarOpen}
-          onCloseMobile={() => setIsMobileSidebarOpen(false)}
-          repliesCount={replies.length}
+          setIsCollapsed={setIsSidebarCollapsed}
         />
 
-        <div className="flex-1 flex flex-col overflow-y-auto">
-          {(activeTab === 'dashboard' || activeTab === 'overview') && (
-            <div className="p-4 flex-1">
-              <DashboardView
-                recipients={recipients}
-                campaignStatus={campaignStatus}
-                onStartQueue={handleStartQueue}
-                onPauseQueue={handlePauseQueue}
-                setActiveTab={setActiveTab}
-                onLoadSkillBridgeData={handleLoadSkillBridgeData}
-                campaignConfig={campaignConfig}
-              />
-            </div>
+        <div className="flex-1 flex flex-col overflow-y-auto min-w-0">
+          {activeTab === 'dashboard' && (
+            <DashboardView
+              recipients={recipients}
+              campaignStatus={campaignStatus}
+              onStartQueue={handleStartQueue}
+              onPauseQueue={handlePauseQueue}
+              recipientTracker={recipientTracker}
+              setActiveTab={setActiveTab}
+              onOpenCompose={() => setIsComposeOpen(true)}
+            />
           )}
 
           {activeTab === 'recipients' && (
-            <GmailMintInboxView
+            <RecipientImportView
               recipients={recipients}
               setRecipients={setRecipients}
               onLoadSkillBridgeData={handleLoadSkillBridgeData}
@@ -345,6 +370,7 @@ export default function App() {
                 onOpenCompose={() => setIsComposeOpen(true)}
                 setCampaignConfig={setCampaignConfig}
                 onRefreshReplies={fetchRepliesFromBackend}
+                smtpConfig={smtpConfig}
               />
             </div>
           )}
@@ -376,6 +402,7 @@ export default function App() {
                 campaignConfig={campaignConfig}
                 setCampaignConfig={setCampaignConfig}
                 recipientTracker={recipientTracker}
+                sentHistoryLog={sentHistoryLog}
               />
             </div>
           )}

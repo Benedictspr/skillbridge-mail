@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { MessageSquare, Mail, Search, RefreshCw, Send, CheckCircle2, User, Sparkles, Trash2, Clock, CornerUpLeft } from 'lucide-react';
+import { MessageSquare, Mail, Search, RefreshCw, Send, CheckCircle2, User, Sparkles, Trash2, Clock, CornerUpLeft, ShieldCheck, Zap } from 'lucide-react';
 
 export default function ReceivedRepliesView({ 
   replies, 
   setReplies, 
   onOpenCompose, 
   setCampaignConfig, 
-  onRefreshReplies 
+  onRefreshReplies,
+  smtpConfig
 }) {
   const [selectedReply, setSelectedReply] = useState(replies[0] || null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSyncingLive, setIsSyncingLive] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [syncStatus, setSyncStatus] = useState('');
 
   const filteredReplies = replies.filter(r => 
     r.senderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -19,6 +22,43 @@ export default function ReceivedRepliesView({
   );
 
   const unreadCount = replies.filter(r => r.isUnread).length;
+
+  const handleFetchLiveGmailReplies = async () => {
+    setIsSyncingLive(true);
+    setSyncStatus('Connecting to imap.gmail.com:993...');
+
+    try {
+      const res = await fetch('http://localhost:3001/api/fetch-live-replies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          smtpUser: smtpConfig?.user || '',
+          smtpPass: smtpConfig?.pass || ''
+        })
+      });
+
+      const data = await res.json();
+      setIsSyncingLive(false);
+
+      if (res.ok && data.success) {
+        if (data.replies && Array.isArray(data.replies)) {
+          setReplies(data.replies);
+          if (data.replies.length > 0 && !selectedReply) {
+            setSelectedReply(data.replies[0]);
+          }
+        }
+        setSyncStatus(`Synced successfully! (${data.count || 0} new emails loaded from Gmail)`);
+        setTimeout(() => setSyncStatus(''), 4000);
+      } else {
+        alert(data.error || 'Failed to fetch Gmail inbox. Please verify your Gmail address & 16-character App Password in Settings.');
+        setSyncStatus('');
+      }
+    } catch (err) {
+      setIsSyncingLive(false);
+      alert('Backend connection error: ' + err.message);
+      setSyncStatus('');
+    }
+  };
 
   const handleSimulateReply = async () => {
     setIsSimulating(true);
@@ -70,24 +110,38 @@ export default function ReceivedRepliesView({
           <div className="flex items-center gap-2 mb-1">
             <span className="bg-purple-100 border border-purple-200 text-purple-800 text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
               <MessageSquare className="w-3.5 h-3.5 text-purple-700" />
-              <span>Received Applicant Responses</span>
+              <span>Real Live Gmail Inbox Sync</span>
             </span>
             <span className="text-xs font-mono font-bold text-gray-500">• {unreadCount} Unread</span>
           </div>
-          <h2 className="text-xl font-bold text-gray-900">Received Replies & Applicant Responses</h2>
+          <h2 className="text-xl font-bold text-gray-900">Received Replies & Live Applicant Inbox</h2>
           <p className="text-xs text-gray-500 mt-0.5">
-            Incoming replies from students responding to your outreach emails.
+            Connects to your Gmail inbox via IMAP SSL (imap.gmail.com:993) to pull real applicant replies live.
           </p>
+          {syncStatus && (
+            <p className="text-xs font-mono font-bold text-emerald-600 mt-1">
+              ✓ {syncStatus}
+            </p>
+          )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={handleFetchLiveGmailReplies}
+            disabled={isSyncingLive}
+            className="bg-black hover:bg-gray-800 text-white font-bold text-xs px-4.5 py-2.5 rounded-lg flex items-center gap-2 shadow-xs transition-colors"
+          >
+            {isSyncingLive ? <RefreshCw className="w-4 h-4 animate-spin text-purple-400" /> : <Zap className="w-4 h-4 text-emerald-400 fill-emerald-400" />}
+            <span>Sync Live Gmail Inbox (IMAP)</span>
+          </button>
+
           <button
             onClick={handleSimulateReply}
             disabled={isSimulating}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 shadow-xs transition-colors"
+            className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs px-3.5 py-2.5 rounded-lg flex items-center gap-2 border border-gray-300 transition-colors"
           >
-            {isSimulating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-yellow-300" />}
-            <span>Simulate Incoming Student Reply</span>
+            {isSimulating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-yellow-600" />}
+            <span>Simulate Reply</span>
           </button>
         </div>
       </div>
@@ -107,17 +161,17 @@ export default function ReceivedRepliesView({
                 className="w-full bg-white border border-gray-300 rounded-lg pl-9 pr-3 py-1.5 text-xs outline-none focus:border-purple-600"
               />
             </div>
-            <button onClick={onRefreshReplies} className="p-2 hover:bg-gray-200 rounded-lg text-gray-600" title="Refresh">
-              <RefreshCw className="w-4 h-4" />
+            <button onClick={handleFetchLiveGmailReplies} className="p-2 hover:bg-gray-200 rounded-lg text-gray-600" title="Sync Gmail Inbox">
+              <RefreshCw className={`w-4 h-4 ${isSyncingLive ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
             {filteredReplies.length === 0 ? (
-              <div className="text-center py-16 text-gray-500 text-xs">
+              <div className="text-center py-16 text-gray-500 text-xs px-4">
                 <MessageSquare className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                <p className="font-bold text-gray-700">No applicant replies yet.</p>
-                <p className="text-[11px] text-gray-400 mt-1">Click "Simulate Incoming Student Reply" to test receiving responses.</p>
+                <p className="font-bold text-gray-700">No applicant replies in list.</p>
+                <p className="text-[11px] text-gray-400 mt-1">Click "Sync Live Gmail Inbox" to pull real replies from imap.gmail.com.</p>
               </div>
             ) : (
               filteredReplies.map((reply) => (
@@ -135,7 +189,7 @@ export default function ReceivedRepliesView({
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2 truncate">
                       <div className="w-6 h-6 rounded-full bg-purple-900 text-white font-extrabold text-[11px] flex items-center justify-center shrink-0">
-                        {reply.senderName.charAt(0)}
+                        {reply.senderName ? reply.senderName.charAt(0) : 'S'}
                       </div>
                       <span className="text-xs font-bold text-gray-900 truncate">{reply.senderName}</span>
                     </div>
@@ -166,7 +220,7 @@ export default function ReceivedRepliesView({
               <div className="border-b border-gray-200 pb-4 flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-purple-900 text-white font-black text-sm flex items-center justify-center shadow-xs">
-                    {selectedReply.senderName.charAt(0)}
+                    {selectedReply.senderName ? selectedReply.senderName.charAt(0) : 'S'}
                   </div>
                   <div>
                     <h3 className="text-base font-extrabold text-gray-900">{selectedReply.senderName}</h3>
@@ -195,7 +249,7 @@ export default function ReceivedRepliesView({
               </div>
 
               {/* Message Content */}
-              <div className="text-xs text-gray-800 leading-relaxed font-sans whitespace-pre-wrap bg-white p-4 rounded-xl border border-gray-200">
+              <div className="text-xs text-gray-800 leading-relaxed font-sans whitespace-pre-wrap bg-white p-4 rounded-xl border border-gray-200 min-h-[160px]">
                 {selectedReply.bodyText}
               </div>
             </div>
