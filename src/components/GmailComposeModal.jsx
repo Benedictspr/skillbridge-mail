@@ -5,9 +5,9 @@ import { EMAIL_TEMPLATES } from '../mockData';
 export default function GmailComposeModal({ 
   isOpen, 
   onClose, 
-  campaignConfig, 
+  campaignConfig = {}, 
   setCampaignConfig, 
-  recipients, 
+  recipients = [], 
   onStartQueue,
   onSendSingleTest 
 }) {

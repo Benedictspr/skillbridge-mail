@@ -2,19 +2,21 @@ import React from 'react';
 import { Users, Send, CheckCircle2, Clock, Play, Sparkles, FileText, ArrowRight, ShieldCheck, Mail, Zap, TrendingUp, AlertTriangle, Home } from 'lucide-react';
 
 export default function DashboardView({ 
-  recipients, 
-  campaignStatus, 
+  recipients = [], 
+  campaignStatus = 'IDLE', 
   onStartQueue, 
   onPauseQueue, 
   setActiveTab, 
   onLoadSkillBridgeData,
-  campaignConfig
+  campaignConfig = {}
 }) {
-  const readyCount = recipients.filter(r => r.status === 'Ready' || r.status === 'Queued').length;
-  const sentCount = recipients.filter(r => r.status === 'Sent').length;
-  const failedCount = recipients.filter(r => r.status === 'Failed').length;
-  const totalCount = recipients.length;
+  const safeRecipients = Array.isArray(recipients) ? recipients : [];
+  const readyCount = safeRecipients.filter(r => r?.status === 'Ready' || r?.status === 'Queued').length;
+  const sentCount = safeRecipients.filter(r => r?.status === 'Sent').length;
+  const failedCount = safeRecipients.filter(r => r?.status === 'Failed').length;
+  const totalCount = safeRecipients.length;
   const successRate = sentCount + failedCount > 0 ? Math.round((sentCount / (sentCount + failedCount)) * 100) : 100;
+  const intervalSec = campaignConfig?.intervalSeconds || 7;
 
   return (
     <div className="bg-[#0B0F19] text-white p-6 md:p-8 rounded-3xl border border-white/10 shadow-2xl space-y-8 animate-fade-in font-sans">

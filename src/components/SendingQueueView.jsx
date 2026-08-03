@@ -28,7 +28,7 @@ export default function SendingQueueView({
 
   const progressPercent = totalCount > 0 ? Math.round((sentRecipientsCount / totalCount) * 100) : 0;
   const remainingCount = readyList.length + (sendingItem ? 1 : 0);
-  const avgPacingSeconds = Math.max(5, campaignConfig.intervalSeconds || 7);
+  const avgPacingSeconds = Math.max(5, campaignConfig?.intervalSeconds || 7);
   const etaSeconds = remainingCount * avgPacingSeconds;
   const etaMinutes = Math.ceil(etaSeconds / 60);
 
