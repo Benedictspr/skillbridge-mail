@@ -5,7 +5,7 @@ export default function AppSidebar({
   activeTab, 
   setActiveTab, 
   onOpenCompose, 
-  recipients, 
+  recipients = [], 
   campaignStatus,
   onLoadSkillBridgeData,
   isCollapsed,
@@ -13,8 +13,9 @@ export default function AppSidebar({
   onCloseMobile,
   repliesCount = 2
 }) {
-  const readyCount = recipients.filter(r => r.status === 'Ready' || r.status === 'Queued').length;
-  const sentCount = recipients.filter(r => r.status === 'Sent').length;
+  const safeRecipients = Array.isArray(recipients) ? recipients : [];
+  const readyCount = safeRecipients.filter(r => r?.status === 'Ready' || r?.status === 'Queued').length;
+  const sentCount = safeRecipients.filter(r => r?.status === 'Sent').length;
 
   return (
     <>

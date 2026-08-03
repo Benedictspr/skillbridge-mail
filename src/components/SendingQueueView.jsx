@@ -2,25 +2,28 @@ import React, { useState } from 'react';
 import { Send, Play, Pause, RotateCcw, Clock, ShieldCheck, CheckCircle2, Terminal, Eye, Mail, List, FileText, Database, Shield } from 'lucide-react';
 
 export default function SendingQueueView({
-  recipients,
+  recipients = [],
   campaignStatus,
   onStartQueue,
   onPauseQueue,
   onResetQueue,
   onSendSingleTest,
-  logs,
-  campaignConfig,
+  logs = [],
+  campaignConfig = {},
   setCampaignConfig,
-  recipientTracker,
+  recipientTracker = {},
   sentHistoryLog = []
 }) {
   const [activeSubTab, setActiveSubTab] = useState('console'); // 'console' | 'sentHistory'
-  const readyList = recipients.filter(r => r.status === 'Ready' || r.status === 'Queued');
-  const sendingItem = recipients.find(r => r.status === 'Sending');
-  const totalCount = recipients.length;
+  const safeRecipients = Array.isArray(recipients) ? recipients : [];
+  const safeSentHistoryLog = Array.isArray(sentHistoryLog) ? sentHistoryLog : [];
 
-  const sentRecipientsCount = recipients.filter(r => r.status === 'Sent' || recipientTracker[r.id]?.status === 'Sent' || recipientTracker[r.id]?.opened).length;
-  const openedRecipientsCount = recipients.filter(r => recipientTracker[r.id]?.opened).length;
+  const readyList = safeRecipients.filter(r => r?.status === 'Ready' || r?.status === 'Queued');
+  const sendingItem = safeRecipients.find(r => r?.status === 'Sending');
+  const totalCount = safeRecipients.length;
+
+  const sentRecipientsCount = safeRecipients.filter(r => r?.status === 'Sent' || recipientTracker[r?.id]?.status === 'Sent' || recipientTracker[r?.id]?.opened).length;
+  const openedRecipientsCount = safeRecipients.filter(r => recipientTracker[r?.id]?.opened).length;
   const openRatePercent = sentRecipientsCount > 0 ? Math.round((openedRecipientsCount / sentRecipientsCount) * 100) : 0;
 
   const progressPercent = totalCount > 0 ? Math.round((sentRecipientsCount / totalCount) * 100) : 0;

@@ -2,26 +2,27 @@ import React, { useState } from 'react';
 import { MessageSquare, Mail, Search, RefreshCw, Send, CheckCircle2, User, Sparkles, Trash2, Clock, CornerUpLeft, ShieldCheck, Zap } from 'lucide-react';
 
 export default function ReceivedRepliesView({ 
-  replies, 
+  replies = [], 
   setReplies, 
   onOpenCompose, 
   setCampaignConfig, 
   onRefreshReplies,
   smtpConfig
 }) {
-  const [selectedReply, setSelectedReply] = useState(replies[0] || null);
+  const safeReplies = Array.isArray(replies) ? replies : [];
+  const [selectedReply, setSelectedReply] = useState(safeReplies[0] || null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSyncingLive, setIsSyncingLive] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
   const [syncStatus, setSyncStatus] = useState('');
 
-  const filteredReplies = replies.filter(r => 
-    r.senderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.senderEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.bodyText.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredReplies = safeReplies.filter(r => 
+    (r?.senderName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (r?.senderEmail || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (r?.bodyText || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const unreadCount = replies.filter(r => r.isUnread).length;
+  const unreadCount = safeReplies.filter(r => r?.isUnread).length;
 
   const handleFetchLiveGmailReplies = async () => {
     setIsSyncingLive(true);
