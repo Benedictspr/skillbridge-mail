@@ -344,9 +344,15 @@ export default function App() {
             if (tab === 'settings') setIsSmtpModalOpen(true);
             else setActiveTab(tab);
           }}
-          unreadRepliesCount={replies.filter(r => r.isUnread).length}
+          recipients={recipients}
+          repliesCount={(replies || []).filter(r => r?.isUnread).length}
           isCollapsed={isSidebarCollapsed}
           setIsCollapsed={setIsSidebarCollapsed}
+          isOpenMobile={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
+          onLoadSkillBridgeData={handleLoadSkillBridgeData}
+          onOpenCompose={() => setIsComposeOpen(true)}
+          campaignStatus={campaignStatus}
         />
 
         <div className="flex-1 flex flex-col overflow-y-auto min-w-0">

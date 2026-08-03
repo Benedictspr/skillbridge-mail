@@ -227,10 +227,12 @@ export default function AppSidebar({
       {/* Mobile Drawer */}
       {isOpenMobile && (
         <div className="fixed inset-0 z-50 flex md:hidden bg-black/50 backdrop-blur-xs">
-          <div className="w-72 bg-[#D4F1E8] h-full shadow-2xl animate-fade-in p-3 flex flex-col justify-between">
+          <div className="w-72 bg-[#D4F1E8] h-full shadow-2xl animate-fade-in p-4 flex flex-col justify-between overflow-y-auto">
             <div className="space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-gray-300">
-                <span className="font-bold text-sm text-gray-900">Navigation Menu</span>
+              <div className="flex items-center justify-between pb-3 border-b border-gray-300">
+                <span className="font-extrabold text-sm text-gray-900 flex items-center gap-2">
+                  <Send className="w-4 h-4 text-blue-600" /> Navigation Menu
+                </span>
                 <button onClick={onCloseMobile} className="p-1 hover:bg-black/10 rounded-full">
                   <X className="w-5 h-5 text-gray-700" />
                 </button>
@@ -248,26 +250,78 @@ export default function AppSidebar({
               </button>
 
               <div className="space-y-1">
-                <div onClick={() => { setActiveTab('recipients'); onCloseMobile(); }} className="flex items-center justify-between p-2.5 rounded-xl font-bold text-xs">
+                {/* Dashboard */}
+                <div 
+                  onClick={() => { setActiveTab('dashboard'); onCloseMobile(); }} 
+                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
+                    activeTab === 'dashboard' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
+                  }`}
+                >
+                  <span className="flex items-center gap-3"><Home className="w-5 h-5 text-indigo-600" /> Dashboard Overview</span>
+                </div>
+
+                {/* Contacts Roster */}
+                <div 
+                  onClick={() => { setActiveTab('recipients'); onCloseMobile(); }} 
+                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
+                    activeTab === 'recipients' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
+                  }`}
+                >
                   <span className="flex items-center gap-3"><Inbox className="w-5 h-5 text-blue-600" /> Contacts Roster</span>
-                  <span className="font-mono text-xs">{recipients.length}</span>
+                  <span className="font-mono text-xs px-2 py-0.5 bg-white rounded-full border border-gray-200">{safeRecipients.length}</span>
                 </div>
-                <div onClick={() => { setActiveTab('replies'); onCloseMobile(); }} className="flex items-center justify-between p-2.5 rounded-xl font-bold text-xs">
+
+                {/* Received Replies */}
+                <div 
+                  onClick={() => { setActiveTab('replies'); onCloseMobile(); }} 
+                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
+                    activeTab === 'replies' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
+                  }`}
+                >
                   <span className="flex items-center gap-3"><MessageSquare className="w-5 h-5 text-purple-600" /> Received Replies</span>
-                  <span className="font-mono text-xs text-purple-700 font-bold">{repliesCount}</span>
+                  <span className="font-mono text-xs px-2 py-0.5 bg-purple-600 text-white rounded-full font-bold">{repliesCount}</span>
                 </div>
-                <div onClick={() => { setActiveTab('builder'); onCloseMobile(); }} className="flex items-center justify-between p-2.5 rounded-xl font-bold text-xs">
+
+                {/* Email Designer */}
+                <div 
+                  onClick={() => { setActiveTab('builder'); onCloseMobile(); }} 
+                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
+                    activeTab === 'builder' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
+                  }`}
+                >
                   <span className="flex items-center gap-3"><FileText className="w-5 h-5 text-indigo-600" /> Email Designer</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">Option 1</span>
                 </div>
-                <div onClick={() => { setActiveTab('queue'); onCloseMobile(); }} className="flex items-center justify-between p-2.5 rounded-xl font-bold text-xs">
+
+                {/* Dispatch Queue */}
+                <div 
+                  onClick={() => { setActiveTab('queue'); onCloseMobile(); }} 
+                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
+                    activeTab === 'queue' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
+                  }`}
+                >
                   <span className="flex items-center gap-3"><Clock className="w-5 h-5 text-amber-600" /> Dispatch Queue</span>
                   <span className="font-mono text-xs">{readyCount}</span>
                 </div>
-                <div onClick={() => { setActiveTab('sent'); onCloseMobile(); }} className="flex items-center justify-between p-2.5 rounded-xl font-bold text-xs">
+
+                {/* Sent Logs */}
+                <div 
+                  onClick={() => { setActiveTab('sent'); onCloseMobile(); }} 
+                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
+                    activeTab === 'sent' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
+                  }`}
+                >
                   <span className="flex items-center gap-3"><Send className="w-5 h-5 text-emerald-600" /> Sent Logs</span>
-                  <span className="font-mono text-xs">{sentCount}</span>
+                  <span className="font-mono text-xs text-emerald-700 font-bold">{sentCount}</span>
                 </div>
-                <div onClick={() => { setActiveTab('settings'); onCloseMobile(); }} className="flex items-center justify-between p-2.5 rounded-xl font-bold text-xs">
+
+                {/* SMTP Gateway */}
+                <div 
+                  onClick={() => { setActiveTab('settings'); onCloseMobile(); }} 
+                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
+                    activeTab === 'settings' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
+                  }`}
+                >
                   <span className="flex items-center gap-3"><Settings className="w-5 h-5 text-gray-700" /> SMTP Gateway</span>
                 </div>
               </div>
