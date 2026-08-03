@@ -158,21 +158,35 @@ export default function App() {
     }
   };
 
-  // Poll backend open tracking statuses & incoming replies every 3 seconds
+  // Poll backend open tracking statuses & incoming replies with startTransition to eliminate INP render delays
   useEffect(() => {
     const pollInterval = setInterval(async () => {
       try {
         const response = await fetch('http://localhost:3001/api/recipient-statuses');
         if (response.ok) {
           const data = await response.json();
-          setRecipientTracker(data);
+          React.startTransition(() => {
+            setRecipientTracker(data);
+          });
         }
-        await fetchRepliesFromBackend();
-        await fetchSentHistoryFromBackend();
+        const replyRes = await fetch('http://localhost:3001/api/replies');
+        if (replyRes.ok) {
+          const replyData = await replyRes.json();
+          React.startTransition(() => {
+            setReplies(replyData);
+          });
+        }
+        const sentRes = await fetch('http://localhost:3001/api/sent-history');
+        if (sentRes.ok) {
+          const sentData = await sentRes.json();
+          React.startTransition(() => {
+            setSentHistoryLog(sentData);
+          });
+        }
       } catch (err) {
-        // Backend starting up
+        // Silent catch
       }
-    }, 3000);
+    }, 4000);
 
     return () => clearInterval(pollInterval);
   }, []);

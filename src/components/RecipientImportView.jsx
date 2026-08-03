@@ -129,9 +129,9 @@ export default function RecipientImportView({ recipients = [], setRecipients, on
   };
 
   const clearAllRecipients = () => {
-    if (window.confirm('Clear all recipients?')) {
+    React.startTransition(() => {
       setRecipients([]);
-    }
+    });
   };
 
   const filteredRecipients = safeRecipients.filter(r => 
