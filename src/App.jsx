@@ -9,16 +9,15 @@ import GmailMintInboxView from './components/GmailMintInboxView';
 import EmailBuilderView from './components/EmailBuilderView';
 import SendingQueueView from './components/SendingQueueView';
 import ReceivedRepliesView from './components/ReceivedRepliesView';
+import SentLogsView from './components/SentLogsView';
 import SmtpSettingsModal from './components/SmtpSettingsModal';
 import GmailComposeModal from './components/GmailComposeModal';
 import { INITIAL_RECIPIENTS, INITIAL_CAMPAIGN, SKILLBRIDGE_STUDENTS } from './mockData';
 import { extractFirstNameFromEmail } from './utils/nameParser';
 
-const DOODLE_B64_IMAGE = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA1MDAgNDAiIGZpbGw9Im5vbmUiPgogIDwhLS0gTGVmdCBEYXNoZWQgQXhpcyAtLT4KICA8bGluZSB4MT0iMTUiIHkxPSIyMCIgeDI9Ijg1IiB5Mj0iMjAiIHN0cm9rZT0iIzcxODA5NiIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1kYXNoYXJyYXk9IjQgMyIgLz4KICAKICA8IS0tIExlZnQgRmxvdXJpc2ggLS0+CiAgPHBhdGggZD0iTSA4NSAyMCBDIDkyIDE0IDk8IDEyIDEwMiA4IE0gODUgMjAgQyA5MiAyNCA5NiAyMiAxMDIgMjIgTSA5MCAyMCBDIDkz IDE2IDk3 IDE0IDEwMCAxMSIgc3Ryb2tlPSIjQTBBRUMwIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiAvPgogIAogIDwhLS0gTW90aWYgMTogSUQgLyBDZXJ0aWZpY2F0ZSBDYXJkICh4PTExNSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1LCA4KSIgc3Ryb2tlPSIjQ0JENUUwIiBzdHJva2Utd2lkdGg9IjEuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxyZWN0IHg9IjIiIHk9IjIiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxOCIgcng9IjMiIC8+CiAgICA8Y2lyY2xlIGN4PSI4IiBjeT0iOSIgcj0iMi41IiAvPgogICAgPHBhdGggZD0iTSA0IDE3IEMgNCAxNCA2 IDEzIDggMTMgQyAxMCAxMyAxMiAxNCAxMiAxNyIgLz4KICAgIDxsaW5lIHgxPSIxMyIgeTE9IjciIHgyPSIyMCIgeTI9IjciIC8+CiAgICA8bGluZSB4MT0iMTMiIHkxPSIxMSIgeDI9IjE5IiB5Mj0iMTEiIC8+CiAgICA8bGluZSB4MT0iMTMiIHkxPSIxNSIgeDI9IjE3IiB5Mj0iMTUiIC8+CiAgPC9nPgoKICA8IS0tIE1vdGlmIDI6IE9wZW4gQm9vayAoeD0xNjUpIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2NSwgOCkiIHN0cm9rZT0iI0UyRThGMCIgc3Ryb2tlLXdpZHRoPSIxLjQiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CiAgICA8cGF0aCBkPSJNIDIgNiBDIDEyIDMgMjAgNSAyMyA3IEMgMjYgNSAzNCAzIDQ0IDYgViAyMCBDIDM0IDE3IDI2IDE5IDIzIDE4IEMgMjAgMTkgMTIgMTcgMiAyMCBaIiAvPgogICAgPGxpbmUgeDE9IjIzIiB5MT0iNyIgeDI9IjIzIiB5Mj0iMTgiIC8+CiAgICA8cGF0aCBkPSJNIDYgMTAgQyAxMSA4IDE2IDkgMTkgMTAgTSA2IDE0IEMgMTEgMTIgMTYgMTMgMTkgMTQgTSAyNyAxMCBDIDMwIDkgMzUgOCA0MCAxMCBNIDI3IDE0IEMgMzAgMTMgMzUgMTIgNDAgMTQiIC8+CiAgPC9nPgoKICA8IS0tIE1vdGlmIDM6IENlbnRlcnBpZWNlIEdyYWR1YXRpb24gQ2FwIHdpdGggVGFzc2VsICh4PTIyNSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjI1LCAyKSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjUsMiA0OCwxMiAyNSwyMiAyLDEyIiBmaWxsPSIjRTJFOEYwIiBmaWxsLW9wYWNpdHk9IjAuMSIgLz4KICAgIDxwYXRoIGQ9Ik0gMTAgMTYgViAyMyBDIDEwIDI2IDQwIDI2IDQwIDIzIFYgMTYiIC8+CiAgICA8Y2lyY2xlIGN4PSIyNSIgY3k9IjEyIiByPSIyIiBmaWxsPSIjRkZGRkZGIiAvPgogICAgPHBhdGggZD0iTSAyNSAxMiBDIDE2IDE0IDkgMjAgNyAyNSIgLz4KICAgIDxwb2x5Z29uIHBvaW50cz0iNSwyNSA5LDMwIDQsMzAiIGZpbGw9IiNGRkZGRkYiIC8+CiAgPC9nPgoKICA8IS0tIE1vdGlmIDQ6IE1pY3Jvc2NvcGUgKHg9Mjk1KSAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyOTUsIDYpIiBzdHJva2U9IiNDQkQ1RTAiIHN0cm9rZS13aWR0aD0iMS40IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPGxpbmUgeDE9IjQiIHkxPSIyNCIgeDI9IjIyIiB5Mj0iMjQiIC8+CiAgICA8bGluZSB4MT0iMTMiIHkxPSIyNCIgeDI9IjEzIiB5Mj0iMTgiIC8+CiAgICA8cGF0aCBkPSJN IDEzIDE0IEMgMTggMTQgMjAgOSAxOCA1IEMgMTYgMiAxMSAyIDkgNSBMIDEzIDE0IiAvPgogICAgPHJlY3QgeD0iOCIgeT0iNyIgd2lkdGg9IjUiIGhlaWghtPSI3IiByeD0iMSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDEwIDEwKSIgLz4KICAgIDxjaXJjbGUgY3g9IjE3IiBjeT0iMTgiIHI9IjEuNSIgLz4KICA8L2c+CgogIDwhLS0gTW90aWYgNTogUXVpbGwgUGVuICYgSW5rcG90ICh4PTM0NSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzQ1LCA2KSIgc3Ryb2tlPSIjRTJFOEYwIiBzdHJva2Utd2lkdGg9IjEuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxwYXRoIGQ9Ik0gMjAgMiBDIDEyIDUgNyAxNCA1IDI0IE0gMjAgMiBDIDE2IDggMTYgMTUgMTggMjEiIC8+CiAgICA8bGluZSB4MT0iMTUiIHkxPSI3IiB4Mj0iMTkiIHkyPSI5IiAvPgogICAgPGxpbmUgeDE9IjE0IiB5MT0iMTEiIHgyPSIxOCIgeTI9IjEzIiAvPgogICAgPGxpbmUgeDE9IjEzIiB5MT0iMTUiIHgyPSIxNyIgeTI9IjE3IiAvPgogICAgPHJlY3QgeD0iMiIgeT0iMTciIHdpZHRoPSI4IiBoZWlnaHQ9IjciIHJ4PSIxIiAvPgogICAgPHBhdGggZD0iTSA0IDE3IFYgMTQgSDggViAxNyIgLz4KICA8L2c+CgogIDwhLS0gUmlnaHQgRmxvdXJpc2ggLS0+CiAgPGcgc3Ryb2tlPSIjQTBBRUMwIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxwYXRoIGQ9Ik0gNDE1IDIwIEMgNDA4IDE0IDQwMiAxMiAzOTggOCBNIDQxNSAyMCBDIDQwOCAyNCA0MDQgMjIgMzk4IDIyIE0gNDEwIDIwIEMgNDA3IDE2IDQwMyAxNCA0MDAgMTEiIC8+CiAgPC9nPgoKICA8IS0tIFJpZ2h0IERhc2hlZCBBeGlzIC0tPgogIDxsaW5lIHgxPSI0MTUiIHkxPSIyMCIgeDI9IjQ4NSIgeTI9IjIwIiBzdHJva2U9IiM3MTgwOTYiIHN0cm9rZS13aWR0aD0iMS4yIiBzdHJva2UtZGFzaGFycmF5PSI0IDMiIC8+Cjwvc3ZnPg==`;
-
 export default function App() {
   // Navigation & View State
-  const [activeTab, setActiveTab] = useState('builder'); // 'dashboard' | 'recipients' | 'builder' | 'queue' | 'replies'
+  const [activeTab, setActiveTab] = useState('builder'); // 'dashboard' | 'recipients' | 'builder' | 'queue' | 'replies' | 'sent'
   const [activeInboxTab, setActiveInboxTab] = useState('primary');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -113,11 +112,21 @@ export default function App() {
   };
 
   const handleStartQueue = () => {
-    const pending = recipients.filter(r => r.status === 'Ready' || r.status === 'Queued');
-    if (pending.length === 0) {
-      alert('Please add recipient emails to your roster first!');
-      return;
+    let safeList = Array.isArray(recipients) ? recipients : [];
+    if (safeList.length === 0) {
+      setRecipients(SKILLBRIDGE_STUDENTS);
+      safeList = SKILLBRIDGE_STUDENTS;
+      addLog(`Loaded SkillBridge Students dataset (${SKILLBRIDGE_STUDENTS.length} contacts).`, 'info');
     }
+
+    const pending = safeList.filter(r => r?.status === 'Ready' || r?.status === 'Queued');
+    if (pending.length === 0) {
+      // Auto-reset all recipients to Ready if previous run completed
+      setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => ({ ...r, status: 'Ready' })));
+      addLog('Reset recipient roster statuses to Ready and starting dispatch queue...', 'info');
+    }
+
+    setActiveTab('queue');
     setCampaignStatus('SENDING');
     addLog('Campaign queue initiated with 5–10 second anti-spam delay per email.', 'info');
   };
@@ -129,7 +138,7 @@ export default function App() {
 
   const handleResetQueue = () => {
     setCampaignStatus('IDLE');
-    setRecipients(prev => prev.map(r => ({ ...r, status: 'Ready' })));
+    setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => ({ ...r, status: 'Ready' })));
     setRecipientTracker({});
     addLog('Reset all recipient statuses to Ready.', 'info');
   };
@@ -200,7 +209,7 @@ export default function App() {
       ? recipient.firstName
       : extractFirstNameFromEmail(recipient.email);
 
-    const renderedBody = campaignConfig.bodyText
+    const renderedBody = (campaignConfig.bodyText || '')
       .replaceAll('{{first_name}}', firstNameVal)
       .replaceAll('{{last_name}}', recipient.lastName || '')
       .replaceAll('{{email}}', recipient.email || '')
@@ -258,7 +267,7 @@ export default function App() {
           recipientId: recipient.id,
           to: recipient.email,
           recipientName: recipient.firstName ? `${recipient.firstName} ${recipient.lastName || ''}`.trim() : recipient.email,
-          subject: campaignConfig.subject.replaceAll('{{first_name}}', recipient.firstName || 'Friend'),
+          subject: (campaignConfig.subject || '').replaceAll('{{first_name}}', recipient.firstName || 'Friend'),
           html: fullHtml,
           smtpUser: smtpConfig.user,
           smtpPass: smtpConfig.pass,
@@ -268,7 +277,7 @@ export default function App() {
 
       const data = await response.json();
       if (response.ok && data.success) {
-        addLog(`Sent to ${recipient.email} via ${data.mode.toUpperCase()} SMTP. MessageID: ${data.messageId || 'OK'}`, 'success');
+        addLog(`Sent to ${recipient.email} via ${(data.mode || 'smtp').toUpperCase()} SMTP. MessageID: ${data.messageId || 'OK'}`, 'success');
         return true;
       } else {
         addLog(`Failed delivery to ${recipient.email}: ${data.error || 'Unknown error'}`, 'error');
@@ -281,17 +290,18 @@ export default function App() {
   };
 
   const handleSendSingleTest = async () => {
-    const target = recipients.find(r => r.status === 'Ready' || r.status === 'Queued') || recipients[0];
+    const safeList = Array.isArray(recipients) ? recipients : [];
+    const target = safeList.find(r => r?.status === 'Ready' || r?.status === 'Queued') || safeList[0];
     if (!target) {
       alert('Please add at least one recipient email address first!');
       return;
     }
 
-    addLog(`Preparing single test dispatch for ${target.firstName} (${target.email})...`, 'sending');
-    setRecipients(prev => prev.map(r => r.id === target.id ? { ...r, status: 'Sending' } : r));
+    addLog(`Preparing single test dispatch for ${target.firstName || 'Friend'} (${target.email})...`, 'sending');
+    setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === target.id ? { ...r, status: 'Sending' } : r));
 
     const success = await dispatchEmailToBackend(target);
-    setRecipients(prev => prev.map(r => r.id === target.id ? { ...r, status: success ? 'Sent' : 'Failed' } : r));
+    setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === target.id ? { ...r, status: success ? 'Sent' : 'Failed' } : r));
     await fetchSentHistoryFromBackend();
   };
 
@@ -304,7 +314,8 @@ export default function App() {
 
     if (isSendingRef.current) return;
 
-    const nextRecipient = recipients.find(r => r.status === 'Ready' || r.status === 'Queued');
+    const safeList = Array.isArray(recipients) ? recipients : [];
+    const nextRecipient = safeList.find(r => r?.status === 'Ready' || r?.status === 'Queued');
 
     if (!nextRecipient) {
       setCampaignStatus('COMPLETED');
@@ -320,12 +331,12 @@ export default function App() {
     const delayMs = Math.floor(Math.random() * 5000) + 5000;
     const delaySec = (delayMs / 1000).toFixed(1);
 
-    setRecipients(prev => prev.map(r => r.id === nextRecipient.id ? { ...r, status: 'Sending' } : r));
-    addLog(`Pacing Engine: Waiting ${delaySec}s before sending to ${nextRecipient.firstName} (${nextRecipient.email}) [5-10s delay protection active]...`, 'sending');
+    setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === nextRecipient.id ? { ...r, status: 'Sending' } : r));
+    addLog(`Pacing Engine: Waiting ${delaySec}s before sending to ${nextRecipient.firstName || 'Friend'} (${nextRecipient.email}) [5-10s delay protection active]...`, 'sending');
 
     const timer = setTimeout(async () => {
       const success = await dispatchEmailToBackend(nextRecipient);
-      setRecipients(prev => prev.map(r => r.id === nextRecipient.id ? { ...r, status: success ? 'Sent' : 'Failed' } : r));
+      setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === nextRecipient.id ? { ...r, status: success ? 'Sent' : 'Failed' } : r));
       await fetchSentHistoryFromBackend();
       isSendingRef.current = false;
     }, delayMs);
@@ -422,7 +433,7 @@ export default function App() {
             </div>
           )}
 
-          {(activeTab === 'queue' || activeTab === 'sent') && (
+          {activeTab === 'queue' && (
             <div className="p-4 flex-1">
               <SendingQueueView
                 recipients={recipients}
@@ -436,6 +447,16 @@ export default function App() {
                 setCampaignConfig={setCampaignConfig}
                 recipientTracker={recipientTracker}
                 sentHistoryLog={sentHistoryLog}
+              />
+            </div>
+          )}
+
+          {activeTab === 'sent' && (
+            <div className="p-4 flex-1">
+              <SentLogsView
+                sentHistoryLog={sentHistoryLog}
+                recipientTracker={recipientTracker}
+                recipients={recipients}
               />
             </div>
           )}
