@@ -971,9 +971,808 @@
       "sentAt": "2026-08-04T00:00:20.070Z",
       "opened": false,
       "messageId": "<e83ddca0-da69-2d8b-0d80-a884a42ab0dc@gmail.com>"
+    },
+    "note-1785800365848-3": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:06:22.020Z",
+      "opened": false,
+      "messageId": "<9ce7f2a8-5006-a4e2-e4b7-f475144bbc84@gmail.com>"
+    },
+    "note-1785800365848-4": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:06:29.280Z",
+      "opened": false,
+      "messageId": "<f877ff45-b6ff-5eaa-55a8-c0cace02d65c@gmail.com>"
+    },
+    "note-1785800365848-5": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:06:36.174Z",
+      "opened": false,
+      "messageId": "<a3ca9842-29f1-ba59-8d1a-c1196ad5f414@gmail.com>"
+    },
+    "note-1785800365848-6": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:06:43.838Z",
+      "opened": false,
+      "messageId": "<7e40ebff-463d-8246-3246-f2a9d77fd297@gmail.com>"
+    },
+    "note-1785800365848-7": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:06:51.550Z",
+      "opened": false,
+      "messageId": "<4bd60222-bb1e-f688-536d-effe8a8b789f@gmail.com>"
+    },
+    "note-1785800365848-8": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:06:58.593Z",
+      "opened": false,
+      "messageId": "<7522e3eb-1a08-7322-7afa-2ab374602783@gmail.com>"
+    },
+    "note-1785800365848-9": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:07:05.612Z",
+      "opened": false,
+      "messageId": "<d98eeb3f-b561-f55d-7cd3-3a99100517ed@gmail.com>"
+    },
+    "note-1785800365848-10": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:07:12.816Z",
+      "opened": false,
+      "messageId": "<5aee12f9-3c70-56da-df05-9abdcdf613e1@gmail.com>"
+    },
+    "note-1785800365848-11": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:07:19.723Z",
+      "opened": false,
+      "messageId": "<691f90a3-30bf-0d3c-da73-9225cae78686@gmail.com>"
+    },
+    "note-1785800365848-12": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:07:26.753Z",
+      "opened": false,
+      "messageId": "<2d9b4c43-07a2-e054-2b22-07285a1efb78@gmail.com>"
+    },
+    "note-1785800365848-13": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:07:34.689Z",
+      "opened": false,
+      "messageId": "<26df3781-9bd4-4ab8-02d6-cc1b6558e304@gmail.com>"
+    },
+    "note-1785800365848-14": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:07:43.679Z",
+      "opened": false,
+      "messageId": "<5ee43761-8789-4828-2379-c226854fa91d@gmail.com>"
+    },
+    "note-1785800365848-15": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:07:51.690Z",
+      "opened": false,
+      "messageId": "<cf6594cf-57db-7217-11d0-41574a3f8611@gmail.com>"
+    },
+    "note-1785800365848-16": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:07:59.717Z",
+      "opened": false,
+      "messageId": "<95ef4cc4-b296-96eb-605c-9c108b3220d8@gmail.com>"
+    },
+    "note-1785800365848-17": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:08:07.264Z",
+      "opened": false,
+      "messageId": "<9135253b-1feb-7ae2-37bc-f6e02d58b9ee@gmail.com>"
+    },
+    "note-1785800365848-18": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:08:14.287Z",
+      "opened": false,
+      "messageId": "<fb30ee5f-01c9-8bca-4708-6dd8fe365b9e@gmail.com>"
+    },
+    "note-1785800365848-19": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:08:21.316Z",
+      "opened": false,
+      "messageId": "<6b4e1f5a-b405-fbaf-fde6-394ca8889494@gmail.com>"
+    },
+    "note-1785800365848-20": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:08:28.342Z",
+      "opened": false,
+      "messageId": "<9f0d5dc4-767a-1f98-ca23-caeced78a434@gmail.com>"
+    },
+    "note-1785800365848-21": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:08:35.390Z",
+      "opened": false,
+      "messageId": "<84cd0149-cd7d-1c11-cc57-c919b389c646@gmail.com>"
+    },
+    "note-1785800365848-22": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:08:42.422Z",
+      "opened": false,
+      "messageId": "<f6796b69-264b-d1f7-c324-3d64c18183a4@gmail.com>"
+    },
+    "note-1785800365848-23": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:08:49.862Z",
+      "opened": false,
+      "messageId": "<ff0bfff9-6aed-fd54-d47f-f2e32a7104a9@gmail.com>"
+    },
+    "note-1785800365848-24": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:08:57.700Z",
+      "opened": false,
+      "messageId": "<fc00c6a6-2875-bab8-a442-5750889744b2@gmail.com>"
+    },
+    "note-1785800365848-25": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:09:05.715Z",
+      "opened": false,
+      "messageId": "<01428892-ddb0-4601-df5d-3e9fc7d89793@gmail.com>"
+    },
+    "note-1785800365848-26": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:09:13.194Z",
+      "opened": false,
+      "messageId": "<98133483-7a43-a169-f903-57ff07473740@gmail.com>"
+    },
+    "note-1785800365848-27": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:09:20.748Z",
+      "opened": false,
+      "messageId": "<a387ffac-ae89-c940-f49a-e46b83f7a008@gmail.com>"
+    },
+    "note-1785800365848-28": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:09:27.958Z",
+      "opened": false,
+      "messageId": "<4a52b1bf-0c38-ecfc-a61a-c4bb0f7feaba@gmail.com>"
+    },
+    "note-1785800365848-29": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:09:34.837Z",
+      "opened": false,
+      "messageId": "<34527b48-d671-a540-64a6-c77062f01d25@gmail.com>"
+    },
+    "note-1785800365848-30": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:09:41.802Z",
+      "opened": false,
+      "messageId": "<d550e3bd-9a03-9bf1-cc49-13d5c452d80e@gmail.com>"
+    },
+    "note-1785800365848-31": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:09:48.775Z",
+      "opened": false,
+      "messageId": "<97f6195d-07f9-b351-2b04-419043dd3d0d@gmail.com>"
+    },
+    "note-1785800365848-32": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:09:55.695Z",
+      "opened": false,
+      "messageId": "<4c1c9003-9d83-9ea4-f3f7-50844111debe@gmail.com>"
+    },
+    "note-1785800365848-33": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:10:04.694Z",
+      "opened": false,
+      "messageId": "<c9de4fe5-3159-c055-01a9-ee07f21d4f41@gmail.com>"
+    },
+    "note-1785800365848-34": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:10:13.680Z",
+      "opened": false,
+      "messageId": "<89dd1e9b-b817-0248-a242-7f70d47d0cdc@gmail.com>"
+    },
+    "note-1785800365848-35": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:10:22.692Z",
+      "opened": false,
+      "messageId": "<3aebddfd-e1d6-e95f-f496-00f77d604f6b@gmail.com>"
+    },
+    "note-1785800365848-36": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:10:30.694Z",
+      "opened": false,
+      "messageId": "<80558d1c-c08c-69ba-705b-5485e97e1cf1@gmail.com>"
+    },
+    "note-1785800365848-37": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:10:39.685Z",
+      "opened": false,
+      "messageId": "<96835fc4-ee48-eb25-a705-f75f000615ff@gmail.com>"
+    },
+    "note-1785800365848-38": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:10:48.695Z",
+      "opened": false,
+      "messageId": "<94cdcc6d-f56b-9985-e775-13ea93aeb79f@gmail.com>"
+    },
+    "note-1785800365848-39": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:10:57.688Z",
+      "opened": false,
+      "messageId": "<c6e7b947-7590-2144-9e41-5865e4e93383@gmail.com>"
+    },
+    "note-1785800365848-40": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:11:06.712Z",
+      "opened": false,
+      "messageId": "<2ad04b4a-e075-a69c-3cc6-5314a9eb7313@gmail.com>"
+    },
+    "note-1785800365848-41": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:11:15.690Z",
+      "opened": false,
+      "messageId": "<ebbdace2-2e96-b197-3ffb-9455c577fbda@gmail.com>"
+    },
+    "note-1785800365848-42": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:11:23.704Z",
+      "opened": false,
+      "messageId": "<de4db5cd-c3d7-be70-422e-23ba394e4703@gmail.com>"
+    },
+    "note-1785800365848-43": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:11:32.689Z",
+      "opened": false,
+      "messageId": "<918a0e5f-403a-44cc-e63c-b37a34fd7f81@gmail.com>"
+    },
+    "note-1785800365848-44": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:11:41.691Z",
+      "opened": false,
+      "messageId": "<69383d3a-c81b-8141-c46b-1ee0165c82e8@gmail.com>"
+    },
+    "note-1785800365848-45": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:11:50.678Z",
+      "opened": false,
+      "messageId": "<b3c25b7c-f1f8-f475-e3b9-cde79cc2e61a@gmail.com>"
+    },
+    "note-1785800365848-46": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:11:57.970Z",
+      "opened": false,
+      "messageId": "<a42cb092-769b-70c3-2720-df48d21def7a@gmail.com>"
+    },
+    "note-1785800365848-47": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:12:04.916Z",
+      "opened": false,
+      "messageId": "<e39d686c-c0b8-492b-f91e-5a5b547f90b2@gmail.com>"
+    },
+    "note-1785800365848-48": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:12:12.142Z",
+      "opened": false,
+      "messageId": "<bc9b199e-2ea7-7834-e24b-c5ea539061ee@gmail.com>"
+    },
+    "note-1785800365848-49": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:12:19.277Z",
+      "opened": false,
+      "messageId": "<27f5fc09-2822-2fd3-40e3-1df3f9a3acac@gmail.com>"
     }
   },
   "sentHistoryLog": [
+    {
+      "id": "sent-1785802341688-6fl5",
+      "recipientId": "note-1785800365848-49",
+      "to": "matthew.harrell1@morehouse.edu",
+      "recipientName": "Matthew",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:12:19.277Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<27f5fc09-2822-2fd3-40e3-1df3f9a3acac@gmail.com>"
+    },
+    {
+      "id": "sent-1785802334061-aeky",
+      "recipientId": "note-1785800365848-48",
+      "to": "matthew.washington@morehouse.edu",
+      "recipientName": "Matthew",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:12:12.142Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<bc9b199e-2ea7-7834-e24b-c5ea539061ee@gmail.com>"
+    },
+    {
+      "id": "sent-1785802326902-4bxp",
+      "recipientId": "note-1785800365848-47",
+      "to": "matthias.hagans@morehouse.edu",
+      "recipientName": "Matthias",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:12:04.916Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<e39d686c-c0b8-492b-f91e-5a5b547f90b2@gmail.com>"
+    },
+    {
+      "id": "sent-1785802319671-rbai",
+      "recipientId": "note-1785800365848-46",
+      "to": "matthias.foster@morehouse.edu",
+      "recipientName": "Matthias",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:11:57.970Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<a42cb092-769b-70c3-2720-df48d21def7a@gmail.com>"
+    },
+    {
+      "id": "sent-1785802312727-un4b",
+      "recipientId": "note-1785800365848-45",
+      "to": "maurice.kennedy@morehouse.edu",
+      "recipientName": "Maurice",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:11:50.678Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<b3c25b7c-f1f8-f475-e3b9-cde79cc2e61a@gmail.com>"
+    },
+    {
+      "id": "sent-1785802303928-9fmk",
+      "recipientId": "note-1785800365848-44",
+      "to": "maurice.smart@morehouse.edu",
+      "recipientName": "Maurice",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:11:41.691Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<69383d3a-c81b-8141-c46b-1ee0165c82e8@gmail.com>"
+    },
+    {
+      "id": "sent-1785802294808-l5ns",
+      "recipientId": "note-1785800365848-43",
+      "to": "maurice.mccrea@morehouse.edu",
+      "recipientName": "Maurice",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:11:32.689Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<918a0e5f-403a-44cc-e63c-b37a34fd7f81@gmail.com>"
+    },
+    {
+      "id": "sent-1785802285689-o6yq",
+      "recipientId": "note-1785800365848-42",
+      "to": "maurice.harrison@morehouse.edu",
+      "recipientName": "Maurice",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:11:23.704Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<de4db5cd-c3d7-be70-422e-23ba394e4703@gmail.com>"
+    },
+    {
+      "id": "sent-1785802277378-kude",
+      "recipientId": "note-1785800365848-41",
+      "to": "maurice.veney@morehouse.edu",
+      "recipientName": "Maurice",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:11:15.690Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<ebbdace2-2e96-b197-3ffb-9455c577fbda@gmail.com>"
+    },
+    {
+      "id": "sent-1785802268570-5mqo",
+      "recipientId": "note-1785800365848-40",
+      "to": "maurice.lewis@morehouse.edu",
+      "recipientName": "Maurice",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:11:06.712Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<2ad04b4a-e075-a69c-3cc6-5314a9eb7313@gmail.com>"
+    },
+    {
+      "id": "sent-1785802259770-o9i6",
+      "recipientId": "note-1785800365848-39",
+      "to": "maverick.scruggs@morehouse.edu",
+      "recipientName": "Maverick",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:10:57.688Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<c6e7b947-7590-2144-9e41-5865e4e93383@gmail.com>"
+    },
+    {
+      "id": "sent-1785802250817-35zw",
+      "recipientId": "note-1785800365848-38",
+      "to": "max.hodgehampton@morehouse.edu",
+      "recipientName": "Max",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:10:48.695Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<94cdcc6d-f56b-9985-e775-13ea93aeb79f@gmail.com>"
+    },
+    {
+      "id": "sent-1785802242192-fjbr",
+      "recipientId": "note-1785800365848-37",
+      "to": "max.mcqueen@morehouse.edu",
+      "recipientName": "Max",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:10:39.685Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<96835fc4-ee48-eb25-a705-f75f000615ff@gmail.com>"
+    },
+    {
+      "id": "sent-1785802232609-kei5",
+      "recipientId": "note-1785800365848-36",
+      "to": "max.archer@morehouse.edu",
+      "recipientName": "Max",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:10:30.694Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<80558d1c-c08c-69ba-705b-5485e97e1cf1@gmail.com>"
+    },
+    {
+      "id": "sent-1785802224417-i0rr",
+      "recipientId": "note-1785800365848-35",
+      "to": "max.coots@morehouse.edu",
+      "recipientName": "Max",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:10:22.692Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<3aebddfd-e1d6-e95f-f496-00f77d604f6b@gmail.com>"
+    },
+    {
+      "id": "sent-1785802215732-t98p",
+      "recipientId": "note-1785800365848-34",
+      "to": "maxie.jacksoniv@morehouse.edu",
+      "recipientName": "Maxie",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:10:13.680Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<89dd1e9b-b817-0248-a242-7f70d47d0cdc@gmail.com>"
+    },
+    {
+      "id": "sent-1785802206706-8nad",
+      "recipientId": "note-1785800365848-33",
+      "to": "maxie.maultsby@morehouse.edu",
+      "recipientName": "Maxie",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:10:04.694Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<c9de4fe5-3159-c055-01a9-ee07f21d4f41@gmail.com>"
+    },
+    {
+      "id": "sent-1785802197653-9dcg",
+      "recipientId": "note-1785800365848-32",
+      "to": "maxime.legoff@morehouse.edu",
+      "recipientName": "Maxime",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:09:55.695Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<4c1c9003-9d83-9ea4-f3f7-50844111debe@gmail.com>"
+    },
+    {
+      "id": "sent-1785802190434-2dra",
+      "recipientId": "note-1785800365848-31",
+      "to": "maximilian.armstead@morehouse.edu",
+      "recipientName": "Maximilian",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:09:48.775Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<97f6195d-07f9-b351-2b04-419043dd3d0d@gmail.com>"
+    },
+    {
+      "id": "sent-1785802183555-7hnl",
+      "recipientId": "note-1785800365848-30",
+      "to": "maximilian.hayfron@morehouse.edu",
+      "recipientName": "Maximilian",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:09:41.802Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<d550e3bd-9a03-9bf1-cc49-13d5c452d80e@gmail.com>"
+    },
+    {
+      "id": "sent-1785802176588-cryw",
+      "recipientId": "note-1785800365848-29",
+      "to": "maximilian.mcwilliam@morehouse.edu",
+      "recipientName": "Maximilian",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:09:34.837Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<34527b48-d671-a540-64a6-c77062f01d25@gmail.com>"
+    },
+    {
+      "id": "sent-1785802169641-qjwr",
+      "recipientId": "note-1785800365848-28",
+      "to": "maximillion.powellfo@morehouse.edu",
+      "recipientName": "Maximillion",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:09:27.958Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<4a52b1bf-0c38-ecfc-a61a-c4bb0f7feaba@gmail.com>"
+    },
+    {
+      "id": "sent-1785802162728-4y0d",
+      "recipientId": "note-1785800365848-27",
+      "to": "maxo.bruneus@morehouse.edu",
+      "recipientName": "Maxo",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:09:20.748Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<a387ffac-ae89-c940-f49a-e46b83f7a008@gmail.com>"
+    },
+    {
+      "id": "sent-1785802155516-krrk",
+      "recipientId": "note-1785800365848-26",
+      "to": "maxwell.pierrephilip@morehouse.edu",
+      "recipientName": "Maxwell",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:09:13.194Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<98133483-7a43-a169-f903-57ff07473740@gmail.com>"
+    },
+    {
+      "id": "sent-1785802147956-px6n",
+      "recipientId": "note-1785800365848-25",
+      "to": "maxwell.dixon@morehouse.edu",
+      "recipientName": "Maxwell",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:09:05.715Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<01428892-ddb0-4601-df5d-3e9fc7d89793@gmail.com>"
+    },
+    {
+      "id": "sent-1785802139778-jmvh",
+      "recipientId": "note-1785800365848-24",
+      "to": "maxwell.jones@morehouse.edu",
+      "recipientName": "Maxwell",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:08:57.700Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<fc00c6a6-2875-bab8-a442-5750889744b2@gmail.com>"
+    },
+    {
+      "id": "sent-1785802132323-v615",
+      "recipientId": "note-1785800365848-23",
+      "to": "maxwell.christie@morehouse.edu",
+      "recipientName": "Maxwell",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:08:49.862Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<ff0bfff9-6aed-fd54-d47f-f2e32a7104a9@gmail.com>"
+    },
+    {
+      "id": "sent-1785802124632-tui6",
+      "recipientId": "note-1785800365848-22",
+      "to": "maxwell.mitchell@morehouse.edu",
+      "recipientName": "Maxwell",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:08:42.422Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<f6796b69-264b-d1f7-c324-3d64c18183a4@gmail.com>"
+    },
+    {
+      "id": "sent-1785802117212-vrvu",
+      "recipientId": "note-1785800365848-21",
+      "to": "maxwell.martin@morehouse.edu",
+      "recipientName": "Maxwell",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:08:35.390Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<84cd0149-cd7d-1c11-cc57-c919b389c646@gmail.com>"
+    },
+    {
+      "id": "sent-1785802110174-7vkf",
+      "recipientId": "note-1785800365848-20",
+      "to": "maxwell.edmonds@morehouse.edu",
+      "recipientName": "Maxwell",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:08:28.342Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<9f0d5dc4-767a-1f98-ca23-caeced78a434@gmail.com>"
+    },
+    {
+      "id": "sent-1785802103133-3yec",
+      "recipientId": "note-1785800365848-19",
+      "to": "maxwell.alston@morehouse.edu",
+      "recipientName": "Maxwell",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:08:21.316Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<6b4e1f5a-b405-fbaf-fde6-394ca8889494@gmail.com>"
+    },
+    {
+      "id": "sent-1785802096094-2me2",
+      "recipientId": "note-1785800365848-18",
+      "to": "maxwell.hayes@morehouse.edu",
+      "recipientName": "Maxwell",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:08:14.287Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<fb30ee5f-01c9-8bca-4708-6dd8fe365b9e@gmail.com>"
+    },
+    {
+      "id": "sent-1785802089053-uq27",
+      "recipientId": "note-1785800365848-17",
+      "to": "maxwell.morrison@morehouse.edu",
+      "recipientName": "Maxwell",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:08:07.264Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<9135253b-1feb-7ae2-37bc-f6e02d58b9ee@gmail.com>"
+    },
+    {
+      "id": "sent-1785802082031-cb1z",
+      "recipientId": "note-1785800365848-16",
+      "to": "mayce.webber@morehouse.edu",
+      "recipientName": "Mayce",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:07:59.717Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<95ef4cc4-b296-96eb-605c-9c108b3220d8@gmail.com>"
+    },
+    {
+      "id": "sent-1785802073942-exvj",
+      "recipientId": "note-1785800365848-15",
+      "to": "mckenzy.cash@morehouse.edu",
+      "recipientName": "Mckenzy",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:07:51.690Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<cf6594cf-57db-7217-11d0-41574a3f8611@gmail.com>"
+    },
+    {
+      "id": "sent-1785802065333-uhr7",
+      "recipientId": "note-1785800365848-14",
+      "to": "mckinley.boatright@morehouse.edu",
+      "recipientName": "Mckinley",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:07:43.679Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<5ee43761-8789-4828-2379-c226854fa91d@gmail.com>"
+    },
+    {
+      "id": "sent-1785802056633-2wpj",
+      "recipientId": "note-1785800365848-13",
+      "to": "mcmillon.camp@morehouse.edu",
+      "recipientName": "Mcmillon",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:07:34.689Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<26df3781-9bd4-4ab8-02d6-cc1b6558e304@gmail.com>"
+    },
+    {
+      "id": "sent-1785802048733-bolb",
+      "recipientId": "note-1785800365848-12",
+      "to": "mekai.noakes@morehouse.edu",
+      "recipientName": "Mekai",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:07:26.753Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<2d9b4c43-07a2-e054-2b22-07285a1efb78@gmail.com>"
+    },
+    {
+      "id": "sent-1785802041532-5p0b",
+      "recipientId": "note-1785800365848-11",
+      "to": "mekai.young@morehouse.edu",
+      "recipientName": "Mekai",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:07:19.723Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<691f90a3-30bf-0d3c-da73-9225cae78686@gmail.com>"
+    },
+    {
+      "id": "sent-1785802034524-25co",
+      "recipientId": "note-1785800365848-10",
+      "to": "mekaiel.holmes@morehouse.edu",
+      "recipientName": "Mekaiel",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:07:12.816Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<5aee12f9-3c70-56da-df05-9abdcdf613e1@gmail.com>"
+    },
+    {
+      "id": "sent-1785802027613-13wp",
+      "recipientId": "note-1785800365848-9",
+      "to": "mekhi.walker1@morehouse.edu",
+      "recipientName": "Mekhi",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:07:05.612Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<d98eeb3f-b561-f55d-7cd3-3a99100517ed@gmail.com>"
+    },
+    {
+      "id": "sent-1785802020413-efju",
+      "recipientId": "note-1785800365848-8",
+      "to": "mekhi.bey@morehouse.edu",
+      "recipientName": "Mekhi",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:06:58.593Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<7522e3eb-1a08-7322-7afa-2ab374602783@gmail.com>"
+    },
+    {
+      "id": "sent-1785802013370-x27z",
+      "recipientId": "note-1785800365848-7",
+      "to": "mekhi.evansel@morehouse.edu",
+      "recipientName": "Mekhi",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:06:51.550Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<4bd60222-bb1e-f688-536d-effe8a8b789f@gmail.com>"
+    },
+    {
+      "id": "sent-1785802006344-zi3s",
+      "recipientId": "note-1785800365848-6",
+      "to": "mekhi.burns@morehouse.edu",
+      "recipientName": "Mekhi",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:06:43.838Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<7e40ebff-463d-8246-3246-f2a9d77fd297@gmail.com>"
+    },
+    {
+      "id": "sent-1785801998618-3q90",
+      "recipientId": "note-1785800365848-5",
+      "to": "mekhi.grissom@morehouse.edu",
+      "recipientName": "Mekhi",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:06:36.174Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<a3ca9842-29f1-ba59-8d1a-c1196ad5f414@gmail.com>"
+    },
+    {
+      "id": "sent-1785801990974-y7ka",
+      "recipientId": "note-1785800365848-4",
+      "to": "mekhi.paschal@morehouse.edu",
+      "recipientName": "Mekhi",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:06:29.280Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<f877ff45-b6ff-5eaa-55a8-c0cace02d65c@gmail.com>"
+    },
+    {
+      "id": "sent-1785801984074-srfr",
+      "recipientId": "note-1785800365848-3",
+      "to": "mekhi.smith1@morehouse.edu",
+      "recipientName": "Mekhi",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:06:22.020Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<9ce7f2a8-5006-a4e2-e4b7-f475144bbc84@gmail.com>"
+    },
     {
       "id": "sent-1785801622475-mxxk",
       "recipientId": "note-1785800365848-2",
