@@ -246,6 +246,10 @@ app.post('/api/fetch-live-replies', async (req, res) => {
       logger: false
     });
 
+    client.on('error', (err) => {
+      console.error('[IMAP CLIENT CAUGHT ERROR]', err.message || err);
+    });
+
     await client.connect();
     let lock = await client.getMailboxLock('INBOX');
 

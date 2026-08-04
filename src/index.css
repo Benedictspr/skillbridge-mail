@@ -36,20 +36,20 @@ body {
   line-height: 1.5;
 }
 
-/* Custom Scrollbars */
+/* Custom Sleek Tiny Scrollbars Matching Site Dark Teal Aesthetic */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(15, 23, 42, 0.6);
 }
 ::-webkit-scrollbar-thumb {
-  background: #BDC1C6;
-  border-radius: 4px;
+  background: #334155;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9AA0A6;
+  background: #0D9488;
 }
 
 /* Gmail Mint Header Search Bar */

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Copy, Check, User, Mail, Send, Tag, Zap, RefreshCw, Sparkles, FileText, Layers, ShieldCheck, Palette, LayoutGrid } from 'lucide-react';
+import { 
+  Eye, Copy, Check, User, Mail, Send, Tag, Zap, RefreshCw, 
+  Sparkles, FileText, Layers, ShieldCheck, Palette, LayoutGrid, 
+  Upload, Type, Image as ImageIcon, Minimize2, Maximize2, X
+} from 'lucide-react';
 import { EMAIL_TEMPLATES } from '../mockData';
 import { extractFirstNameFromEmail } from '../utils/nameParser';
 import VisualEmailDesigner from './VisualEmailDesigner';
-
-const DOODLE_B64_IMAGE = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA1MDAgNDAiIGZpbGw9Im5vbmUiPgogIDwhLS0gTGVmdCBEYXNoZWQgQXhpcyAtLT4KICA8bGluZSB4MT0iMTUiIHkxPSIyMCIgeDI9Ijg1IiB5Mj0iMjAiIHN0cm9rZT0iIzcxODA5NiIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1kYXNoYXJyYXk9IjQgMyIgLz4KICAKICA8IS0tIExlZnQgRmxvdXJpc2ggLS0+CiAgPHBhdGggZD0iTSA4NSAyMCBDIDkyIDE0IDk4IDEyIDEwMiA4IE0gODUgMjAgQyA5MiAyNCA5NiAyMiAxMDIgMjIgTSA5MCAyMCBDIDkzIDE2IDk3IDE0IDEwMCAxMSIgc3Ryb2tlPSIjQTBBRUMwIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiAvPgogIAogIDwhLS0gTW90aWYgMTogSUQgLyBDZXJ0aWZpY2F0ZSBDYXJkICh4PTExNSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1LCA4KSIgc3Ryb2tlPSIjQ0JENUUwIiBzdHJva2Utd2lkdGg9IjEuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxyZWN0IHg9IjIiIHk9IjIiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxOCIgcng9IjMiIC8+CiAgICA8Y2lyY2xlIGN4PSI4IiBjeT0iOSIgcj0iMi41IiAvPgogICAgPHBhdGggZD0iTSA0IDE3IEMgNCAxNCA2 IDEzIDggMTMgQyAxMCAxMyAxMiAxNCAxMiAxNyIgLz4KICAgIDxsaW5lIHgxPSIxMyIgeTE9IjciIHgyPSIyMCIgeTI9IjciIC8+CiAgICA8bGluZSB4MT0iMTMiIHkxPSIxMSIgeDI9IjE5IiB5Mj0iMTEiIC8+CiAgICA8bGluZSB4MT0iMTMiIHkxPSIxNSIgeDI9IjE3IiB5Mj0iMTUiIC8+CiAgPC9nPgoKICA8IS0tIE1vdGlmIDI6IE9wZW4gQm9vayAoeD0xNjUpIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2NSwgOCkiIHN0cm9rZT0iI0UyRThGMCIgc3Ryb2tlLXdpZHRoPSIxLjQiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CiAgICA8cGF0aCBkPSJNIDIgNiBDIDEyIDMgMjAgNSAyMyA3IEMgMjYgNSAzNCAzIDQ0IDYgViAyMCBDIDM0IDE3IDI2IDE5IDIzIDE4IEMgMjAgMTkgMTIgMTcgMiAyMCBaIiAvPgogICAgPGxpbmUgeDE9IjIzIiB5MT0iNyIgeDI9IjIzIiB5Mj0iMTgiIC8+CiAgICA8cGF0aCBkPSJNIDYgMTAgQyAxMSA4IDE2IDkgMTkgMTAgTSA2IDE0IEMgMTEgMTIgMTYgMTMgMTkgMTQgTSAyNyAxMCBDIDMwIDkgMzUgOCA0MCAxMCBNIDI3IDE0IEMgMzAgMTMgMzUgMTIgNDAgMTQiIC8+CiAgPC9nPgoKICA8IS0tIE1vdGlmIDM6IENlbnRlcnBpZWNlIEdyYWR1YXRpb24gQ2FwIHdpdGggVGFzc2VsICh4PTIyNSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjI1LCAyKSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjUsMiA0OCwxMiAyNSwyMiAyLDEyIiBmaWxsPSIjRTJFOEYwIiBmaWxsLW9wYWNpdHk9IjAuMSIgLz4KICAgIDxwYXRoIGQ9Ik0gMTAgMTYgViAyMyBDIDEwIDI2IDQwIDI2IDQwIDIzIFYgMTYiIC8+CiAgICA8Y2lyY2xlIGN4PSIyNSIgY3k9IjEyIiByPSIyIiBmaWxsPSIjRkZGRkZGIiAvPgogICAgPHBhdGggZD0iTSAyNSAxMiBDIDE2IDE0IDkgMjAgNyAyNSIgLz4KICAgIDxwb2x5Z29uIHBvaW50cz0iNSwyNSA5LDMwIDQsMzAiIGZpbGw9IiNGRkZGRkYiIC8+CiAgPC9nPgoKICA8IS0tIE1vdGlmIDQ6IE1pY3Jvc2NvcGUgKHg9Mjk1KSAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyOTUsIDYpIiBzdHJva2U9IiNDQkQ1RTAiIHN0cm9rZS13aWR0aD0iMS40IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPGxpbmUgeDE9IjQiIHkxPSIyNCIgeDI9IjIyIiB5Mj0iMjQiIC8+CiAgICA8bGluZSB4MT0iMTMiIHkxPSIyNCIgeDI9IjEzIiB5Mj0iMTgiIC8+CiAgICA8cGF0aCBkPSJNIDEzIDE0IEMgMTggMTQgMjAgOSAxOCA1IEMgMTYgMiAxMSAyIDkgNSBMIDEzIDE0IiAvPgogICAgPHJlY3QgeD0iOCIgeT0iNyIgd2lkdGg9IjUiIGhlaWghtPSI3IiByeD0iMSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDEwIDEwKSIgLz4KICAgIDxjaXJjbGUgY3g9IjE3IiBjeT0iMTgiIHI9IjEuNSIgLz4KICA8L2c+CgogIDwhLS0gTW90aWYgNTogUXVpbGwgUGVuICYgSW5rcG90ICh4PTM0NSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzQ1LCA2KSIgc3Ryb2tlPSIjRTJFOEYwIiBzdHJva2Utd2lkdGg9IjEuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxwYXRoIGQ9Ik0gMjAgMiBDIDEyIDUgNyAxNCA1IDI0IE0gMjAgMiBDIDE2IDggMTYgMTUgMTggMjEiIC8+CiAgICA8bGluZSB4MT0iMTUiIHkxPSI3IiB4Mj0iMTkiIHkyPSI5IiAvPgogICAgPGxpbmUgeDE9IjE0IiB5MT0iMTEiIHgyPSIxOCIgeTI9IjEzIiAvPgogICAgPGxpbmUgeDE9IjEzIiB5MT0iMTUiIHgyPSIxNyIgeTI9IjE3IiAvPgogICAgPHJlY3QgeD0iMiIgeT0iMTciIHdpZHRoPSI4IiBoZWlnaHQ9IjciIHJ4PSIxIiAvPgogICAgPHBhdGggZD0iTSA0IDE3IFYgMTQgSDggViAxNyIgLz4KICA8L2c+CgogIDwhLS0gUmlnaHQgRmxvdXJpc2ggLS0+CiAgPGcgc3Ryb2tlPSIjQTBBRUMwIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxwYXRoIGQ9Ik0gNDE1IDIwIEMgNDA4IDE0IDQwMiAxMiAzOTggOCBNIDQxNSAyMCBDIDQwOCAyNCA0MDQgMjIgMzk4IDIyIE0gNDEwIDIwIEMgNDA3IDE2IDQwMyAxNCA0MDAgMTEiIC8+CiAgPC9nPgoKICA8IS0tIFJpZ2h0IERhc2hlZCBBeGlzIC0tPgogIDxsaW5lIHgxPSI0MTUiIHkxPSIyMCIgeDI9IjQ4NSIgeTI9IjIwIiBzdHJva2U9IiM3MTgwOTYiIHN0cm9rZS13aWR0aD0iMS4yIiBzdHJva2UtZGFzaGFycmF5PSI0IDMiIC8+Cjwvc3ZnPg==`;
+import { FONT_CATALOG, loadGoogleFontsInDOM } from './designer/fonts';
 
 export default function EmailBuilderView({ 
   campaignConfig = {}, 
@@ -18,11 +21,16 @@ export default function EmailBuilderView({
   const safeRecipients = Array.isArray(recipients) ? recipients : [];
   const safeConfig = campaignConfig || {};
   const [selectedRecipientId, setSelectedRecipientId] = useState(safeRecipients[0]?.id || '');
-  const [deviceFrame, setDeviceFrame] = useState('macbook');
   const [copied, setCopied] = useState(false);
   const [isSendingTest, setIsSendingTest] = useState(false);
-  const [templateTheme, setTemplateTheme] = useState('venita-black'); // 'venita-black' | 'modern-light'
   const [editorMode, setEditorMode] = useState('visual'); // 'visual' | 'text'
+  const [selectedFont, setSelectedFont] = useState(FONT_CATALOG[0].family);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Load Google Fonts into document DOM
+  useEffect(() => {
+    loadGoogleFontsInDOM();
+  }, []);
 
   // Synchronize sender email with Gmail SMTP address if set
   useEffect(() => {
@@ -40,6 +48,14 @@ export default function EmailBuilderView({
   };
 
   const activeSenderEmail = smtpConfig?.user || campaignConfig.senderEmail || '';
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  };
 
   const renderTextWithMergeTags = (text) => {
     if (!text) return '';
@@ -63,72 +79,45 @@ export default function EmailBuilderView({
     }));
   };
 
-  const handleTemplateSelect = (templateId) => {
-    const tmpl = EMAIL_TEMPLATES.find(t => t.id === templateId);
-    if (tmpl) {
-      setCampaignConfig(prev => ({
-        ...prev,
-        templateId: tmpl.id,
-        subject: tmpl.subject,
-        bodyText: tmpl.bodyText,
-        headerLogoText: tmpl.headerLogoText,
-        buttonText: tmpl.buttonText,
-        buttonUrl: tmpl.buttonUrl,
-        signatureText: tmpl.signatureText
-      }));
+  const handleTextFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imageTag = `\n[IMAGE: ${event.target.result}]\n`;
+        setCampaignConfig(prev => ({
+          ...prev,
+          bodyText: (prev.bodyText || '') + imageTag
+        }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const generateFullHtmlEmail = () => {
-    const renderedBody = renderTextWithMergeTags(campaignConfig.bodyText).replace(/\n/g, '<br/>');
-    const renderedSubject = renderTextWithMergeTags(campaignConfig.subject);
-    const renderedSignature = renderTextWithMergeTags(campaignConfig.signatureText).replace(/\n/g, '<br/>');
-    const ctaUrl = campaignConfig.buttonUrl || 'https://t.me/+AB0OloYpE7I1NTVk';
+  const formatBodyContent = (text) => {
+    if (!text) return '';
+    let parsed = renderTextWithMergeTags(text);
 
-    if (templateTheme === 'venita-black') {
-      return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>${renderedSubject}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; background-color: #07080D; margin: 0; padding: 24px; color: #F9FAFB;">
-  <div style="max-width: 580px; margin: 0 auto; background: #0D0E16; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);">
-    ${campaignConfig.headerLogoText ? `
-      <div style="background: #000000; padding: 32px 24px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.12);">
-        <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; font-family: 'Cormorant Garamond', Garamond, Georgia, serif; color: #FFFFFF;">${campaignConfig.headerLogoText}</h1>
-      </div>
-    ` : ''}
-    <div style="padding: 36px; font-size: 15px; line-height: 1.8; color: #E2E8F0;">
-      ${renderedBody}
-      <div style="margin: 28px 0 20px 0; text-align: center;">
-        <table border="0" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto; border-collapse: separate; border-spacing: 18px 10px;">
-          <tr>
-            <td align="center" style="padding: 0;">
-              <a href="${ctaUrl}" target="_blank" rel="noopener noreferrer" style="background: #0f172a; color: #ffffff !important; padding: 11px 22px; text-decoration: none; font-weight: 700; border-radius: 8px; font-size: 14px; border: 1px solid #334155; box-shadow: 0 4px 14px rgba(0,0,0,0.3); display: inline-block; white-space: nowrap; margin: 6px 10px;">Apply via Telegram</a>
-            </td>
-            <td align="center" style="padding: 0;">
-              <a href="mailto:${activeSenderEmail || 'outreach@skillbridge.org'}" style="background: #0f172a; color: #ffffff !important; padding: 11px 22px; text-decoration: none; font-weight: 700; border-radius: 8px; font-size: 14px; border: 1px solid #334155; box-shadow: 0 4px 14px rgba(0,0,0,0.3); display: inline-block; white-space: nowrap; margin: 6px 10px;">Reply via Email</a>
-            </td>
-          </tr>
-        </table>
-      </div>
-      ${campaignConfig.signatureText ? `
-        <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); font-weight: 600; color: #F1F5F9; font-size: 15px; font-family: 'Plus Jakarta Sans', Arial, sans-serif;">
-          ${renderedSignature}
-        </div>
-      ` : ''}
-    </div>
-    <div style="background: #07080D; padding: 18px 36px; text-align: center; font-size: 11px; color: #64748B; border-top: 1px solid rgba(255, 255, 255, 0.06);">
-      ${activeSenderEmail ? `SkillBridge Student Outreach &bull; ${activeSenderEmail}` : 'SkillBridge Student Outreach'}
-    </div>
-  </div>
-</body>
-</html>`;
-    }
+    // Replace [IMAGE: url]
+    parsed = parsed.replace(/\[IMAGE:\s*([^\]]+)\]/g, '<div style="text-align:center; margin:16px 0;"><img src="$1" style="max-width:100%; border-radius:8px; display:inline-block;" /></div>');
+
+    // Replace [BUTTON: label -> url]
+    parsed = parsed.replace(/\[BUTTON:\s*([^\-]+)->\s*([^\]]+)\]/g, '<div style="text-align:center; margin:20px 0;"><a href="$2" target="_blank" style="background:#007C89; color:#ffffff; font-weight:bold; padding:12px 24px; text-decoration:none; border-radius:8px; display:inline-block;">$1</a></div>');
+
+    // Replace [NOTE: text]
+    parsed = parsed.replace(/\[NOTE:\s*([^\]]+)\]/g, '<div style="background:#f1f5f9; border-left:4px solid #007C89; padding:12px 16px; border-radius:6px; margin:16px 0; color:#0f172a; font-weight:bold;">$1</div>');
+
+    // Replace ### Headings
+    parsed = parsed.replace(/^###\s*(.+)$/gm, '<h2 style="font-size:22px; font-weight:800; color:#0f172a; margin:16px 0 8px 0;">$1</h2>');
+
+    return parsed.replace(/\n/g, '<br/>');
+  };
+
+  const generateFullHtmlEmail = () => {
+    const renderedSubject = renderTextWithMergeTags(campaignConfig.subject || '');
+    const renderedBody = formatBodyContent(campaignConfig.bodyText || '');
+    const renderedSignature = renderTextWithMergeTags(campaignConfig.signatureText || '');
+    const ctaUrl = campaignConfig.buttonUrl || 'https://t.me/+AB0OloYpE7I1NTVk';
 
     return `<!DOCTYPE html>
 <html>
@@ -137,26 +126,17 @@ export default function EmailBuilderView({
   <title>${renderedSubject}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 24px; color: #1e293b;">
+<body style="font-family: ${selectedFont}; background-color: #f4f6f8; margin: 0; padding: 24px; color: #1e293b;">
   <div style="max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
-    ${campaignConfig.headerLogoText ? `<div style="background: #000000; padding: 32px 24px; text-align: center; color: #ffffff;"><h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; font-family: 'Cormorant Garamond', Garamond, Georgia, serif;">${campaignConfig.headerLogoText}</h1></div>` : ''}
+    ${campaignConfig.headerLogoText ? `<div style="background: #000000; padding: 32px 24px; text-align: center; color: #ffffff;"><h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;">${campaignConfig.headerLogoText}</h1></div>` : ''}
     <div style="padding: 36px; font-size: 15px; line-height: 1.7; color: #334155;">
       ${renderedBody}
       <div style="margin: 28px 0 20px 0; text-align: center;">
-        <table border="0" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto; border-collapse: separate; border-spacing: 18px 10px;">
-          <tr>
-            <td align="center" style="padding: 0;">
-              <a href="${ctaUrl}" target="_blank" rel="noopener noreferrer" style="background: #0f172a; color: #ffffff !important; padding: 11px 22px; text-decoration: none; font-weight: 700; border-radius: 8px; font-size: 14px; border: 1px solid #334155; box-shadow: 0 4px 14px rgba(0,0,0,0.3); display: inline-block; white-space: nowrap; margin: 6px 10px;">Apply via Telegram</a>
-            </td>
-            <td align="center" style="padding: 0;">
-              <a href="mailto:${activeSenderEmail || 'outreach@skillbridge.org'}" style="background: #0f172a; color: #ffffff !important; padding: 11px 22px; text-decoration: none; font-weight: 700; border-radius: 8px; font-size: 14px; border: 1px solid #334155; box-shadow: 0 4px 14px rgba(0,0,0,0.3); display: inline-block; white-space: nowrap; margin: 6px 10px;">Reply via Email</a>
-            </td>
-          </tr>
-        </table>
+        <a href="${ctaUrl}" target="_blank" style="background: #007C89; color: #ffffff; padding: 12px 28px; text-decoration: none; font-weight: bold; border-radius: 8px; font-size: 14px; display: inline-block;">Apply via Telegram</a>
       </div>
-      ${campaignConfig.signatureText ? `<div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-weight: 600; color: #0f172a; font-size: 15px; font-family: 'Plus Jakarta Sans', Arial, sans-serif;">${renderedSignature}</div>` : ''}
+      ${campaignConfig.signatureText ? `<div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">${renderedSignature}</div>` : ''}
     </div>
     <div style="background: #f9fafb; padding: 18px 36px; text-align: center; font-size: 11px; color: #64748B; border-top: 1px solid #e2e8f0;">
       ${activeSenderEmail ? `SkillBridge Student Outreach &bull; ${activeSenderEmail}` : 'SkillBridge Student Outreach'}
@@ -178,208 +158,233 @@ export default function EmailBuilderView({
     setIsSendingTest(false);
   };
 
+  // Render Visual Drop Studio in Full Screen Viewport
+  if (editorMode === 'visual') {
+    return (
+      <VisualEmailDesigner
+        campaignConfig={campaignConfig}
+        setCampaignConfig={setCampaignConfig}
+        recipients={recipients}
+        onStartQueue={onStartQueue}
+        onSendSingleTest={onSendSingleTest}
+        smtpConfig={smtpConfig}
+        onCloseStudio={() => setActiveTab && setActiveTab('dashboard')}
+        editorMode={editorMode}
+        setEditorMode={setEditorMode}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6 font-sans">
-      {/* Studio Header Bar & Studio Mode Switcher */}
-      <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full border border-purple-200 inline-block mb-1 shadow-xs">
-            Email Designer Studio
-          </span>
-          <h2 className="text-xl font-bold text-gray-900">Email Personalization Studio</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Build emails visually or customize text templates with live merge tag previews.</p>
+      {/* Studio Mode Selector Bar & Window Controls */}
+      <div className="bg-slate-900 text-white p-4 rounded-2xl border border-slate-800 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          {/* Window Control Buttons */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setActiveTab && setActiveTab('dashboard')}
+              className="w-3.5 h-3.5 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-[9px] text-red-950 font-bold opacity-80 hover:opacity-100 transition-opacity"
+              title="Close Studio (Return to Dashboard)"
+            >
+              ✕
+            </button>
+            <button
+              onClick={toggleFullscreen}
+              className="w-3.5 h-3.5 rounded-full bg-amber-500 hover:bg-amber-600 flex items-center justify-center text-[9px] text-amber-950 font-bold opacity-80 hover:opacity-100 transition-opacity"
+              title="Minimize / Restore View"
+            >
+              –
+            </button>
+            <button
+              onClick={toggleFullscreen}
+              className="w-3.5 h-3.5 rounded-full bg-emerald-500 hover:bg-emerald-600 flex items-center justify-center text-[9px] text-emerald-950 font-bold opacity-80 hover:opacity-100 transition-opacity"
+              title="Maximize Full Screen"
+            >
+              +
+            </button>
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2 text-teal-400 text-xs font-bold uppercase tracking-wider mb-0.5">
+              <Sparkles className="w-4 h-4" /> SkillBridge Email Studio
+            </div>
+            <h2 className="text-base font-bold text-white">Select Your Preferred Designer Studio</h2>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Main Studio Mode Selector (Visual vs Standard Text) */}
-          <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-300 text-xs">
+        <div className="flex items-center gap-3">
+          {/* Mode Switcher Tabs */}
+          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
             <button
               onClick={() => setEditorMode('visual')}
-              className={`px-3.5 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all ${
-                editorMode === 'visual' ? 'bg-black text-white shadow-xs' : 'text-gray-700 hover:text-black'
+              className={`px-4 py-2 rounded-lg font-extrabold tracking-wide flex items-center gap-2 transition-all uppercase ${
+                editorMode === 'visual' ? 'bg-teal-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'
               }`}
             >
-              <Palette className="w-4 h-4 text-purple-400" />
-              <span>Visual Drag Studio (Canva / Mailchimp)</span>
+              <Palette className="w-4 h-4" />
+              <span>VISUAL DROP STUDIO</span>
             </button>
 
             <button
               onClick={() => setEditorMode('text')}
-              className={`px-3.5 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all ${
-                editorMode === 'text' ? 'bg-black text-white shadow-xs' : 'text-gray-700 hover:text-black'
+              className={`px-4 py-2 rounded-lg font-extrabold tracking-wide flex items-center gap-2 transition-all ${
+                editorMode === 'text' ? 'bg-teal-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'
               }`}
             >
-              <FileText className="w-4 h-4 text-blue-400" />
-              <span>Standard Text Mode</span>
+              <FileText className="w-4 h-4" />
+              <span>Standard Form & Text Mode</span>
+            </button>
+          </div>
+
+          {/* Explicit Window Control Action Icons */}
+          <div className="flex items-center gap-1 border-l border-slate-800 pl-3">
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
+              title={isFullscreen ? "Exit Fullscreen" : "Full Screen Mode"}
+            >
+              {isFullscreen ? <Minimize2 className="w-4 h-4 text-amber-400" /> : <Maximize2 className="w-4 h-4 text-teal-400" />}
+            </button>
+
+            <button
+              onClick={() => setActiveTab && setActiveTab('dashboard')}
+              className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
+              title="Close Studio"
+            >
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Render Selected Studio Mode */}
-      {editorMode === 'visual' ? (
-        <VisualEmailDesigner
-          campaignConfig={campaignConfig}
-          setCampaignConfig={setCampaignConfig}
-          recipients={recipients}
-          onStartQueue={onStartQueue}
-          onSendSingleTest={onSendSingleTest}
-        />
-      ) : (
-        /* Standard Form Editor Mode */
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Form (6 Cols) */}
-          <div className="lg:col-span-6 space-y-5">
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
-              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-100 pb-3 flex items-center gap-2">
-                <Mail className="w-4 h-4 text-blue-600" />
-                <span>1. Header & Sender Details</span>
-              </h3>
+      {/* Enhanced Standard Form & Text Mode */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Form (6 Cols) */}
+        <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-5">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+              <FileText className="w-4 h-4 text-teal-600" /> Standard Template Form Editor
+            </h3>
+          </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-gray-700 block mb-1">Sender Name</label>
-                  <input
-                    type="text"
-                    value={campaignConfig.senderName || ''}
-                    onChange={(e) => setCampaignConfig(prev => ({ ...prev, senderName: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold outline-none focus:border-blue-600"
-                    placeholder="Benedict"
-                  />
-                </div>
+          {/* Font Family Selector */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+              <Type className="w-3.5 h-3.5 text-teal-600" /> Primary Font Family (System & Google Fonts)
+            </label>
+            <select
+              value={selectedFont}
+              onChange={(e) => setSelectedFont(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs font-semibold text-gray-900 focus:outline-none focus:border-teal-600"
+            >
+              {FONT_CATALOG.map(f => (
+                <option key={f.name} value={f.family}>{f.name} ({f.type.toUpperCase()})</option>
+              ))}
+            </select>
+          </div>
 
-                <div>
-                  <label className="text-xs font-bold text-gray-700 block mb-1">Reply-To Address</label>
-                  <input
-                    type="email"
-                    value={activeSenderEmail}
-                    onChange={(e) => setCampaignConfig(prev => ({ ...prev, senderEmail: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold outline-none focus:border-blue-600 font-mono"
-                    placeholder="outreach@skillbridge.org"
-                  />
-                </div>
-              </div>
+          {/* Subject Input */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-700">Subject Line</label>
+            <input
+              type="text"
+              value={campaignConfig.subject || ''}
+              onChange={(e) => setCampaignConfig(prev => ({ ...prev, subject: e.target.value }))}
+              placeholder="e.g. Remote Opportunity for {{first_name}}"
+              className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs text-gray-900 focus:outline-none focus:border-teal-600 font-medium"
+            />
+          </div>
 
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1">Email Subject Line</label>
+          {/* Merge Tag & Format Helpers */}
+          <div className="space-y-1.5">
+            <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Quick Inserters</div>
+            <div className="flex flex-wrap gap-1.5">
+              {['{{first_name}}', '{{company}}', '{{role}}', '{{email}}'].map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => insertMergeTag(tag)}
+                  className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-teal-700 text-[11px] font-mono font-bold rounded-lg border border-gray-300"
+                >
+                  {tag}
+                </button>
+              ))}
+
+              {/* Upload Image File for Text Mode */}
+              <label className="px-3 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 text-[11px] font-bold rounded-lg border border-teal-200 cursor-pointer flex items-center gap-1">
+                <Upload className="w-3.5 h-3.5 text-teal-600" /> Insert SVG/GIF/Image File
                 <input
-                  type="text"
-                  value={campaignConfig.subject || ''}
-                  onChange={(e) => setCampaignConfig(prev => ({ ...prev, subject: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 outline-none focus:border-blue-600"
-                  placeholder="Remote Opportunity for Students"
+                  type="file"
+                  accept="image/*,.svg,.gif,.png,.jpg,.jpeg,.webp"
+                  onChange={handleTextFileUpload}
+                  className="hidden"
                 />
-              </div>
-            </div>
-
-            {/* Body Text & Personalization Chips */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-blue-600" />
-                  <span>2. Email Message Body</span>
-                </h3>
-                <span className="text-xs text-gray-400 font-mono">Insert tags below:</span>
-              </div>
-
-              {/* Personalization Tag Chips */}
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  { tag: '{{first_name}}', label: 'First Name' },
-                  { tag: '{{last_name}}', label: 'Last Name' },
-                  { tag: '{{email}}', label: 'Email' },
-                  { tag: '{{company}}', label: 'School / Org' },
-                  { tag: '{{role}}', label: 'Target Role' },
-                  { tag: '{{sender_name}}', label: 'Sender Name' }
-                ].map(chip => (
-                  <button
-                    key={chip.tag}
-                    onClick={() => insertMergeTag(chip.tag)}
-                    className="bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 font-mono text-[11px] font-bold px-2 py-0.5 rounded transition-colors flex items-center gap-1"
-                  >
-                    <span>+</span>
-                    <span>{chip.tag}</span>
-                  </button>
-                ))}
-              </div>
-
-              <div>
-                <textarea
-                  rows={10}
-                  value={campaignConfig.bodyText || ''}
-                  onChange={(e) => setCampaignConfig(prev => ({ ...prev, bodyText: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl p-3 text-xs leading-relaxed font-sans outline-none focus:border-blue-600 shadow-inner"
-                  placeholder="Write your email body text here..."
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1">Signature Block</label>
-                <textarea
-                  rows={2}
-                  value={campaignConfig.signatureText || ''}
-                  onChange={(e) => setCampaignConfig(prev => ({ ...prev, signatureText: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg p-2 text-xs font-sans outline-none focus:border-blue-600"
-                  placeholder="Benedict&#10;Director of Student Outreach"
-                />
-              </div>
+              </label>
             </div>
           </div>
 
-          {/* Right Live Preview Column (6 Cols) */}
-          <div className="lg:col-span-6 space-y-5">
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-emerald-600" />
-                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Live Preview Output</h3>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-gray-500 font-semibold">Test Target:</span>
-                  <select
-                    value={selectedRecipientId}
-                    onChange={(e) => setSelectedRecipientId(e.target.value)}
-                    className="bg-gray-50 border border-gray-300 font-semibold px-2 py-1 rounded outline-none text-xs"
-                  >
-                    {safeRecipients.map(r => (
-                      <option key={r.id} value={r.id}>
-                        {r.firstName || 'Friend'} ({r.email})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+          {/* Body Textarea */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-700">Body Content (Supports Merge Tags & Markdown)</label>
+            <textarea
+              rows={10}
+              value={campaignConfig.bodyText || ''}
+              onChange={(e) => setCampaignConfig(prev => ({ ...prev, bodyText: e.target.value }))}
+              className="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 text-xs text-gray-900 focus:outline-none focus:border-teal-600 leading-relaxed font-sans"
+            />
+          </div>
+
+          {/* Signature Input */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-700">Signature</label>
+            <input
+              type="text"
+              value={campaignConfig.signatureText || ''}
+              onChange={(e) => setCampaignConfig(prev => ({ ...prev, signatureText: e.target.value }))}
+              className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs text-gray-900 focus:outline-none focus:border-teal-600"
+            />
+          </div>
+        </div>
+
+        {/* Right Live Device Render Preview (6 Cols) */}
+        <div className="lg:col-span-6 bg-slate-900 p-6 rounded-2xl border border-slate-800 text-slate-100 flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 text-teal-400" />
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-200">Live Recipient Preview</span>
               </div>
 
-              {/* Rendered Email Frame */}
-              <div className="border border-gray-300 rounded-xl overflow-hidden shadow-inner bg-gray-100 p-4">
-                <iframe
-                  title="Email Live Preview"
-                  srcDoc={generateFullHtmlEmail()}
-                  className="w-full h-[460px] bg-white rounded-lg shadow-sm border border-gray-200"
-                />
-              </div>
-
-              <div className="flex items-center justify-between pt-2">
+              <div className="flex gap-2">
                 <button
                   onClick={handleCopyCode}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-3.5 py-2 rounded-lg border border-gray-300 flex items-center gap-1.5 transition-colors"
+                  className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-200 flex items-center gap-1 border border-slate-700"
                 >
-                  {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-gray-600" />}
-                  <span>{copied ? 'HTML Copied!' : 'Copy HTML Output'}</span>
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-blue-400" />}
+                  <span>{copied ? 'Copied!' : 'Copy Code'}</span>
                 </button>
-
                 <button
-                  onClick={onStartQueue}
-                  className="bg-black hover:bg-gray-800 text-white text-xs font-bold px-5 py-2 rounded-lg shadow-sm flex items-center gap-2 transition-colors"
+                  onClick={handleTestSendClick}
+                  disabled={isSendingTest}
+                  className="px-3 py-1 bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-bold rounded-lg flex items-center gap-1 shadow-md"
                 >
-                  <Send className="w-4 h-4 text-emerald-400" />
-                  <span>Save & Start Dispatch Queue</span>
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{isSendingTest ? 'Sending...' : 'Send Test'}</span>
                 </button>
               </div>
+            </div>
+
+            {/* Simulated Render Frame */}
+            <div className="bg-slate-100 rounded-xl p-4 overflow-hidden border border-slate-700 text-slate-900 min-h-[480px]">
+              <iframe
+                srcDoc={generateFullHtmlEmail()}
+                title="Live Standard Mode Render"
+                className="w-full h-[460px] border-none bg-white rounded-lg shadow-sm"
+              />
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

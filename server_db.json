@@ -1253,9 +1253,26 @@
       "sentAt": "2026-08-04T00:12:19.277Z",
       "opened": false,
       "messageId": "<27f5fc09-2822-2fd3-40e3-1df3f9a3acac@gmail.com>"
+    },
+    "sb-1": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T01:14:46.795Z",
+      "opened": false,
+      "messageId": "sandbox-1785806086795"
     }
   },
   "sentHistoryLog": [
+    {
+      "id": "sent-1785806086795-lw18",
+      "recipientId": "sb-1",
+      "to": "john.doe@university.edu",
+      "recipientName": "John Doe",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T01:14:46.795Z",
+      "status": "Sent (Sandbox)",
+      "mode": "sandbox",
+      "messageId": "sandbox-1785806086795"
+    },
     {
       "id": "sent-1785802341688-6fl5",
       "recipientId": "note-1785800365848-49",
