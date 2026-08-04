@@ -87,6 +87,15 @@ export default function App() {
 
   const [recipientTracker, setRecipientTracker] = useState({});
   const isSendingRef = useRef(false);
+  const recipientsRef = useRef(recipients);
+  const campaignConfigRef = useRef(campaignConfig);
+  const campaignStatusRef = useRef(campaignStatus);
+  const queueTimerRef = useRef(null);
+
+  // Synchronize refs
+  useEffect(() => { recipientsRef.current = recipients; }, [recipients]);
+  useEffect(() => { campaignConfigRef.current = campaignConfig; }, [campaignConfig]);
+  useEffect(() => { campaignStatusRef.current = campaignStatus; }, [campaignStatus]);
 
   // Synchronize state with localStorage
   useEffect(() => {
@@ -128,16 +137,20 @@ export default function App() {
 
     setActiveTab('queue');
     setCampaignStatus('SENDING');
-    addLog('Campaign queue initiated with 5–10 second anti-spam delay per email.', 'info');
+    addLog('Campaign queue initiated with continuous 1-by-1 email dispatches.', 'info');
   };
 
   const handlePauseQueue = () => {
     setCampaignStatus('PAUSED');
+    isSendingRef.current = false;
+    if (queueTimerRef.current) clearTimeout(queueTimerRef.current);
     addLog('Queue paused by user.', 'info');
   };
 
   const handleResetQueue = () => {
     setCampaignStatus('IDLE');
+    isSendingRef.current = false;
+    if (queueTimerRef.current) clearTimeout(queueTimerRef.current);
     setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => ({ ...r, status: 'Ready' })));
     setRecipientTracker({});
     addLog('Reset all recipient statuses to Ready.', 'info');
@@ -305,46 +318,70 @@ export default function App() {
     await fetchSentHistoryFromBackend();
   };
 
-  // Queue Execution Engine Loop with Automatic 1-by-1 Continuous Pacing
+  // Self-Sustaining 1-by-1 Campaign Dispatch Queue Loop
   useEffect(() => {
     if (campaignStatus !== 'SENDING') {
+      if (queueTimerRef.current) clearTimeout(queueTimerRef.current);
       isSendingRef.current = false;
       return;
     }
 
-    if (isSendingRef.current) return;
+    const runNextDispatchStep = async () => {
+      if (campaignStatusRef.current !== 'SENDING') {
+        isSendingRef.current = false;
+        return;
+      }
 
-    const safeList = Array.isArray(recipients) ? recipients : [];
-    const nextRecipient = safeList.find(r => r?.status === 'Ready' || r?.status === 'Queued');
+      if (isSendingRef.current) return;
 
-    if (!nextRecipient) {
-      setCampaignStatus('COMPLETED');
-      addLog('Campaign complete! All recipients in roster have received individual emails.', 'success');
-      confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
-      isSendingRef.current = false;
-      return;
-    }
+      const currentRecipients = Array.isArray(recipientsRef.current) ? recipientsRef.current : [];
+      const nextRecipient = currentRecipients.find(r => r?.status === 'Ready' || r?.status === 'Queued');
 
-    isSendingRef.current = true;
+      if (!nextRecipient) {
+        setCampaignStatus('COMPLETED');
+        addLog('Campaign complete! All recipients in roster have received individual emails.', 'success');
+        confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+        isSendingRef.current = false;
+        return;
+      }
 
-    // Use user-configured intervalSeconds (e.g. 5s, 8s, 10s, 15s)
-    const intervalSec = Math.max(2, campaignConfig?.intervalSeconds || 7);
-    const delayMs = intervalSec * 1000;
+      isSendingRef.current = true;
+      const intervalSec = Math.max(2, campaignConfigRef.current?.intervalSeconds || 7);
+      const delayMs = intervalSec * 1000;
 
-    addLog(`Pacing Engine: Waiting ${intervalSec}s before sending to ${nextRecipient.firstName || 'Friend'} (${nextRecipient.email})...`, 'sending');
+      addLog(`Pacing Engine: Waiting ${intervalSec}s before sending to ${nextRecipient.firstName || 'Friend'} (${nextRecipient.email})...`, 'sending');
 
-    const timer = setTimeout(async () => {
-      // Mark as Sending right when dispatching payload to backend
-      setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === nextRecipient.id ? { ...r, status: 'Sending' } : r));
+      queueTimerRef.current = setTimeout(async () => {
+        if (campaignStatusRef.current !== 'SENDING') {
+          isSendingRef.current = false;
+          return;
+        }
 
-      const success = await dispatchEmailToBackend(nextRecipient);
-      setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === nextRecipient.id ? { ...r, status: success ? 'Sent' : 'Failed' } : r));
-      await fetchSentHistoryFromBackend();
-      isSendingRef.current = false;
-    }, delayMs);
+        // Mark as Sending right when dispatching payload to backend
+        setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === nextRecipient.id ? { ...r, status: 'Sending' } : r));
 
-    return () => clearTimeout(timer);
-  }, [campaignStatus, recipients, campaignConfig?.intervalSeconds]);
+        const success = await dispatchEmailToBackend(nextRecipient);
+
+        setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === nextRecipient.id ? { ...r, status: success ? 'Sent' : 'Failed' } : r));
+        await fetchSentHistoryFromBackend();
+
+        isSendingRef.current = false;
+
+        // Immediately trigger the NEXT email in queue!
+        if (campaignStatusRef.current === 'SENDING') {
+          setTimeout(() => {
+            runNextDispatchStep();
+          }, 150);
+        }
+      }, delayMs);
+    };
+
+    runNextDispatchStep();
+
+    return () => {
+      if (queueTimerRef.current) clearTimeout(queueTimerRef.current);
+    };
+  }, [campaignStatus]);
 
   return (
     <div className="min-h-screen bg-[#D4F1E8] flex flex-col font-sans">

@@ -959,9 +959,43 @@
       "sentAt": "2026-08-03T23:27:00.296Z",
       "opened": false,
       "messageId": "<75721622-c6ac-4c33-a5e6-20f0e3fa8fa8@gmail.com>"
+    },
+    "note-1785800365847-1": {
+      "status": "Sent",
+      "sentAt": "2026-08-03T23:59:13.004Z",
+      "opened": false,
+      "messageId": "<9e612a84-f0d6-0e7f-e59d-6e7ebff8c383@gmail.com>"
+    },
+    "note-1785800365848-2": {
+      "status": "Sent",
+      "sentAt": "2026-08-04T00:00:20.070Z",
+      "opened": false,
+      "messageId": "<e83ddca0-da69-2d8b-0d80-a884a42ab0dc@gmail.com>"
     }
   },
   "sentHistoryLog": [
+    {
+      "id": "sent-1785801622475-mxxk",
+      "recipientId": "note-1785800365848-2",
+      "to": "mekhi.graham@morehouse.edu",
+      "recipientName": "Mekhi",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-04T00:00:20.070Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<e83ddca0-da69-2d8b-0d80-a884a42ab0dc@gmail.com>"
+    },
+    {
+      "id": "sent-1785801555467-zwfd",
+      "recipientId": "note-1785800365847-1",
+      "to": "mekhi.holly@morehouse.edu",
+      "recipientName": "Mekhi",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-03T23:59:13.004Z",
+      "status": "Sent",
+      "mode": "gmail",
+      "messageId": "<9e612a84-f0d6-0e7f-e59d-6e7ebff8c383@gmail.com>"
+    },
     {
       "id": "sent-1785799622633-vpze",
       "recipientId": "note-1785799423524-0",
