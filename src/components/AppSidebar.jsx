@@ -1,5 +1,8 @@
 import React from 'react';
-import { Plus, Inbox, Send, FileText, Clock, Settings, ShieldCheck, X, MessageSquare, Home } from 'lucide-react';
+import { 
+  Plus, Inbox, Send, FileText, Clock, Settings, ShieldCheck, X, 
+  MessageSquare, Home, GitCommit, Lock, MessageCircle, Terminal, Cpu, Zap
+} from 'lucide-react';
 
 export default function AppSidebar({ 
   activeTab, 
@@ -11,7 +14,8 @@ export default function AppSidebar({
   isCollapsed,
   isOpenMobile,
   onCloseMobile,
-  repliesCount = 2
+  repliesCount = 2,
+  currentOrg
 }) {
   const safeRecipients = Array.isArray(recipients) ? recipients : [];
   const readyCount = safeRecipients.filter(r => r?.status === 'Ready' || r?.status === 'Queued').length;
@@ -25,13 +29,13 @@ export default function AppSidebar({
       }`}>
         <div className="flex flex-col justify-between h-full py-3 px-2">
           {/* Top Actions & Nav Folders */}
-          <div className="space-y-4">
-            {/* New Outreach Campaign Button */}
+          <div className="space-y-3">
+            {/* New Campaign Button */}
             {isCollapsed ? (
               <button
                 onClick={onOpenCompose}
                 className="w-10 h-10 mx-auto bg-white hover:bg-blue-50 text-blue-600 border border-gray-300 rounded-full flex items-center justify-center shadow-xs transition-transform hover:scale-105"
-                title="New Outreach Campaign"
+                title="New Campaign"
               >
                 <Plus className="w-5 h-5 text-blue-600" />
               </button>
@@ -41,13 +45,13 @@ export default function AppSidebar({
                 className="w-full bg-white hover:bg-gray-100 text-[#001D35] border border-gray-300 font-bold rounded-2xl px-4 py-3 text-xs shadow-xs flex items-center gap-3"
               >
                 <Plus className="w-5 h-5 text-blue-600 shrink-0" />
-                <span>New Outreach Campaign</span>
+                <span>New Campaign</span>
               </button>
             )}
 
             {/* Folder Navigation Items */}
-            <div className="space-y-1 pt-1">
-              {/* Dashboard / Analytics */}
+            <div className="space-y-1">
+              {/* Dashboard */}
               <div
                 onClick={() => setActiveTab('dashboard')}
                 className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
@@ -61,13 +65,51 @@ export default function AppSidebar({
                 </div>
               </div>
 
+              {/* Campaign Pipeline (Lifecycle Engine) */}
+              <div
+                onClick={() => setActiveTab('lifecycle')}
+                className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
+                  activeTab === 'lifecycle' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
+                } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
+                title="Campaign Pipeline (Lifecycle Engine)"
+              >
+                <div className="flex items-center gap-3 text-xs">
+                  <GitCommit className="w-5 h-5 text-purple-600 shrink-0" />
+                  {!isCollapsed && <span>Campaign Pipeline</span>}
+                </div>
+                {!isCollapsed && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">
+                    Flowchart
+                  </span>
+                )}
+              </div>
+
+              {/* Deliverability & Anti-Spam Command Center */}
+              <div
+                onClick={() => setActiveTab('deliverability')}
+                className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
+                  activeTab === 'deliverability' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
+                } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
+                title="Deliverability & Anti-Spam Command Center"
+              >
+                <div className="flex items-center gap-3 text-xs">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+                  {!isCollapsed && <span>Deliverability & Spam</span>}
+                </div>
+                {!isCollapsed && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-mono">
+                    99/100
+                  </span>
+                )}
+              </div>
+
               {/* Contacts Roster */}
               <div
                 onClick={() => setActiveTab('recipients')}
                 className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
                   activeTab === 'recipients' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title={`Contacts Roster (${recipients.length})`}
+                title={`Contacts Roster (${safeRecipients.length})`}
               >
                 <div className="flex items-center gap-3 text-xs">
                   <Inbox className="w-5 h-5 text-blue-600 shrink-0" />
@@ -75,7 +117,7 @@ export default function AppSidebar({
                 </div>
                 {!isCollapsed && (
                   <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-white/80 border border-gray-200">
-                    {recipients.length}
+                    {safeRecipients.length}
                   </span>
                 )}
               </div>
@@ -99,23 +141,18 @@ export default function AppSidebar({
                 )}
               </div>
 
-              {/* Email Designer */}
+              {/* Visual Designer & Renderer */}
               <div
                 onClick={() => setActiveTab('builder')}
                 className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
                   activeTab === 'builder' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title="Email Designer"
+                title="Visual Content & Template Studio"
               >
                 <div className="flex items-center gap-3 text-xs">
                   <FileText className="w-5 h-5 text-indigo-600 shrink-0" />
-                  {!isCollapsed && <span>Email Designer</span>}
+                  {!isCollapsed && <span>Template Designer</span>}
                 </div>
-                {!isCollapsed && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
-                    Option 1
-                  </span>
-                )}
               </div>
 
               {/* Dispatch Queue */}
@@ -149,75 +186,40 @@ export default function AppSidebar({
               >
                 <div className="flex items-center gap-3 text-xs">
                   <Send className="w-5 h-5 text-emerald-600 shrink-0" />
-                  {!isCollapsed && <span>Sent Logs</span>}
+                  {!isCollapsed && <span>Sent Logs & Bounces</span>}
                 </div>
                 {!isCollapsed && (
                   <span className="text-xs font-mono text-emerald-700 font-bold">{sentCount}</span>
                 )}
               </div>
 
-              {/* SMTP Gateway */}
+              {/* Developer API & Webhooks */}
               <div
-                onClick={() => setActiveTab('settings')}
+                onClick={() => setActiveTab('api')}
                 className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
-                  activeTab === 'settings' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
+                  activeTab === 'api' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title="SMTP Gateway"
+                title="SkillBridge API Keys & Webhooks"
               >
                 <div className="flex items-center gap-3 text-xs">
-                  <Settings className="w-5 h-5 text-gray-700 shrink-0" />
-                  {!isCollapsed && <span>SMTP Gateway</span>}
+                  <Terminal className="w-5 h-5 text-slate-800 shrink-0" />
+                  {!isCollapsed && <span>API & Webhooks</span>}
                 </div>
               </div>
             </div>
-
-            {!isCollapsed && (
-              <div className="pt-4 border-t border-gray-300/60 space-y-2">
-                <span className="text-xs font-bold text-gray-600 uppercase tracking-wider px-2 block">
-                  Campaign Lists
-                </span>
-
-                <div 
-                  onClick={() => {
-                    onLoadSkillBridgeData();
-                    setActiveTab('recipients');
-                  }}
-                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-semibold text-gray-800 hover:bg-black/5 cursor-pointer"
-                >
-                  <span className="w-2.5 h-2.5 rounded-full bg-black shrink-0" />
-                  <span>SkillBridge Students (50)</span>
-                </div>
-
-                <div 
-                  onClick={() => setActiveTab('recipients')}
-                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-semibold text-gray-700 hover:bg-black/5 cursor-pointer"
-                >
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0" />
-                  <span>Remote Opportunities</span>
-                </div>
-
-                <div 
-                  onClick={() => setActiveTab('recipients')}
-                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-semibold text-gray-700 hover:bg-black/5 cursor-pointer"
-                >
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0" />
-                  <span>Tech Tutors</span>
-                </div>
-              </div>
-            )}
           </div>
 
           {!isCollapsed && (
             <div 
-              onClick={() => setActiveTab('settings')}
+              onClick={() => setActiveTab('deliverability')}
               className="p-3 bg-white rounded-xl border border-gray-300 shadow-xs space-y-1 text-xs cursor-pointer hover:border-black transition-colors"
             >
               <div className="flex items-center gap-1.5 text-gray-900 font-bold">
-                <ShieldCheck className="w-4 h-4 text-blue-600" />
-                <span>Anti-Spam 1-by-1 Safe</span>
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Anti-Scraped Address Shield</span>
               </div>
               <p className="text-[11px] text-gray-500 leading-tight">
-                Dispatches individually with delay.
+                Protects {currentOrg?.name || 'SkillBridge'} reputation against bad lists.
               </p>
             </div>
           )}
@@ -238,91 +240,27 @@ export default function AppSidebar({
                 </button>
               </div>
 
-              <button
-                onClick={() => {
-                  onCloseMobile();
-                  onOpenCompose();
-                }}
-                className="w-full bg-white text-[#001D35] border border-gray-300 font-bold rounded-2xl px-4 py-3 text-xs shadow-xs flex items-center gap-3"
-              >
-                <Plus className="w-5 h-5 text-blue-600 shrink-0" />
-                <span>New Outreach Campaign</span>
-              </button>
-
-              <div className="space-y-1">
-                {/* Dashboard */}
-                <div 
-                  onClick={() => { setActiveTab('dashboard'); onCloseMobile(); }} 
-                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
-                    activeTab === 'dashboard' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
-                  }`}
-                >
-                  <span className="flex items-center gap-3"><Home className="w-5 h-5 text-indigo-600" /> Dashboard Overview</span>
+              <div className="space-y-1 text-xs font-bold">
+                <div onClick={() => { setActiveTab('dashboard'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
+                  <Home className="w-5 h-5 text-indigo-600" /> Dashboard Overview
                 </div>
-
-                {/* Contacts Roster */}
-                <div 
-                  onClick={() => { setActiveTab('recipients'); onCloseMobile(); }} 
-                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
-                    activeTab === 'recipients' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
-                  }`}
-                >
-                  <span className="flex items-center gap-3"><Inbox className="w-5 h-5 text-blue-600" /> Contacts Roster</span>
-                  <span className="font-mono text-xs px-2 py-0.5 bg-white rounded-full border border-gray-200">{safeRecipients.length}</span>
+                <div onClick={() => { setActiveTab('lifecycle'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
+                  <GitCommit className="w-5 h-5 text-purple-600" /> Campaign Pipeline
                 </div>
-
-                {/* Received Replies */}
-                <div 
-                  onClick={() => { setActiveTab('replies'); onCloseMobile(); }} 
-                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
-                    activeTab === 'replies' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
-                  }`}
-                >
-                  <span className="flex items-center gap-3"><MessageSquare className="w-5 h-5 text-purple-600" /> Received Replies</span>
-                  <span className="font-mono text-xs px-2 py-0.5 bg-purple-600 text-white rounded-full font-bold">{repliesCount}</span>
+                <div onClick={() => { setActiveTab('deliverability'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600" /> Deliverability & Spam Center
                 </div>
-
-                {/* Email Designer */}
-                <div 
-                  onClick={() => { setActiveTab('builder'); onCloseMobile(); }} 
-                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
-                    activeTab === 'builder' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
-                  }`}
-                >
-                  <span className="flex items-center gap-3"><FileText className="w-5 h-5 text-indigo-600" /> Email Designer</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">Option 1</span>
+                <div onClick={() => { setActiveTab('recipients'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
+                  <Inbox className="w-5 h-5 text-blue-600" /> Contacts Roster ({safeRecipients.length})
                 </div>
-
-                {/* Dispatch Queue */}
-                <div 
-                  onClick={() => { setActiveTab('queue'); onCloseMobile(); }} 
-                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
-                    activeTab === 'queue' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
-                  }`}
-                >
-                  <span className="flex items-center gap-3"><Clock className="w-5 h-5 text-amber-600" /> Dispatch Queue</span>
-                  <span className="font-mono text-xs">{readyCount}</span>
+                <div onClick={() => { setActiveTab('replies'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
+                  <MessageSquare className="w-5 h-5 text-purple-600" /> Received Replies ({repliesCount})
                 </div>
-
-                {/* Sent Logs */}
-                <div 
-                  onClick={() => { setActiveTab('sent'); onCloseMobile(); }} 
-                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
-                    activeTab === 'sent' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
-                  }`}
-                >
-                  <span className="flex items-center gap-3"><Send className="w-5 h-5 text-emerald-600" /> Sent Logs</span>
-                  <span className="font-mono text-xs text-emerald-700 font-bold">{sentCount}</span>
+                <div onClick={() => { setActiveTab('builder'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-indigo-600" /> Template Designer
                 </div>
-
-                {/* SMTP Gateway */}
-                <div 
-                  onClick={() => { setActiveTab('settings'); onCloseMobile(); }} 
-                  className={`flex items-center justify-between p-2.5 rounded-xl font-bold text-xs cursor-pointer ${
-                    activeTab === 'settings' ? 'bg-[#D3E3FD] text-[#041E49]' : 'text-gray-800 hover:bg-black/5'
-                  }`}
-                >
-                  <span className="flex items-center gap-3"><Settings className="w-5 h-5 text-gray-700" /> SMTP Gateway</span>
+                <div onClick={() => { setActiveTab('api'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
+                  <Terminal className="w-5 h-5 text-slate-800" /> API & Webhooks
                 </div>
               </div>
             </div>

@@ -10,19 +10,51 @@ import EmailBuilderView from './components/EmailBuilderView';
 import SendingQueueView from './components/SendingQueueView';
 import ReceivedRepliesView from './components/ReceivedRepliesView';
 import SentLogsView from './components/SentLogsView';
+import DeliverabilityCenterView from './components/DeliverabilityCenterView';
+import CampaignLifecycleView from './components/CampaignLifecycleView';
+import SkillBridgeSmsView from './components/SkillBridgeSmsView';
+import SkillBridgeWhatsAppView from './components/SkillBridgeWhatsAppView';
+import SkillBridgeApiView from './components/SkillBridgeApiView';
 import SmtpSettingsModal from './components/SmtpSettingsModal';
 import GmailComposeModal from './components/GmailComposeModal';
-import { INITIAL_RECIPIENTS, INITIAL_CAMPAIGN, SKILLBRIDGE_STUDENTS } from './mockData';
+import { 
+  INITIAL_RECIPIENTS, 
+  INITIAL_CAMPAIGN, 
+  SKILLBRIDGE_STUDENTS, 
+  INITIAL_ORGANIZATIONS, 
+  INITIAL_SUPPRESSION_LIST 
+} from './mockData';
 import { extractFirstNameFromEmail } from './utils/nameParser';
 
 export default function App() {
-  // Navigation & View State
-  const [activeTab, setActiveTab] = useState('builder'); // 'dashboard' | 'recipients' | 'builder' | 'queue' | 'replies' | 'sent'
+  // Navigation & Multi-Tenant State
+  const [activeTab, setActiveTab] = useState('deliverability'); // 'dashboard' | 'lifecycle' | 'deliverability' | 'recipients' | 'builder' | 'queue' | 'replies' | 'sent' | 'sms' | 'whatsapp' | 'api'
+  const [activeSuite, setActiveSuite] = useState('mail'); // 'mail' | 'sms' | 'whatsapp' | 'design' | 'api'
   const [activeInboxTab, setActiveInboxTab] = useState('primary');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // 1. Core Data Stores with LocalStorage Persistence & Safe Error Handling
+  // 1. Multi-Tenant Organization Context
+  const [currentOrg, setCurrentOrg] = useState(() => {
+    try {
+      const saved = localStorage.getItem('skillbridge_currentOrg');
+      return saved ? JSON.parse(saved) : INITIAL_ORGANIZATIONS[0];
+    } catch (e) {
+      return INITIAL_ORGANIZATIONS[0];
+    }
+  });
+
+  // 2. Suppression List (Scraped Address Shield & Hard Bounces)
+  const [suppressionList, setSuppressionList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('skillbridge_suppressionList');
+      return saved ? JSON.parse(saved) : INITIAL_SUPPRESSION_LIST;
+    } catch (e) {
+      return INITIAL_SUPPRESSION_LIST;
+    }
+  });
+
+  // 3. Core Data Stores with LocalStorage Persistence & Safe Error Handling
   const [smtpConfig, setSmtpConfig] = useState(() => {
     try {
       const saved = localStorage.getItem('skillbridge_smtpConfig');
@@ -61,7 +93,8 @@ export default function App() {
       subject: 'Re: Remote Opportunity for Students',
       bodyText: "Hi Benedict,\n\nThank you for reaching out! I am a 3rd-year Mathematics student at University and very interested in the remote tutoring role. I have 2 years of teaching experience with high school algebra and calculus.\n\nPlease let me know the next steps for applying.\n\nBest regards,\nJohn Doe",
       receivedAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
-      isUnread: true
+      isUnread: true,
+      organization_id: 'org_skillbridge_1001'
     },
     {
       id: 'reply-102',
@@ -71,7 +104,8 @@ export default function App() {
       subject: 'Re: Remote Opportunity for Students',
       bodyText: "Hello Benedict,\n\nI saw your email regarding flexible student work opportunities. I specialize in Python, Django, and Data Science. I am available for 10-15 hours per week alongside my studies.\n\nLooking forward to hearing from you!\n\nMary Smith",
       receivedAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-      isUnread: false
+      isUnread: false,
+      organization_id: 'org_skillbridge_1001'
     }
   ]);
 
@@ -99,6 +133,14 @@ export default function App() {
 
   // Synchronize state with localStorage
   useEffect(() => {
+    localStorage.setItem('skillbridge_currentOrg', JSON.stringify(currentOrg));
+  }, [currentOrg]);
+
+  useEffect(() => {
+    localStorage.setItem('skillbridge_suppressionList', JSON.stringify(suppressionList));
+  }, [suppressionList]);
+
+  useEffect(() => {
     localStorage.setItem('skillbridge_smtpConfig', JSON.stringify(smtpConfig));
   }, [smtpConfig]);
 
@@ -116,16 +158,18 @@ export default function App() {
   };
 
   const handleLoadSkillBridgeData = () => {
-    setRecipients(SKILLBRIDGE_STUDENTS);
-    addLog(`Loaded SkillBridge Students dataset (${SKILLBRIDGE_STUDENTS.length} contacts).`, 'info');
+    const scopedStudents = SKILLBRIDGE_STUDENTS.map(s => ({ ...s, organization_id: currentOrg.id }));
+    setRecipients(scopedStudents);
+    addLog(`Loaded SkillBridge Students dataset (${scopedStudents.length} contacts) bound to ${currentOrg.name}.`, 'info');
   };
 
   const handleStartQueue = () => {
     let safeList = Array.isArray(recipients) ? recipients : [];
     if (safeList.length === 0) {
-      setRecipients(SKILLBRIDGE_STUDENTS);
-      safeList = SKILLBRIDGE_STUDENTS;
-      addLog(`Loaded SkillBridge Students dataset (${SKILLBRIDGE_STUDENTS.length} contacts).`, 'info');
+      const scopedStudents = SKILLBRIDGE_STUDENTS.map(s => ({ ...s, organization_id: currentOrg.id }));
+      setRecipients(scopedStudents);
+      safeList = scopedStudents;
+      addLog(`Loaded SkillBridge Students dataset (${scopedStudents.length} contacts).`, 'info');
     }
 
     const pending = safeList.filter(r => r?.status === 'Ready' || r?.status === 'Queued');
@@ -152,201 +196,148 @@ export default function App() {
     isSendingRef.current = false;
     if (queueTimerRef.current) clearTimeout(queueTimerRef.current);
     setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => ({ ...r, status: 'Ready' })));
-    setRecipientTracker({});
-    addLog('Reset all recipient statuses to Ready.', 'info');
+    addLog('Reset dispatch queue to IDLE.', 'info');
   };
 
-  const fetchRepliesFromBackend = async () => {
+  // Dispatch single test email
+  const handleSendSingleTest = async (recipientEmail) => {
+    addLog(`Sending single test email to ${recipientEmail}...`, 'sending');
     try {
-      const response = await fetch('http://localhost:3001/api/replies');
-      if (response.ok) {
-        const data = await response.json();
-        setReplies(data);
+      const response = await fetch('http://localhost:5000/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipientEmail,
+          recipientName: 'Test Recipient',
+          subject: campaignConfig.subject || 'Test Outreach Email',
+          bodyText: campaignConfig.bodyText || 'Test Body',
+          headerLogoText: campaignConfig.headerLogoText,
+          buttonText: campaignConfig.buttonText,
+          buttonUrl: campaignConfig.buttonUrl,
+          signatureText: campaignConfig.signatureText,
+          smtpUser: smtpConfig.user,
+          smtpPass: smtpConfig.pass,
+          organization_id: currentOrg.id
+        })
+      });
+
+      const resData = await response.json();
+      if (response.ok && resData.success) {
+        addLog(`Test email successfully sent to ${recipientEmail}!`, 'success');
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        return true;
+      } else {
+        addLog(`Test email failed: ${resData.message || 'Server error'}`, 'error');
+        return false;
       }
     } catch (err) {
-      // Backend starting up
+      addLog(`Test email error: ${err.message}. Check backend node server.`, 'error');
+      return false;
+    }
+  };
+
+  // Dispatch batch email backend helper
+  const dispatchEmailToBackend = async (recipient) => {
+    try {
+      // Check suppression list first (Scraped Shield / Hard Bounce)
+      const isSuppressed = suppressionList.some(s => s.email.toLowerCase() === recipient.email.toLowerCase());
+      if (isSuppressed) {
+        addLog(`BLOCKED: Recipient ${recipient.email} is in Organization Suppression List! Skipping.`, 'error');
+        return false;
+      }
+
+      const response = await fetch('http://localhost:5000/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipientEmail: recipient.email,
+          recipientName: recipient.firstName ? `${recipient.firstName} ${recipient.lastName || ''}`.trim() : recipient.email,
+          subject: campaignConfig.subject || 'Remote Opportunity for Students',
+          bodyText: campaignConfig.bodyText || '',
+          headerLogoText: campaignConfig.headerLogoText,
+          buttonText: campaignConfig.buttonText,
+          buttonUrl: campaignConfig.buttonUrl,
+          signatureText: campaignConfig.signatureText,
+          smtpUser: smtpConfig.user,
+          smtpPass: smtpConfig.pass,
+          organization_id: currentOrg.id
+        })
+      });
+
+      const resData = await response.json();
+      if (response.ok && resData.success) {
+        addLog(`Dispatched to ${recipient.firstName || 'Student'} (${recipient.email}) successfully!`, 'success');
+        return true;
+      } else {
+        addLog(`Failed sending to ${recipient.email}: ${resData.message || 'Error'}`, 'error');
+        return false;
+      }
+    } catch (err) {
+      addLog(`Network/Server error dispatching to ${recipient.email}: ${err.message}`, 'error');
+      return false;
     }
   };
 
   const fetchSentHistoryFromBackend = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/sent-history');
+      const response = await fetch('http://localhost:5000/api/sent-history');
       if (response.ok) {
         const data = await response.json();
-        setSentHistoryLog(data);
+        if (data.sentHistory) {
+          setSentHistoryLog(data.sentHistory);
+        }
       }
-    } catch (err) {
-      // Backend starting up
+    } catch (e) {
+      // silent backend check
     }
   };
 
-  // Poll backend open tracking statuses & incoming replies with startTransition to eliminate INP render delays
-  useEffect(() => {
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await fetch('http://localhost:3001/api/recipient-statuses');
-        if (response.ok) {
-          const data = await response.json();
-          React.startTransition(() => {
-            setRecipientTracker(data);
-          });
+  const fetchRepliesFromBackend = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/replies');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.replies && Array.isArray(data.replies)) {
+          setReplies(data.replies);
         }
-        const replyRes = await fetch('http://localhost:3001/api/replies');
-        if (replyRes.ok) {
-          const replyData = await replyRes.json();
-          React.startTransition(() => {
-            setReplies(replyData);
-          });
-        }
-        const sentRes = await fetch('http://localhost:3001/api/sent-history');
-        if (sentRes.ok) {
-          const sentData = await sentRes.json();
-          React.startTransition(() => {
-            setSentHistoryLog(sentData);
-          });
-        }
-      } catch (err) {
-        // Silent catch
       }
-    }, 4000);
+    } catch (e) {
+      // silent backend check
+    }
+  };
 
-    return () => clearInterval(pollInterval);
+  useEffect(() => {
+    fetchSentHistoryFromBackend();
+    fetchRepliesFromBackend();
   }, []);
 
-  // Dispatch Email Function (Calls Backend Server)
-  const dispatchEmailToBackend = async (recipient) => {
-    const replyAddress = smtpConfig.user || campaignConfig.senderEmail || '';
-    const ctaUrl = campaignConfig.buttonUrl || 'https://t.me/+AB0OloYpE7I1NTVk';
-
-    const firstNameVal = (recipient.firstName && recipient.firstName !== 'Friend')
-      ? recipient.firstName
-      : extractFirstNameFromEmail(recipient.email);
-
-    const renderedBody = (campaignConfig.bodyText || '')
-      .replaceAll('{{first_name}}', firstNameVal)
-      .replaceAll('{{last_name}}', recipient.lastName || '')
-      .replaceAll('{{email}}', recipient.email || '')
-      .replaceAll('{{company}}', recipient.company || 'SkillBridge')
-      .replaceAll('{{role}}', recipient.role || 'Student')
-      .replaceAll('{{sender_name}}', campaignConfig.senderName || 'Benedict')
-      .replace(/\n/g, '<br/>');
-
-    const fullHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background-color: #07080D; margin: 0; padding: 20px; color: #F9FAFB; }
-    .container { max-width: 580px; margin: 0 auto; background: #0D0E16; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-    .header { background: #000000; padding: 32px 24px; text-align: center; color: #ffffff; font-family: 'Cormorant Garamond', Garamond, Georgia, serif; font-weight: 700; font-size: 28px; letter-spacing: 3px; border-bottom: 1px solid rgba(255,255,255,0.12); text-transform: uppercase; }
-    .content { padding: 36px; font-size: 15px; line-height: 1.8; color: #E2E8F0; }
-    .signature { margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); font-weight: 600; color: #F1F5F9; font-size: 15px; font-family: 'Plus Jakarta Sans', Arial, sans-serif; }
-    .footer { background: #07080D; padding: 18px 36px; text-align: center; font-size: 11px; color: #64748B; border-top: 1px solid rgba(255,255,255,0.06); }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">${campaignConfig.headerLogoText || 'SKILLBRIDGE CAREERS'}</div>
-    <div class="content">
-      ${renderedBody}
-      <div style="margin: 28px 0 20px 0; text-align: center;">
-        <table border="0" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto; border-collapse: separate; border-spacing: 18px 10px;">
-          <tr>
-            <td align="center" style="padding: 0;">
-              <a href="${ctaUrl}" target="_blank" rel="noopener noreferrer" style="background: #0f172a; color: #ffffff !important; padding: 11px 22px; text-decoration: none; font-weight: 700; border-radius: 8px; font-size: 14px; border: 1px solid #334155; box-shadow: 0 4px 14px rgba(0,0,0,0.3); display: inline-block; white-space: nowrap; margin: 6px 10px;">Apply via Telegram</a>
-            </td>
-            <td align="center" style="padding: 0;">
-              <a href="mailto:${replyAddress || 'outreach@skillbridge.org'}" style="background: #0f172a; color: #ffffff !important; padding: 11px 22px; text-decoration: none; font-weight: 700; border-radius: 8px; font-size: 14px; border: 1px solid #334155; box-shadow: 0 4px 14px rgba(0,0,0,0.3); display: inline-block; white-space: nowrap; margin: 6px 10px;">Reply via Email</a>
-            </td>
-          </tr>
-        </table>
-      </div>
-      <div class="signature">${campaignConfig.signatureText ? campaignConfig.signatureText.replace(/\n/g, '<br/>') : 'Benedict'}</div>
-    </div>
-    <div class="footer">${replyAddress ? `SkillBridge Student Outreach &bull; ${replyAddress}` : 'SkillBridge Student Outreach'}</div>
-  </div>
-</body>
-</html>`;
-
-    try {
-      const response = await fetch('http://localhost:3001/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          recipientId: recipient.id,
-          to: recipient.email,
-          recipientName: recipient.firstName ? `${recipient.firstName} ${recipient.lastName || ''}`.trim() : recipient.email,
-          subject: (campaignConfig.subject || '').replaceAll('{{first_name}}', recipient.firstName || 'Friend'),
-          html: fullHtml,
-          smtpUser: smtpConfig.user,
-          smtpPass: smtpConfig.pass,
-          mode: smtpConfig.mode
-        })
-      });
-
-      const data = await response.json();
-      if (response.ok && data.success) {
-        addLog(`Sent to ${recipient.email} via ${(data.mode || 'smtp').toUpperCase()} SMTP. MessageID: ${data.messageId || 'OK'}`, 'success');
-        return true;
-      } else {
-        addLog(`Failed delivery to ${recipient.email}: ${data.error || 'Unknown error'}`, 'error');
-        return false;
-      }
-    } catch (err) {
-      addLog(`Backend delivery error for ${recipient.email}: ${err.message}`, 'error');
-      return false;
-    }
-  };
-
-  const handleSendSingleTest = async () => {
-    const safeList = Array.isArray(recipients) ? recipients : [];
-    const target = safeList.find(r => r?.status === 'Ready' || r?.status === 'Queued') || safeList[0];
-    if (!target) {
-      alert('Please add at least one recipient email address first!');
-      return;
-    }
-
-    addLog(`Preparing single test dispatch for ${target.firstName || 'Friend'} (${target.email})...`, 'sending');
-    setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === target.id ? { ...r, status: 'Sending' } : r));
-
-    const success = await dispatchEmailToBackend(target);
-    setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === target.id ? { ...r, status: success ? 'Sent' : 'Failed' } : r));
-    await fetchSentHistoryFromBackend();
-  };
-
-  // Self-Sustaining 1-by-1 Campaign Dispatch Queue Loop
+  // Continuous Pacing Queue Engine
   useEffect(() => {
     if (campaignStatus !== 'SENDING') {
-      if (queueTimerRef.current) clearTimeout(queueTimerRef.current);
       isSendingRef.current = false;
+      if (queueTimerRef.current) clearTimeout(queueTimerRef.current);
       return;
     }
 
     const runNextDispatchStep = async () => {
-      if (campaignStatusRef.current !== 'SENDING') {
-        isSendingRef.current = false;
-        return;
-      }
-
       if (isSendingRef.current) return;
+      isSendingRef.current = true;
 
-      const currentRecipients = Array.isArray(recipientsRef.current) ? recipientsRef.current : [];
-      const nextRecipient = currentRecipients.find(r => r?.status === 'Ready' || r?.status === 'Queued');
+      const currentList = recipientsRef.current || [];
+      const pendingRecipients = currentList.filter(r => r?.status === 'Ready' || r?.status === 'Queued');
 
-      if (!nextRecipient) {
+      if (pendingRecipients.length === 0) {
         setCampaignStatus('COMPLETED');
-        addLog('Campaign complete! All recipients in roster have received individual emails.', 'success');
-        confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
         isSendingRef.current = false;
+        addLog('All campaign emails dispatched cleanly!', 'success');
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
         return;
       }
 
-      isSendingRef.current = true;
-      const intervalSec = Math.max(2, campaignConfigRef.current?.intervalSeconds || 7);
+      const nextRecipient = pendingRecipients[0];
+      const baseSec = campaignConfigRef.current.intervalSeconds || 5;
+      const useJitter = campaignConfigRef.current.useJitter !== false;
+      const intervalSec = useJitter ? baseSec + Math.floor(Math.random() * 3) : baseSec;
       const delayMs = intervalSec * 1000;
 
       addLog(`Pacing Engine: Waiting ${intervalSec}s before sending to ${nextRecipient.firstName || 'Friend'} (${nextRecipient.email})...`, 'sending');
@@ -357,7 +348,6 @@ export default function App() {
           return;
         }
 
-        // Mark as Sending right when dispatching payload to backend
         setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === nextRecipient.id ? { ...r, status: 'Sending' } : r));
 
         const success = await dispatchEmailToBackend(nextRecipient);
@@ -367,7 +357,6 @@ export default function App() {
 
         isSendingRef.current = false;
 
-        // Immediately trigger the NEXT email in queue!
         if (campaignStatusRef.current === 'SENDING') {
           setTimeout(() => {
             runNextDispatchStep();
@@ -389,16 +378,21 @@ export default function App() {
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         campaignStatus={campaignStatus}
-        onRefresh={() => addLog('Refreshed workspace status.', 'info')}
+        onRefresh={() => addLog('Refreshed workspace deliverability status.', 'info')}
         onToggleSidebar={() => {
           setIsSidebarCollapsed(!isSidebarCollapsed);
           setIsMobileSidebarOpen(!isMobileSidebarOpen);
         }}
         onOpenSettings={() => setIsSmtpModalOpen(true)}
         onNavigateHome={() => {
-          setActiveTab('recipients');
+          setActiveTab('dashboard');
           setActiveInboxTab('primary');
         }}
+        currentOrg={currentOrg}
+        setCurrentOrg={setCurrentOrg}
+        activeSuite={activeSuite}
+        setActiveSuite={setActiveSuite}
+        setActiveTab={setActiveTab}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -417,6 +411,7 @@ export default function App() {
           onLoadSkillBridgeData={handleLoadSkillBridgeData}
           onOpenCompose={() => setIsComposeOpen(true)}
           campaignStatus={campaignStatus}
+          currentOrg={currentOrg}
         />
 
         <div className="flex-1 flex flex-col overflow-y-auto min-w-0">
@@ -429,7 +424,30 @@ export default function App() {
               recipientTracker={recipientTracker}
               setActiveTab={setActiveTab}
               onOpenCompose={() => setIsComposeOpen(true)}
+              currentOrg={currentOrg}
             />
+          )}
+
+          {activeTab === 'lifecycle' && (
+            <div className="p-4 flex-1">
+              <CampaignLifecycleView
+                campaignConfig={campaignConfig}
+                recipients={recipients}
+                currentOrg={currentOrg}
+                onNavigateTo={setActiveTab}
+              />
+            </div>
+          )}
+
+          {activeTab === 'deliverability' && (
+            <div className="p-4 flex-1">
+              <DeliverabilityCenterView
+                currentOrg={currentOrg}
+                suppressionList={suppressionList}
+                setSuppressionList={setSuppressionList}
+                onUpdateOrg={(updated) => setCurrentOrg(updated)}
+              />
+            </div>
           )}
 
           {activeTab === 'recipients' && (
@@ -442,6 +460,7 @@ export default function App() {
               recipientTracker={recipientTracker}
               activeInboxTab={activeInboxTab}
               setActiveInboxTab={setActiveInboxTab}
+              currentOrg={currentOrg}
             />
           )}
 
@@ -454,6 +473,7 @@ export default function App() {
                 setCampaignConfig={setCampaignConfig}
                 onRefreshReplies={fetchRepliesFromBackend}
                 smtpConfig={smtpConfig}
+                currentOrg={currentOrg}
               />
             </div>
           )}
@@ -468,6 +488,7 @@ export default function App() {
                 setActiveTab={setActiveTab}
                 onSendSingleTest={handleSendSingleTest}
                 smtpConfig={smtpConfig}
+                currentOrg={currentOrg}
               />
             </div>
           )}
@@ -486,6 +507,7 @@ export default function App() {
                 setCampaignConfig={setCampaignConfig}
                 recipientTracker={recipientTracker}
                 sentHistoryLog={sentHistoryLog}
+                currentOrg={currentOrg}
               />
             </div>
           )}
@@ -496,22 +518,26 @@ export default function App() {
                 sentHistoryLog={sentHistoryLog}
                 recipientTracker={recipientTracker}
                 recipients={recipients}
+                currentOrg={currentOrg}
               />
             </div>
           )}
 
-          {/* Fallback for settings or unhandled activeTab */}
-          {!['dashboard', 'overview', 'recipients', 'replies', 'builder', 'queue', 'sent'].includes(activeTab) && (
+          {activeTab === 'sms' && (
             <div className="p-4 flex-1">
-              <EmailBuilderView
-                campaignConfig={campaignConfig}
-                setCampaignConfig={setCampaignConfig}
-                recipients={recipients}
-                onStartQueue={handleStartQueue}
-                setActiveTab={setActiveTab}
-                onSendSingleTest={handleSendSingleTest}
-                smtpConfig={smtpConfig}
-              />
+              <SkillBridgeSmsView currentOrg={currentOrg} />
+            </div>
+          )}
+
+          {activeTab === 'whatsapp' && (
+            <div className="p-4 flex-1">
+              <SkillBridgeWhatsAppView currentOrg={currentOrg} />
+            </div>
+          )}
+
+          {activeTab === 'api' && (
+            <div className="p-4 flex-1">
+              <SkillBridgeApiView currentOrg={currentOrg} />
             </div>
           )}
         </div>
@@ -532,6 +558,7 @@ export default function App() {
         recipients={recipients}
         onStartQueue={handleStartQueue}
         onSendSingleTest={handleSendSingleTest}
+        currentOrg={currentOrg}
       />
 
       <SmtpSettingsModal
@@ -539,6 +566,7 @@ export default function App() {
         onClose={() => setIsSmtpModalOpen(false)}
         smtpConfig={smtpConfig}
         setSmtpConfig={setSmtpConfig}
+        currentOrg={currentOrg}
       />
     </div>
   );
