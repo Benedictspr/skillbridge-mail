@@ -614,20 +614,31 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
       );
 
     case 'video':
+      const videoSrc = cmp.videoUrl || cmp.url || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
       return (
         <div style={{ paddingTop: `${pt}px`, paddingBottom: `${pb}px`, textAlign: cmp.align || 'center' }}>
           <div
-            onClick={() => onOpenVideoModal(cmp.videoUrl || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenVideoModal(videoSrc);
+            }}
             className="group relative inline-block rounded-xl overflow-hidden cursor-pointer shadow-lg max-w-full"
+            title="Click to Play Video Preview"
           >
             <img
               src={cmp.url || 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&q=80'}
               alt="Video Thumbnail"
               className="w-full max-w-[540px] rounded-xl group-hover:scale-105 transition-transform"
             />
-            <div className="absolute inset-0 bg-slate-950/40 group-hover:bg-slate-950/20 flex items-center justify-center transition-colors">
-              <div className="w-14 h-14 rounded-full bg-teal-500/90 text-slate-950 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
-                <Play className="w-6 h-6 fill-current translate-x-0.5" />
+            <div className="absolute inset-0 bg-slate-950/50 group-hover:bg-slate-950/30 flex items-center justify-center transition-colors">
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenVideoModal(videoSrc);
+                }}
+                className="w-16 h-16 rounded-full bg-teal-500 hover:bg-teal-400 text-slate-950 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform cursor-pointer"
+              >
+                <Play className="w-8 h-8 fill-current translate-x-0.5" />
               </div>
             </div>
           </div>

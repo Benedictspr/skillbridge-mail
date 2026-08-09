@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { 
   Eye, Copy, Check, User, Mail, Send, Tag, Zap, RefreshCw, 
   Sparkles, FileText, Layers, ShieldCheck, Palette, LayoutGrid, 
-  Upload, Type, Image as ImageIcon, Minimize2, Maximize2, X
+  Upload, Type, Image as ImageIcon, Minimize2, Maximize2, X, Compass, MousePointer
 } from 'lucide-react';
 import { EMAIL_TEMPLATES } from '../mockData';
 import { extractFirstNameFromEmail } from '../utils/nameParser';
 import VisualEmailDesigner from './VisualEmailDesigner';
+import CorelDesignStudio from './designer/CorelDesignStudio';
 import { FONT_CATALOG, loadGoogleFontsInDOM } from './designer/fonts';
 
 export default function EmailBuilderView({ 
@@ -23,7 +24,7 @@ export default function EmailBuilderView({
   const [selectedRecipientId, setSelectedRecipientId] = useState(safeRecipients[0]?.id || '');
   const [copied, setCopied] = useState(false);
   const [isSendingTest, setIsSendingTest] = useState(false);
-  const [editorMode, setEditorMode] = useState('visual'); // 'visual' | 'text'
+  const [editorMode, setEditorMode] = useState('visual'); // 'visual' | 'corel' | 'text'
   const [selectedFont, setSelectedFont] = useState(FONT_CATALOG[0].family);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -175,6 +176,21 @@ export default function EmailBuilderView({
     );
   }
 
+  // Render CorelDRAW-Inspired Design Studio (Beta)
+  if (editorMode === 'corel') {
+    return (
+      <CorelDesignStudio
+        campaignConfig={campaignConfig}
+        setCampaignConfig={setCampaignConfig}
+        recipients={recipients}
+        onSendSingleTest={onSendSingleTest}
+        onCloseStudio={() => setActiveTab && setActiveTab('dashboard')}
+        editorMode={editorMode}
+        setEditorMode={setEditorMode}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6 font-sans">
       {/* Studio Mode Selector Bar & Window Controls */}
@@ -214,11 +230,11 @@ export default function EmailBuilderView({
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Mode Switcher Tabs */}
-          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+          {/* 3 Mode Switcher Tabs */}
+          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs gap-1">
             <button
               onClick={() => setEditorMode('visual')}
-              className={`px-4 py-2 rounded-lg font-extrabold tracking-wide flex items-center gap-2 transition-all uppercase ${
+              className={`px-3.5 py-2 rounded-lg font-extrabold tracking-wide flex items-center gap-1.5 transition-all uppercase ${
                 editorMode === 'visual' ? 'bg-teal-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -227,8 +243,18 @@ export default function EmailBuilderView({
             </button>
 
             <button
+              onClick={() => setEditorMode('corel')}
+              className={`px-3.5 py-2 rounded-lg font-extrabold tracking-wide flex items-center gap-1.5 transition-all uppercase ${
+                editorMode === 'corel' ? 'bg-teal-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Compass className="w-4 h-4" />
+              <span>DESIGN STUDIO (BETA)</span>
+            </button>
+
+            <button
               onClick={() => setEditorMode('text')}
-              className={`px-4 py-2 rounded-lg font-extrabold tracking-wide flex items-center gap-2 transition-all ${
+              className={`px-3.5 py-2 rounded-lg font-extrabold tracking-wide flex items-center gap-1.5 transition-all ${
                 editorMode === 'text' ? 'bg-teal-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'
               }`}
             >
