@@ -199,11 +199,11 @@ export default function AppSidebar({
                 className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
                   activeTab === 'api' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title="Sendaat API Keys & Webhooks"
+                title="Documentation, API Keys & Webhooks"
               >
                 <div className="flex items-center gap-3 text-xs">
                   <Terminal className="w-5 h-5 text-slate-800 shrink-0" />
-                  {!isCollapsed && <span>API & Webhooks</span>}
+                  {!isCollapsed && <span>Documentation & API</span>}
                 </div>
               </div>
             </div>
@@ -260,7 +260,7 @@ export default function AppSidebar({
                   <FileText className="w-5 h-5 text-indigo-600" /> Template Designer
                 </div>
                 <div onClick={() => { setActiveTab('api'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
-                  <Terminal className="w-5 h-5 text-slate-800" /> API & Webhooks
+                  <Terminal className="w-5 h-5 text-slate-800" /> Documentation & API
                 </div>
               </div>
             </div>

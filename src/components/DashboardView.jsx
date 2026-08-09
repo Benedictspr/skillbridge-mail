@@ -84,6 +84,159 @@ export default function DashboardView({
         </div>
       </div>
 
+      {/* 4-Step Sequential Outreach Protocol Workflow Hub */}
+      <div className="bg-[#151C2C] border border-white/15 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-mono font-bold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+              <span>Sendaat Outreach Protocol</span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+              4 Steps to Launch Your Campaign
+            </h2>
+            <p className="text-slate-400 text-xs md:text-sm max-w-3xl leading-relaxed">
+              Follow these four sequential operational stages to build templates, target contacts, dispatch queued emails, and track deliverability metrics. Each aspect leads directly into the next step.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3.5 py-2 rounded-xl border border-emerald-500/20 shrink-0">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span>Infrastructure Active & Warm</span>
+          </div>
+        </div>
+
+        {/* 4 Connected Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* STEP 1: CREATE */}
+          <div className="bg-[#1E293B]/90 hover:bg-[#1E293B] border border-blue-500/40 hover:border-blue-400 p-6 rounded-2xl space-y-4 flex flex-col justify-between transition-all duration-200 shadow-md group relative">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-lg bg-blue-600 text-white font-mono text-xs font-black tracking-wider">
+                  STEP 1
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                  <FileText className="w-5 h-5" />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white group-hover:text-blue-300 transition-colors">
+                  CREATE
+                </h3>
+                <span className="text-[11px] font-mono text-blue-400 block font-semibold">
+                  (Visual Email Designer & Studio)
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed font-normal">
+                Design responsive, high-converting outreach templates in our visual studio. Inject dynamic personalization variables (<code className="text-amber-300 font-mono text-[10px]">{"{{first_name}}"}</code>, <code className="text-amber-300 font-mono text-[10px]">{"{{company}}"}</code>) and run instant spam word inspections to guarantee top inbox placement.
+              </p>
+            </div>
+            <button
+              onClick={() => setActiveTab('builder')}
+              className="w-full mt-2 py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+            >
+              <span>Open Email Designer</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* STEP 2: AUDIENCE */}
+          <div className="bg-[#1E293B]/90 hover:bg-[#1E293B] border border-purple-500/40 hover:border-purple-400 p-6 rounded-2xl space-y-4 flex flex-col justify-between transition-all duration-200 shadow-md group relative">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-mono text-xs font-black tracking-wider">
+                  STEP 2
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                  <Users className="w-5 h-5" />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white group-hover:text-purple-300 transition-colors">
+                  AUDIENCE
+                </h3>
+                <span className="text-[11px] font-mono text-purple-400 block font-semibold">
+                  (Contact Roster & Address Shield)
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed font-normal">
+                Import, clean, and validate contact lists with real-time hard bounce suppression and domain score checks. Our automated Anti-Scraped Address Shield protects your sender score against bad lists and spam trap domains.
+              </p>
+            </div>
+            <button
+              onClick={() => setActiveTab('recipients')}
+              className="w-full mt-2 py-2.5 px-4 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+            >
+              <span>Manage Contact Roster</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* STEP 3: SEND */}
+          <div className="bg-[#1E293B]/90 hover:bg-[#1E293B] border border-amber-500/40 hover:border-amber-400 p-6 rounded-2xl space-y-4 flex flex-col justify-between transition-all duration-200 shadow-md group relative">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-lg bg-amber-600 text-white font-mono text-xs font-black tracking-wider">
+                  STEP 3
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                  <Zap className="w-5 h-5" />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white group-hover:text-amber-300 transition-colors">
+                  SEND
+                </h3>
+                <span className="text-[11px] font-mono text-amber-400 block font-semibold">
+                  (Campaign Dispatch & Pacing Console)
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed font-normal">
+                Execute rate-limited cold outreach with adaptive throttle pacing (7-15s per email), sub-150ms dispatch latency, multi-account SMTP rotation, and DKIM/SPF authentication to bypass spam filters seamlessly.
+              </p>
+            </div>
+            <button
+              onClick={() => setActiveTab('queue')}
+              className="w-full mt-2 py-2.5 px-4 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+            >
+              <span>Open Dispatch Pacing</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* STEP 4: ANALYZE */}
+          <div className="bg-[#1E293B]/90 hover:bg-[#1E293B] border border-emerald-500/40 hover:border-emerald-400 p-6 rounded-2xl space-y-4 flex flex-col justify-between transition-all duration-200 shadow-md group relative">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-mono text-xs font-black tracking-wider">
+                  STEP 4
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white group-hover:text-emerald-300 transition-colors">
+                  ANALYZE
+                </h3>
+                <span className="text-[11px] font-mono text-emerald-400 block font-semibold">
+                  (Sent Outreach History Logs & Analytics)
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed font-normal">
+                Inspect 1x1 open tracking pixel receipts, click rates, message IDs, and live IMAP reply threads in real-time. Continuously monitor your domain reputation score and refine your outreach performance.
+              </p>
+            </div>
+            <button
+              onClick={() => setActiveTab('sent')}
+              className="w-full mt-2 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+            >
+              <span>View Sent History Logs</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* High Contrast Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Metric 1 */}
