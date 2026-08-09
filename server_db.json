@@ -3944,8 +3944,8 @@
     }
   ],
   "storedSmtpConfig": {
-    "user": "shaptsevjkonikevich@gmail.com",
-    "pass": "smjpsmbbqhjvovcp",
+    "user": "invalid@gmail.com",
+    "pass": "wrongpass",
     "mode": "gmail"
   }
 }

@@ -199,7 +199,7 @@ export default function AppSidebar({
                 className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
                   activeTab === 'api' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title="SkillBridge API Keys & Webhooks"
+                title="Sendaat API Keys & Webhooks"
               >
                 <div className="flex items-center gap-3 text-xs">
                   <Terminal className="w-5 h-5 text-slate-800 shrink-0" />
@@ -219,7 +219,7 @@ export default function AppSidebar({
                 <span>Anti-Scraped Address Shield</span>
               </div>
               <p className="text-[11px] text-gray-500 leading-tight">
-                Protects {currentOrg?.name || 'SkillBridge'} reputation against bad lists.
+                Protects {currentOrg?.name || 'Sendaat'} reputation against bad lists.
               </p>
             </div>
           )}

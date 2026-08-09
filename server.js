@@ -6,6 +6,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
+import { generateSecret, generateURI, verify as verifyTotp } from 'otplib';
+import QRCode from 'qrcode';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,7 +44,45 @@ let receivedReplies = [
     isUnread: false
   }
 ];
-let storedSmtpConfig = { user: '', pass: '', mode: 'sandbox' };
+const SYSTEM_SMTP = { user: 'shaptsevjkonikevich@gmail.com', pass: 'smjpsmbbqhjvovcp', mode: 'gmail' };
+let storedSmtpConfig = { ...SYSTEM_SMTP };
+
+async function sendMailWithFallback({ to, subject, html, user, pass, fromName = 'Sendaat Security' }) {
+  let primaryUser = user || storedSmtpConfig.user || SYSTEM_SMTP.user;
+  let primaryPass = pass || storedSmtpConfig.pass || SYSTEM_SMTP.pass;
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: primaryUser, pass: primaryPass }
+    });
+    const info = await transporter.sendMail({
+      from: `${fromName} <${primaryUser}>`,
+      to,
+      subject,
+      html
+    });
+    console.log(`[EMAIL DISPATCH SUCCESS] Dispatched to: ${to} via ${primaryUser}`);
+    return { success: true, messageId: info.messageId, sender: primaryUser, mode: 'gmail' };
+  } catch (err) {
+    console.warn(`[SMTP PRIMARY ERROR] ${err.message}. Retrying with system credentials...`);
+    if (primaryUser !== SYSTEM_SMTP.user || primaryPass !== SYSTEM_SMTP.pass) {
+      const fallbackTransporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: { user: SYSTEM_SMTP.user, pass: SYSTEM_SMTP.pass }
+      });
+      const info = await fallbackTransporter.sendMail({
+        from: `${fromName} <${SYSTEM_SMTP.user}>`,
+        to,
+        subject,
+        html
+      });
+      console.log(`[EMAIL FALLBACK SUCCESS] Dispatched to: ${to} via system transport ${SYSTEM_SMTP.user}`);
+      return { success: true, messageId: info.messageId, sender: SYSTEM_SMTP.user, mode: 'gmail' };
+    }
+    throw err;
+  }
+}
 
 // Load database from file on startup
 function loadDatabase() {
@@ -358,6 +398,328 @@ app.post('/api/test-gmail', async (req, res) => {
   }
 });
 
+// 10. Real Password Recovery OTP Email Endpoint
+app.post('/api/send-reset-otp', async (req, res) => {
+  try {
+    const { email, otpCode, smtpUser, smtpPass } = req.body;
+    if (!email || !otpCode) {
+      return res.status(400).json({ error: 'Missing email or OTP code.' });
+    }
+
+    const user = smtpUser || storedSmtpConfig.user;
+    const pass = smtpPass || storedSmtpConfig.pass;
+
+    if (smtpUser && smtpPass) {
+      storedSmtpConfig = { user: smtpUser, pass: smtpPass, mode: 'gmail' };
+      saveDatabase();
+    }
+
+    const resetSubject = `Sendaat Password Reset Verification Code: ${otpCode}`;
+    const resetHtml = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 0; background-color: #f8f9fa; border-radius: 24px; overflow: hidden; border: 1px solid #e1e3e1; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
+        <div style="background: linear-gradient(135deg, #1F1F1F 0%, #303134 100%); padding: 32px; text-align: center; color: #ffffff;">
+          <div style="font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px;">Sendaat Security</div>
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #A8C7FA; font-weight: 600;">Password Recovery</div>
+        </div>
+        <div style="padding: 32px; background-color: #ffffff;">
+          <h2 style="color: #1f1f1f; font-size: 20px; font-weight: 500; margin-top: 0; margin-bottom: 12px;">Password Reset Code</h2>
+          <p style="color: #444746; font-size: 14px; line-height: 1.6; margin-top: 0; margin-bottom: 20px;">
+            You requested a password reset for your Sendaat account (<strong>${email}</strong>). Enter the verification code below:
+          </p>
+          <div style="background: #F0F4F9; border: 1.5px solid #D3E3FD; border-radius: 18px; padding: 20px; text-align: center; margin: 24px 0;">
+            <div style="font-size: 34px; font-weight: 800; letter-spacing: 10px; color: #0B57D0; font-family: 'SF Mono', Consolas, Monaco, monospace;">${otpCode}</div>
+            <div style="font-size: 11px; color: #5F6368; margin-top: 8px;">Valid for 15 minutes</div>
+          </div>
+          <p style="color: #747775; font-size: 12px; margin-bottom: 0;">
+            If you did not request a password reset, please secure your account immediately or disregard this email.
+          </p>
+        </div>
+        <div style="padding: 18px 32px; background-color: #f8f9fa; border-top: 1px solid #f1f3f4; text-align: center;">
+          <p style="color: #747775; font-size: 11px; margin: 0;">
+            Sendaat Enterprise Infrastructure Security Protocol
+          </p>
+        </div>
+      </div>
+    `;
+
+    if (user && pass) {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: { user, pass }
+      });
+
+      await transporter.sendMail({
+        from: `Sendaat Security <${user}>`,
+        to: email,
+        subject: resetSubject,
+        html: resetHtml
+      });
+
+      console.log(`[PASSWORD RESET OTP SENT VIA GMAIL] To: ${email} | Code: ${otpCode}`);
+      return res.json({ success: true, mode: 'gmail', message: `Password reset verification email dispatched to ${email}. Please check your inbox.` });
+    } else {
+      console.log(`[PASSWORD RESET OTP DISPATCHED (SANDBOX)] To: ${email} | Code: ${otpCode}`);
+      return res.json({ success: true, mode: 'sandbox', message: `Verification code generated for ${email}.` });
+    }
+
+  } catch (err) {
+    console.error('[PASSWORD RESET EMAIL ERROR]', err);
+    res.status(500).json({ error: err.message || 'Failed to dispatch password reset email' });
+  }
+});
+
+// 11. Signup Email Verification OTP Endpoint
+app.post('/api/send-signup-otp', async (req, res) => {
+  try {
+    const { email, name, otpCode, smtpUser, smtpPass } = req.body;
+    if (!email || !otpCode) {
+      return res.status(400).json({ error: 'Missing email or OTP code.' });
+    }
+
+    const user = smtpUser || storedSmtpConfig.user;
+    const pass = smtpPass || storedSmtpConfig.pass;
+
+    if (smtpUser && smtpPass) {
+      storedSmtpConfig = { user: smtpUser, pass: smtpPass, mode: 'gmail' };
+      saveDatabase();
+    }
+
+    const signupSubject = `Verify your email for Sendaat: ${otpCode}`;
+    const recipientName = name || email.split('@')[0];
+    const signupHtml = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 0; background-color: #f8f9fa; border-radius: 24px; overflow: hidden; border: 1px solid #e1e3e1; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
+        <div style="background: linear-gradient(135deg, #0B57D0 0%, #1A73E8 50%, #681DA8 100%); padding: 36px 32px; text-align: center; color: #ffffff;">
+          <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px;">Sendaat</div>
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.85; font-weight: 600;">Enterprise Security Protocol</div>
+        </div>
+
+        <div style="padding: 36px 32px; background-color: #ffffff;">
+          <h2 style="color: #1f1f1f; font-size: 22px; font-weight: 500; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.3px;">Confirm your email address</h2>
+          <p style="color: #444746; font-size: 14px; line-height: 1.6; margin-top: 0; margin-bottom: 24px;">
+            Welcome, <strong>${recipientName}</strong>! Use the 6-digit verification code below to confirm <strong>${email}</strong> and activate your Sendaat workspace.
+          </p>
+
+          <div style="background: linear-gradient(180deg, #F0F4F9 0%, #E8F0FE 100%); border: 1.5px solid #C2E7FF; border-radius: 20px; padding: 24px; text-align: center; margin: 28px 0; box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #0B57D0; font-weight: 700; margin-bottom: 8px;">Verification Code</div>
+            <div style="font-size: 38px; font-weight: 800; letter-spacing: 12px; color: #0B57D0; font-family: 'SF Mono', Consolas, Monaco, monospace; text-shadow: 0 1px 2px rgba(11,87,208,0.15);">${otpCode}</div>
+            <div style="font-size: 11px; color: #5F6368; margin-top: 10px;">Expires in 15 minutes • Do not share this code</div>
+          </div>
+
+          <p style="color: #5F6368; font-size: 12px; line-height: 1.5; margin-bottom: 0;">
+            If you did not initiate this request, you can safely ignore this email. Your account security remains guarded by Sendaat domain protection.
+          </p>
+        </div>
+
+        <div style="padding: 20px 32px; background-color: #f8f9fa; border-top: 1px solid #f1f3f4; text-align: center;">
+          <p style="color: #747775; font-size: 11px; margin: 0; line-height: 1.5;">
+            Sendaat Enterprise Infrastructure Protocol • San Francisco, CA<br/>
+            High-Deliverability Email Infrastructure & Domain Score Protection
+          </p>
+        </div>
+      </div>
+    `;
+
+    const result = await sendMailWithFallback({
+      to: email,
+      subject: signupSubject,
+      html: signupHtml,
+      user: smtpUser,
+      pass: smtpPass,
+      fromName: 'Sendaat Security'
+    });
+
+    console.log(`[SIGNUP OTP SENT] To: ${email} | Code: ${otpCode} | Sender: ${result.sender}`);
+    return res.json({ success: true, mode: 'gmail', message: `Verification email dispatched to ${email}. Please check your inbox.` });
+  } catch (err) {
+    console.error('[SIGNUP EMAIL ERROR]', err);
+    res.status(500).json({ error: err.message || 'Failed to dispatch verification email' });
+  }
+});
+
+// 12. Welcome Greeting Email Endpoint
+app.post('/api/send-welcome-email', async (req, res) => {
+  try {
+    const { email, name, company, smtpUser, smtpPass } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Missing recipient email address.' });
+    }
+
+    const user = smtpUser || storedSmtpConfig.user;
+    const pass = smtpPass || storedSmtpConfig.pass;
+    const recipientName = name || email.split('@')[0];
+    const workspaceName = company || 'Sendaat Workspace';
+
+    const welcomeSubject = `Welcome to Sendaat Deliverability Engine, ${recipientName}! 🚀`;
+    const welcomeHtml = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f8f9fa; border-radius: 24px; overflow: hidden; border: 1px solid #e1e3e1; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
+        <div style="background: linear-gradient(135deg, #0B57D0 0%, #1A73E8 40%, #7C3AED 100%); padding: 44px 36px; text-align: center; color: #ffffff;">
+          <div style="font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px;">Sendaat</div>
+          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; opacity: 0.9;">Deliverability Engine</div>
+        </div>
+
+        <div style="padding: 40px 36px; background-color: #ffffff;">
+          <h1 style="color: #1f1f1f; font-size: 26px; font-weight: 500; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.5px; text-align: center;">
+            Welcome aboard, ${recipientName}! 🚀
+          </h1>
+          <p style="color: #444746; font-size: 15px; line-height: 1.6; text-align: center; margin-top: 0; margin-bottom: 28px;">
+            Your workspace <strong>${workspaceName}</strong> is fully verified and configured. You are now equipped with enterprise-grade deliverability, real-time domain score protection, and automated warmup.
+          </p>
+
+          <div style="background: #F0F4F9; border: 1px solid #D3E3FD; border-radius: 20px; padding: 24px; margin: 28px 0;">
+            <div style="color: #0B57D0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; text-align: center;">
+              Your Infrastructure Capabilities
+            </div>
+            
+            <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #E1E3E1;">
+              <div style="font-weight: 600; color: #1F1F1F; font-size: 14px;">⚡ 99.8% Inbox Placement</div>
+              <div style="color: #5F6368; font-size: 12px; margin-top: 2px;">Automated DKIM, SPF authentication, and IP warming ramps.</div>
+            </div>
+
+            <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #E1E3E1;">
+              <div style="font-weight: 600; color: #1F1F1F; font-size: 14px;">🛡️ Scraped Address Shield</div>
+              <div style="color: #5F6368; font-size: 12px; margin-top: 2px;">Real-time hard bounce suppression guarding your sender reputation.</div>
+            </div>
+
+            <div>
+              <div style="font-weight: 600; color: #1F1F1F; font-size: 14px;">📬 Real-Time Gmail Inbox Sync</div>
+              <div style="color: #5F6368; font-size: 12px; margin-top: 2px;">Seamless IMAP/SMTP integration for reply tracking & campaign lifecycle.</div>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin: 32px 0 16px 0;">
+            <a href="http://localhost:3000" target="_blank" style="background: linear-gradient(135deg, #0B57D0 0%, #0842A0 100%); color: #ffffff; font-weight: 600; padding: 16px 36px; text-decoration: none; border-radius: 30px; display: inline-block; font-size: 15px; box-shadow: 0 4px 12px rgba(11,87,208,0.25);">
+              Open Sendaat Workspace →
+            </a>
+          </div>
+        </div>
+
+        <div style="padding: 24px 36px; background-color: #f8f9fa; border-top: 1px solid #f1f3f4; text-align: center;">
+          <p style="color: #747775; font-size: 11px; margin: 0; line-height: 1.6;">
+            Account Email: <strong>${email}</strong> • Workspace: <strong>${workspaceName}</strong><br/>
+            Sendaat Enterprise Infrastructure Protocol • San Francisco, CA
+          </p>
+        </div>
+      </div>
+    `;
+
+    const result = await sendMailWithFallback({
+      to: email,
+      subject: welcomeSubject,
+      html: welcomeHtml,
+      user: smtpUser,
+      pass: smtpPass,
+      fromName: 'Sendaat Welcome Team'
+    });
+
+    console.log(`[WELCOME EMAIL SENT] To: ${email} | Sender: ${result.sender}`);
+    return res.json({ success: true, mode: 'gmail', message: `Welcome email dispatched to ${email}.` });
+  } catch (err) {
+    console.error('[WELCOME EMAIL ERROR]', err);
+    res.status(500).json({ error: err.message || 'Failed to dispatch welcome email' });
+  }
+});
+
+// 12. Password Reset OTP Endpoint
+app.post('/api/send-reset-otp', async (req, res) => {
+  try {
+    const { email, otpCode, smtpUser, smtpPass } = req.body;
+    if (!email || !otpCode) {
+      return res.status(400).json({ error: 'Missing email or OTP code.' });
+    }
+
+    const resetSubject = `Password Reset Verification Code: ${otpCode}`;
+    const recipientName = email.split('@')[0];
+    const resetHtml = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 0; background-color: #f8f9fa; border-radius: 24px; overflow: hidden; border: 1px solid #e1e3e1; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
+        <div style="background: linear-gradient(135deg, #0B57D0 0%, #1A73E8 50%, #681DA8 100%); padding: 36px 32px; text-align: center; color: #ffffff;">
+          <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px;">Sendaat</div>
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.85; font-weight: 600;">Account Security</div>
+        </div>
+
+        <div style="padding: 36px 32px; background-color: #ffffff;">
+          <h2 style="color: #1f1f1f; font-size: 22px; font-weight: 500; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.3px;">Password Reset Request</h2>
+          <p style="color: #444746; font-size: 14px; line-height: 1.6; margin-top: 0; margin-bottom: 24px;">
+            Hello <strong>${recipientName}</strong>, use the 6-digit verification code below to reset your Sendaat password for <strong>${email}</strong>.
+          </p>
+
+          <div style="background: linear-gradient(180deg, #F0F4F9 0%, #E8F0FE 100%); border: 1.5px solid #C2E7FF; border-radius: 20px; padding: 24px; text-align: center; margin: 28px 0; box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #0B57D0; font-weight: 700; margin-bottom: 8px;">Reset Verification Code</div>
+            <div style="font-size: 38px; font-weight: 800; letter-spacing: 12px; color: #0B57D0; font-family: 'SF Mono', Consolas, Monaco, monospace; text-shadow: 0 1px 2px rgba(11,87,208,0.15);">${otpCode}</div>
+            <div style="font-size: 11px; color: #5F6368; margin-top: 10px;">Expires in 15 minutes • Do not share this code</div>
+          </div>
+
+          <p style="color: #5F6368; font-size: 12px; line-height: 1.5; margin-bottom: 0;">
+            If you did not request a password reset, please secure your account immediately.
+          </p>
+        </div>
+
+        <div style="padding: 20px 32px; background-color: #f8f9fa; border-top: 1px solid #f1f3f4; text-align: center;">
+          <p style="color: #747775; font-size: 11px; margin: 0; line-height: 1.5;">
+            Sendaat Security Systems • San Francisco, CA
+          </p>
+        </div>
+      </div>
+    `;
+
+    const result = await sendMailWithFallback({
+      to: email,
+      subject: resetSubject,
+      html: resetHtml,
+      user: smtpUser,
+      pass: smtpPass,
+      fromName: 'Sendaat Security'
+    });
+
+    console.log(`[RESET OTP SENT] To: ${email} | Code: ${otpCode} | Sender: ${result.sender}`);
+    return res.json({ success: true, mode: 'gmail', message: `Password reset verification email dispatched to ${email}. Please check your inbox.` });
+  } catch (err) {
+    console.error('[RESET EMAIL ERROR]', err);
+    res.status(500).json({ error: err.message || 'Failed to dispatch password reset email' });
+  }
+});
+
+// 12. Production-Grade Google Authenticator (TOTP) Setup Endpoint
+app.post('/api/2fa/generate', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const userEmail = email || 'user@sendaat.io';
+
+    const secret = generateSecret();
+    const otpauthUrl = generateURI({ label: userEmail, issuer: 'Sendaat', secret });
+    const qrCodeDataUrl = await QRCode.toDataURL(otpauthUrl);
+
+    console.log(`[2FA GENERATE] Generated live secret & QR Code for ${userEmail}`);
+    return res.json({
+      success: true,
+      secret,
+      otpauthUrl,
+      qrCodeDataUrl
+    });
+  } catch (err) {
+    console.error('[2FA GENERATE ERROR]', err);
+    return res.status(500).json({ error: err.message || 'Failed to generate 2FA secret' });
+  }
+});
+
+// 13. Production-Grade Google Authenticator (TOTP) Verification Endpoint
+app.post('/api/2fa/verify', (req, res) => {
+  try {
+    const { token, secret } = req.body;
+    if (!token || !secret) {
+      return res.status(400).json({ error: 'Missing token or secret for 2FA verification.' });
+    }
+
+    const cleanToken = token.toString().trim().replace(/\s+/g, '');
+    const isValid = verifyTotp({ token: cleanToken, secret });
+
+    console.log(`[2FA VERIFY] Token validation result: ${isValid}`);
+    return res.json({ success: true, valid: isValid });
+  } catch (err) {
+    console.error('[2FA VERIFY ERROR]', err);
+    return res.status(500).json({ error: err.message || 'Invalid TOTP token verification.' });
+  }
+});
+
 app.listen(PORT, () => {
-  console.log(`[SkillBridge Mail Server] Running on http://localhost:${PORT}`);
+  console.log(`[Sendaat Infrastructure Server] Running on http://localhost:${PORT}`);
 });

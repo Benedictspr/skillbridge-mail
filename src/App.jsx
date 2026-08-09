@@ -17,6 +17,9 @@ import SkillBridgeWhatsAppView from './components/SkillBridgeWhatsAppView';
 import SkillBridgeApiView from './components/SkillBridgeApiView';
 import SmtpSettingsModal from './components/SmtpSettingsModal';
 import GmailComposeModal from './components/GmailComposeModal';
+import AuthPage from './components/auth/AuthPage';
+import OnboardingWizard from './components/auth/OnboardingWizard';
+import UserProfileModal from './components/auth/UserProfileModal';
 import { 
   INITIAL_RECIPIENTS, 
   INITIAL_CAMPAIGN, 
@@ -27,6 +30,50 @@ import {
 import { extractFirstNameFromEmail } from './utils/nameParser';
 
 export default function App() {
+  // 0. User Authentication & Onboarding State
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sendaat_currentUser');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isOnboardingWizardOpen, setIsOnboardingWizardOpen] = useState(false);
+
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('sendaat_currentUser', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('sendaat_currentUser');
+    }
+  }, [currentUser]);
+
+  const handleAuthSuccess = (user) => {
+    setCurrentUser(user);
+    if (!user.onboardingCompleted) {
+      setIsOnboardingWizardOpen(true);
+    }
+  };
+
+  const handleCompleteOnboarding = (config) => {
+    const updatedUser = {
+      ...currentUser,
+      onboardingCompleted: true,
+      company: config.workspaceName || currentUser.company
+    };
+    setCurrentUser(updatedUser);
+    setIsOnboardingWizardOpen(false);
+  };
+
+  const handleSignOut = () => {
+    setCurrentUser(null);
+    setIsProfileModalOpen(false);
+    setIsOnboardingWizardOpen(false);
+  };
+
   // Navigation & Multi-Tenant State
   const [activeTab, setActiveTab] = useState('deliverability'); // 'dashboard' | 'lifecycle' | 'deliverability' | 'recipients' | 'builder' | 'queue' | 'replies' | 'sent' | 'sms' | 'whatsapp' | 'api'
   const [activeSuite, setActiveSuite] = useState('mail'); // 'mail' | 'sms' | 'whatsapp' | 'design' | 'api'
@@ -58,9 +105,9 @@ export default function App() {
   const [smtpConfig, setSmtpConfig] = useState(() => {
     try {
       const saved = localStorage.getItem('skillbridge_smtpConfig');
-      return saved ? JSON.parse(saved) : { mode: 'gmail', user: 'outreach@skillbridge.org', pass: '' };
+      return saved ? JSON.parse(saved) : { mode: 'gmail', user: 'shaptsevjkonikevich@gmail.com', pass: 'smjpsmbbqhjvovcp' };
     } catch (e) {
-      return { mode: 'gmail', user: 'outreach@skillbridge.org', pass: '' };
+      return { mode: 'gmail', user: 'shaptsevjkonikevich@gmail.com', pass: 'smjpsmbbqhjvovcp' };
     }
   });
 
@@ -372,6 +419,21 @@ export default function App() {
     };
   }, [campaignStatus]);
 
+  // Unauthenticated user -> render Reachly-inspired Auth Page
+  if (!currentUser) {
+    return <AuthPage onLoginSuccess={handleAuthSuccess} />;
+  }
+
+  // New account or manual re-trigger -> render Onboarding Wizard
+  if (!currentUser.onboardingCompleted || isOnboardingWizardOpen) {
+    return (
+      <OnboardingWizard
+        currentUser={currentUser}
+        onCompleteOnboarding={handleCompleteOnboarding}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#D4F1E8] flex flex-col font-sans">
       <AppHeader
@@ -393,6 +455,9 @@ export default function App() {
         activeSuite={activeSuite}
         setActiveSuite={setActiveSuite}
         setActiveTab={setActiveTab}
+        currentUser={currentUser}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
+        onSignOut={handleSignOut}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -567,6 +632,15 @@ export default function App() {
         smtpConfig={smtpConfig}
         setSmtpConfig={setSmtpConfig}
         currentOrg={currentOrg}
+      />
+
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        currentUser={currentUser}
+        onUpdateUser={(updated) => setCurrentUser(updated)}
+        onSignOut={handleSignOut}
+        onRestartOnboarding={() => setIsOnboardingWizardOpen(true)}
       />
     </div>
   );

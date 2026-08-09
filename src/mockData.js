@@ -1,10 +1,10 @@
 // Multi-Tenant Organizations Schema
 export const INITIAL_ORGANIZATIONS = [
   {
-    id: 'org_skillbridge_1001',
-    name: 'SkillBridge Global',
-    domain: 'skillbridge.org',
-    plan: 'Enterprise Infrastructure',
+    id: 'org_sendaat_1001',
+    name: 'Sendaat Enterprise',
+    domain: 'sendaat.io',
+    plan: 'Enterprise Deliverability',
     reputationScore: 99,
     hourlyQuota: 2500,
     dailyQuota: 50000,
