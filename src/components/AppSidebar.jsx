@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
-  Plus, Inbox, Send, FileText, Clock, Settings, ShieldCheck, X, 
-  MessageSquare, Home, GitCommit, Lock, MessageCircle, Terminal, Cpu, Zap
+  Plus, Contact2, SendHorizontal, PenTool, ShieldCheck, X, 
+  MessageSquare, Home, Code2, BarChart3
 } from 'lucide-react';
 
 export default function AppSidebar({ 
@@ -10,8 +10,8 @@ export default function AppSidebar({
   onOpenCompose, 
   recipients = [], 
   campaignStatus,
-  onLoadSkillBridgeData,
   isCollapsed,
+  setIsCollapsed,
   isOpenMobile,
   onCloseMobile,
   repliesCount = 2,
@@ -23,187 +23,167 @@ export default function AppSidebar({
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <aside className={`bg-[#D4F1E8] shrink-0 hidden md:block border-r border-black/10 transition-all duration-200 select-none ${
-        isCollapsed ? 'w-16 overflow-hidden' : 'w-64'
+      {/* Desktop Sidebar (Matte Vantablack - Clean Icon Navigation, Perfectly Aligned Counters) */}
+      <aside className={`bg-[#09090B] shrink-0 hidden md:block border-r border-zinc-800/80 transition-all duration-300 ease-in-out select-none text-white ${
+        isCollapsed ? 'w-14 overflow-hidden' : 'w-56'
       }`}>
-        <div className="flex flex-col justify-between h-full py-3 px-2">
+        <div className="flex flex-col justify-between h-full py-3.5 px-2">
           {/* Top Actions & Nav Folders */}
-          <div className="space-y-3">
-            {/* New Campaign Button */}
+          <div className="space-y-4">
+            {/* New Campaign / Compose Button */}
             {isCollapsed ? (
               <button
                 onClick={onOpenCompose}
-                className="w-10 h-10 mx-auto bg-white hover:bg-blue-50 text-blue-600 border border-gray-300 rounded-full flex items-center justify-center shadow-xs transition-transform hover:scale-105"
-                title="New Campaign"
+                className="w-9 h-9 mx-auto hover:bg-zinc-800 text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+                title="Compose"
               >
-                <Plus className="w-5 h-5 text-blue-600" />
+                <Plus className="w-5 h-5 text-white stroke-[2.5]" />
               </button>
             ) : (
               <button
                 onClick={onOpenCompose}
-                className="w-full bg-white hover:bg-gray-100 text-[#001D35] border border-gray-300 font-bold rounded-2xl px-4 py-3 text-xs shadow-xs flex items-center gap-3"
+                className="w-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-extrabold rounded-xl px-3.5 py-2.5 text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
-                <Plus className="w-5 h-5 text-blue-600 shrink-0" />
-                <span>New Campaign</span>
+                <Plus className="w-4 h-4 text-white stroke-[2.5]" />
+                <span>Compose</span>
               </button>
             )}
 
-            {/* Folder Navigation Items */}
+            {/* Folder Navigation Items (Standardized w-6 text-right aligned counters) */}
             <div className="space-y-1">
               {/* Dashboard */}
               <div
                 onClick={() => setActiveTab('dashboard')}
-                className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
-                  activeTab === 'dashboard' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
+                className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
+                  activeTab === 'dashboard' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title="Outreach Analytics & Overview"
+                title="Dashboard"
               >
-                <div className="flex items-center gap-3 text-xs">
-                  <Home className="w-5 h-5 text-indigo-600 shrink-0" />
-                  {!isCollapsed && <span>Dashboard Overview</span>}
+                <div className="flex items-center gap-2.5 text-xs">
+                  <Home className="w-4 h-4 text-white shrink-0 stroke-[1.75]" />
+                  {!isCollapsed && <span>Dashboard</span>}
                 </div>
               </div>
 
-              {/* Campaign Pipeline (Lifecycle Engine) */}
+              {/* STEP 1: CREATE */}
               <div
-                onClick={() => setActiveTab('lifecycle')}
-                className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
-                  activeTab === 'lifecycle' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
+                onClick={() => setActiveTab('builder')}
+                className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
+                  activeTab === 'builder' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title="Campaign Pipeline (Lifecycle Engine)"
+                title="Create"
               >
-                <div className="flex items-center gap-3 text-xs">
-                  <GitCommit className="w-5 h-5 text-purple-600 shrink-0" />
-                  {!isCollapsed && <span>Campaign Pipeline</span>}
+                <div className="flex items-center gap-2.5 text-xs">
+                  <PenTool className="w-4 h-4 text-white shrink-0 stroke-[1.75]" />
+                  {!isCollapsed && <span>Create</span>}
                 </div>
-                {!isCollapsed && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">
-                    Flowchart
-                  </span>
-                )}
               </div>
 
-              {/* Deliverability & Anti-Spam Command Center */}
-              <div
-                onClick={() => setActiveTab('deliverability')}
-                className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
-                  activeTab === 'deliverability' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
-                } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title="Deliverability & Anti-Spam Command Center"
-              >
-                <div className="flex items-center gap-3 text-xs">
-                  <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
-                  {!isCollapsed && <span>Deliverability & Spam</span>}
-                </div>
-                {!isCollapsed && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-mono">
-                    99/100
-                  </span>
-                )}
-              </div>
-
-              {/* Contacts Roster */}
+              {/* STEP 2: AUDIENCE */}
               <div
                 onClick={() => setActiveTab('recipients')}
-                className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
-                  activeTab === 'recipients' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
+                className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
+                  activeTab === 'recipients' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title={`Contacts Roster (${safeRecipients.length})`}
+                title={`Audience (${safeRecipients.length})`}
               >
-                <div className="flex items-center gap-3 text-xs">
-                  <Inbox className="w-5 h-5 text-blue-600 shrink-0" />
-                  {!isCollapsed && <span>Contacts Roster</span>}
+                <div className="flex items-center gap-2.5 text-xs">
+                  <Contact2 className="w-4 h-4 text-white shrink-0 stroke-[1.75]" />
+                  {!isCollapsed && <span>Audience</span>}
                 </div>
                 {!isCollapsed && (
-                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-white/80 border border-gray-200">
+                  <span className="text-xs font-mono font-semibold text-zinc-400 w-6 text-right shrink-0">
                     {safeRecipients.length}
                   </span>
                 )}
               </div>
 
-              {/* Received Replies Inbox */}
+              {/* STEP 3: SEND */}
               <div
-                onClick={() => setActiveTab('replies')}
-                className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
-                  activeTab === 'replies' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
+                onClick={() => setActiveTab('queue')}
+                className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
+                  activeTab === 'queue' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title={`Received Replies (${repliesCount})`}
+                title={`Send (${readyCount})`}
               >
-                <div className="flex items-center gap-3 text-xs">
-                  <MessageSquare className="w-5 h-5 text-purple-600 shrink-0" />
-                  {!isCollapsed && <span>Received Replies</span>}
+                <div className="flex items-center gap-2.5 text-xs">
+                  <SendHorizontal className="w-4 h-4 text-white shrink-0 stroke-[1.75]" />
+                  {!isCollapsed && <span>Send</span>}
                 </div>
                 {!isCollapsed && (
-                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-purple-600 text-white shadow-xs">
+                  campaignStatus === 'SENDING' ? (
+                    <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                  ) : (
+                    <span className="text-xs font-mono font-semibold text-zinc-400 w-6 text-right shrink-0">
+                      {readyCount}
+                    </span>
+                  )
+                )}
+              </div>
+
+              {/* STEP 4: ANALYSE */}
+              <div
+                onClick={() => setActiveTab('sent')}
+                className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
+                  activeTab === 'sent' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
+                } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
+                title={`Analyse (${sentCount})`}
+              >
+                <div className="flex items-center gap-2.5 text-xs">
+                  <BarChart3 className="w-4 h-4 text-white shrink-0 stroke-[1.75]" />
+                  {!isCollapsed && <span>Analyse</span>}
+                </div>
+                {!isCollapsed && (
+                  <span className="text-xs font-mono font-semibold text-zinc-400 w-6 text-right shrink-0">
+                    {sentCount}
+                  </span>
+                )}
+              </div>
+
+              {/* Deliverability */}
+              <div
+                onClick={() => setActiveTab('deliverability')}
+                className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
+                  activeTab === 'deliverability' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
+                } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
+                title="Deliverability"
+              >
+                <div className="flex items-center gap-2.5 text-xs">
+                  <ShieldCheck className="w-4 h-4 text-white shrink-0 stroke-[1.75]" />
+                  {!isCollapsed && <span>Deliverability</span>}
+                </div>
+              </div>
+
+              {/* Replies */}
+              <div
+                onClick={() => setActiveTab('replies')}
+                className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
+                  activeTab === 'replies' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
+                } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
+                title={`Replies (${repliesCount})`}
+              >
+                <div className="flex items-center gap-2.5 text-xs">
+                  <MessageSquare className="w-4 h-4 text-white shrink-0 stroke-[1.75]" />
+                  {!isCollapsed && <span>Replies</span>}
+                </div>
+                {!isCollapsed && (
+                  <span className="text-xs font-mono font-semibold text-zinc-400 w-6 text-right shrink-0">
                     {repliesCount}
                   </span>
                 )}
               </div>
 
-              {/* Visual Designer & Renderer */}
-              <div
-                onClick={() => setActiveTab('builder')}
-                className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
-                  activeTab === 'builder' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
-                } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title="Visual Content & Template Studio"
-              >
-                <div className="flex items-center gap-3 text-xs">
-                  <FileText className="w-5 h-5 text-indigo-600 shrink-0" />
-                  {!isCollapsed && <span>Template Designer</span>}
-                </div>
-              </div>
-
-              {/* Dispatch Queue */}
-              <div
-                onClick={() => setActiveTab('queue')}
-                className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
-                  activeTab === 'queue' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
-                } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title={`Dispatch Queue (${readyCount})`}
-              >
-                <div className="flex items-center gap-3 text-xs">
-                  <Clock className="w-5 h-5 text-amber-600 shrink-0" />
-                  {!isCollapsed && <span>Dispatch Queue</span>}
-                </div>
-                {!isCollapsed && (
-                  campaignStatus === 'SENDING' ? (
-                    <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
-                  ) : (
-                    <span className="text-xs font-mono font-bold text-gray-600">{readyCount}</span>
-                  )
-                )}
-              </div>
-
-              {/* Sent Logs */}
-              <div
-                onClick={() => setActiveTab('sent')}
-                className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
-                  activeTab === 'sent' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
-                } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title={`Sent Logs (${sentCount})`}
-              >
-                <div className="flex items-center gap-3 text-xs">
-                  <Send className="w-5 h-5 text-emerald-600 shrink-0" />
-                  {!isCollapsed && <span>Sent Logs & Bounces</span>}
-                </div>
-                {!isCollapsed && (
-                  <span className="text-xs font-mono text-emerald-700 font-bold">{sentCount}</span>
-                )}
-              </div>
-
-              {/* Developer API & Webhooks */}
+              {/* Documentation */}
               <div
                 onClick={() => setActiveTab('api')}
-                className={`flex items-center p-2.5 rounded-xl cursor-pointer transition-colors ${
-                  activeTab === 'api' ? 'bg-[#D3E3FD] text-[#041E49] font-bold' : 'text-gray-700 hover:bg-black/5 font-semibold'
+                className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
+                  activeTab === 'api' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                title="Documentation, API Keys & Webhooks"
+                title="Documentation"
               >
-                <div className="flex items-center gap-3 text-xs">
-                  <Terminal className="w-5 h-5 text-slate-800 shrink-0" />
-                  {!isCollapsed && <span>Documentation & API</span>}
+                <div className="flex items-center gap-2.5 text-xs">
+                  <Code2 className="w-4 h-4 text-white shrink-0 stroke-[1.75]" />
+                  {!isCollapsed && <span>Documentation</span>}
                 </div>
               </div>
             </div>
@@ -212,14 +192,14 @@ export default function AppSidebar({
           {!isCollapsed && (
             <div 
               onClick={() => setActiveTab('deliverability')}
-              className="p-3 bg-white rounded-xl border border-gray-300 shadow-xs space-y-1 text-xs cursor-pointer hover:border-black transition-colors"
+              className="p-2.5 bg-zinc-900/60 rounded-lg border border-zinc-800 text-xs text-zinc-300 cursor-pointer hover:border-zinc-700 transition-colors space-y-1"
             >
-              <div className="flex items-center gap-1.5 text-gray-900 font-bold">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Anti-Scraped Address Shield</span>
+              <div className="flex items-center gap-1.5 text-white font-bold">
+                <ShieldCheck className="w-3.5 h-3.5 text-white" />
+                <span>Anti-Spam Shield</span>
               </div>
-              <p className="text-[11px] text-gray-500 leading-tight">
-                Protects {currentOrg?.name || 'Sendaat'} reputation against bad lists.
+              <p className="text-[10px] text-zinc-400 leading-tight">
+                Domain isolation active for {currentOrg?.name || 'Sendaat'}.
               </p>
             </div>
           )}
@@ -228,39 +208,46 @@ export default function AppSidebar({
 
       {/* Mobile Drawer */}
       {isOpenMobile && (
-        <div className="fixed inset-0 z-50 flex md:hidden bg-black/50 backdrop-blur-xs">
-          <div className="w-72 bg-[#D4F1E8] h-full shadow-2xl animate-fade-in p-4 flex flex-col justify-between overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex md:hidden bg-black/80 backdrop-blur-xs">
+          <div className="w-64 bg-[#09090B] border-r border-zinc-800 h-full shadow-2xl animate-fade-in p-4 flex flex-col justify-between overflow-y-auto text-white">
             <div className="space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-gray-300">
-                <span className="font-extrabold text-sm text-gray-900 flex items-center gap-2">
-                  <Send className="w-4 h-4 text-blue-600" /> Navigation Menu
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                <span className="font-extrabold text-sm text-white flex items-center gap-2">
+                  <SendHorizontal className="w-4 h-4 text-white" /> Menu
                 </span>
-                <button onClick={onCloseMobile} className="p-1 hover:bg-black/10 rounded-full">
-                  <X className="w-5 h-5 text-gray-700" />
+                <button onClick={onCloseMobile} className="p-1 hover:bg-zinc-800 rounded-full text-zinc-300">
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-1 text-xs font-bold">
-                <div onClick={() => { setActiveTab('dashboard'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
-                  <Home className="w-5 h-5 text-indigo-600" /> Dashboard Overview
+                <div onClick={() => { setActiveTab('dashboard'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center gap-3 text-zinc-200">
+                  <Home className="w-4 h-4 text-white" /> Dashboard
                 </div>
-                <div onClick={() => { setActiveTab('lifecycle'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
-                  <GitCommit className="w-5 h-5 text-purple-600" /> Campaign Pipeline
+                <div onClick={() => { setActiveTab('builder'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center gap-3 text-zinc-200">
+                  <PenTool className="w-4 h-4 text-white" /> Create
                 </div>
-                <div onClick={() => { setActiveTab('deliverability'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
-                  <ShieldCheck className="w-5 h-5 text-emerald-600" /> Deliverability & Spam Center
+                <div onClick={() => { setActiveTab('recipients'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center justify-between text-zinc-200">
+                  <div className="flex items-center gap-3"><Contact2 className="w-4 h-4 text-white" /> Audience</div>
+                  <span className="text-xs font-mono font-semibold text-zinc-400 w-6 text-right">{safeRecipients.length}</span>
                 </div>
-                <div onClick={() => { setActiveTab('recipients'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
-                  <Inbox className="w-5 h-5 text-blue-600" /> Contacts Roster ({safeRecipients.length})
+                <div onClick={() => { setActiveTab('queue'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center justify-between text-zinc-200">
+                  <div className="flex items-center gap-3"><SendHorizontal className="w-4 h-4 text-white" /> Send</div>
+                  <span className="text-xs font-mono font-semibold text-zinc-400 w-6 text-right">{readyCount}</span>
                 </div>
-                <div onClick={() => { setActiveTab('replies'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
-                  <MessageSquare className="w-5 h-5 text-purple-600" /> Received Replies ({repliesCount})
+                <div onClick={() => { setActiveTab('sent'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center justify-between text-zinc-200">
+                  <div className="flex items-center gap-3"><BarChart3 className="w-4 h-4 text-white" /> Analyse</div>
+                  <span className="text-xs font-mono font-semibold text-zinc-400 w-6 text-right">{sentCount}</span>
                 </div>
-                <div onClick={() => { setActiveTab('builder'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-indigo-600" /> Template Designer
+                <div onClick={() => { setActiveTab('deliverability'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center gap-3 text-zinc-200">
+                  <ShieldCheck className="w-4 h-4 text-white" /> Deliverability
                 </div>
-                <div onClick={() => { setActiveTab('api'); onCloseMobile(); }} className="p-2.5 rounded-xl hover:bg-black/5 cursor-pointer flex items-center gap-3">
-                  <Terminal className="w-5 h-5 text-slate-800" /> Documentation & API
+                <div onClick={() => { setActiveTab('replies'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center justify-between text-zinc-200">
+                  <div className="flex items-center gap-3"><MessageSquare className="w-4 h-4 text-white" /> Replies</div>
+                  <span className="text-xs font-mono font-semibold text-zinc-400 w-6 text-right">{repliesCount}</span>
+                </div>
+                <div onClick={() => { setActiveTab('api'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center gap-3 text-zinc-200">
+                  <Code2 className="w-4 h-4 text-white" /> Documentation
                 </div>
               </div>
             </div>

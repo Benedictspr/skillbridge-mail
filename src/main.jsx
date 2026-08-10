@@ -46,7 +46,7 @@ class ErrorBoundary extends Component {
             boxShadow: '0 20px 40px rgba(0,0,0,0.8)'
           }}>
             <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '12px', color: '#EF4444' }}>
-              SkillBridge Mail - Application Recovery
+              Sendaat Mail - Application Recovery
             </h2>
             <p style={{ fontSize: '13px', color: '#9CA3AF', marginBottom: '20px', lineHeight: '1.6' }}>
               The application encountered a browser cache error. Click below to clear state cache and reload cleanly.

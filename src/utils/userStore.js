@@ -3,15 +3,39 @@
 const DEFAULT_USERS = [
   {
     id: 'usr_default_admin',
-    email: 'benedict@sendaat.io',
+    email: 'maverick@sendaat.io',
     password: 'Password123!',
-    name: 'Benedict Vance',
+    name: 'Maverick Vance',
     company: 'Sendaat Enterprise',
     role: 'Infrastructure Lead',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
     onboardingCompleted: true,
     twoFactorEnabled: false,
     twoFactorSecret: 'SENDAAT-2FA-784920'
+  },
+  {
+    id: 'usr_maverick',
+    email: 'm4verickjack@gmail.com',
+    password: 'Password123!',
+    name: 'Maverick Jack',
+    company: 'Sendaat Enterprise',
+    role: 'Workspace Owner',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+    onboardingCompleted: true,
+    twoFactorEnabled: false,
+    twoFactorSecret: 'SENDAAT-2FA-991023'
+  },
+  {
+    id: 'usr_smtp_owner',
+    email: 'shaptsevjkonikevich@gmail.com',
+    password: 'Password123!',
+    name: 'Sendaat Admin',
+    company: 'Sendaat Network',
+    role: 'Platform Admin',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+    onboardingCompleted: true,
+    twoFactorEnabled: false,
+    twoFactorSecret: 'SENDAAT-2FA-100293'
   }
 ];
 
@@ -21,6 +45,13 @@ export function getRegisteredUsers() {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
+        // Ensure m4verickjack@gmail.com is present in existing list
+        const hasMaverick = parsed.some(u => u.email.toLowerCase() === 'm4verickjack@gmail.com');
+        if (!hasMaverick) {
+          const merged = [...parsed, DEFAULT_USERS[1]];
+          localStorage.setItem('sendaat_registeredUsers', JSON.stringify(merged));
+          return merged;
+        }
         return parsed;
       }
     }
@@ -35,7 +66,8 @@ export function getRegisteredUsers() {
 
 export function registerUser(newUser) {
   const users = getRegisteredUsers();
-  const existing = users.find(u => u.email.toLowerCase() === newUser.email.toLowerCase());
+  const cleanEmail = newUser.email.trim().toLowerCase();
+  const existing = users.find(u => u.email.toLowerCase() === cleanEmail);
   
   if (existing) {
     throw new Error('An account with this email address already exists. Please sign in.');
@@ -43,12 +75,12 @@ export function registerUser(newUser) {
 
   const userRecord = {
     id: 'usr_' + Date.now(),
-    email: newUser.email.trim(),
+    email: cleanEmail,
     password: newUser.password,
-    name: newUser.name.trim(),
-    company: newUser.company ? newUser.company.trim() : `${newUser.name.split(' ')[0]}'s Workspace`,
+    name: newUser.name ? newUser.name.trim() : cleanEmail.split('@')[0],
+    company: newUser.company ? newUser.company.trim() : `${cleanEmail.split('@')[0]}'s Workspace`,
     role: newUser.role || 'Workspace Owner',
-    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(newUser.email)}`,
+    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
     onboardingCompleted: false,
     isEmailVerified: newUser.isEmailVerified ?? true,
     twoFactorEnabled: newUser.twoFactorEnabled || false,
@@ -57,6 +89,16 @@ export function registerUser(newUser) {
 
   const updatedUsers = [...users, userRecord];
   localStorage.setItem('sendaat_registeredUsers', JSON.stringify(updatedUsers));
+
+  // Sync with backend DB
+  try {
+    fetch('http://localhost:3001/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userRecord)
+    }).catch(() => {});
+  } catch (e) {}
+
   return userRecord;
 }
 
@@ -67,11 +109,19 @@ export function validateCredentials(email, password) {
   const user = users.find(u => u.email.toLowerCase() === cleanEmail);
   
   if (!user) {
-    return { success: false, reason: 'EMAIL_NOT_FOUND', message: 'No account found with this email address. Please create an account.' };
+    return { 
+      success: false, 
+      reason: 'EMAIL_NOT_FOUND', 
+      message: 'No account found with this email address. Please create an account.' 
+    };
   }
 
   if (user.password !== password) {
-    return { success: false, reason: 'INVALID_PASSWORD', message: 'Incorrect password. Please try again or reset your password.' };
+    return { 
+      success: false, 
+      reason: 'INVALID_PASSWORD', 
+      message: 'Incorrect password. Please try again or reset your password.' 
+    };
   }
 
   return { success: true, user };

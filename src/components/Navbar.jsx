@@ -24,7 +24,7 @@ export default function Navbar({ activeTab, setActiveTab, recipients, campaignSt
           <div>
             <div className="flex items-center gap-2">
               <span className="font-black text-xl tracking-tight text-white font-heading">
-                SkillBridge <span className="gradient-text">Mail</span>
+                Sendaat <span className="gradient-text">Mail</span>
               </span>
               <span className="badge-pill badge-ready text-[9px] py-0.5 px-2">Outreach v1.0</span>
             </div>

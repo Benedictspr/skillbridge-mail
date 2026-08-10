@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { MessageSquare, ShieldCheck, Zap, Phone, CheckCircle, Send, Users, AlertCircle } from 'lucide-react';
 
 export default function SkillBridgeSmsView({ currentOrg }) {
-  const [smsText, setSmsText] = useState('Hi {first_name}, your SkillBridge remote tutoring application has been received. Reply YES to confirm your interview slot!');
+  const [smsText, setSmsText] = useState('Hi {first_name}, your Sendaat remote application has been received. Reply YES to confirm your interview slot!');
   const [testNumber, setTestNumber] = useState('+1 (555) 019-2834');
 
   return (
@@ -10,7 +10,7 @@ export default function SkillBridgeSmsView({ currentOrg }) {
       <div className="bg-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-xl border border-slate-800 space-y-3">
         <div className="flex items-center gap-2">
           <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-mono font-bold">
-            SKILLBRIDGE INFRASTRUCTURE SUITE
+            SENDAAT INFRASTRUCTURE SUITE
           </span>
           <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold">
             10DLC Compliant
@@ -18,7 +18,7 @@ export default function SkillBridgeSmsView({ currentOrg }) {
         </div>
         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
           <MessageSquare className="w-8 h-8 text-blue-400" />
-          SkillBridge SMS – Enterprise Bulk Messaging
+          Sendaat SMS – Enterprise Bulk Messaging
         </h1>
         <p className="text-slate-400 text-sm max-w-2xl">
           High-throughput SMS campaign infrastructure with carrier-grade 10DLC brand registration, TCPA opt-out management, and automated carrier routing for {currentOrg.name}.

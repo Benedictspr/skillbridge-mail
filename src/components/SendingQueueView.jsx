@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Send, Play, Pause, RotateCcw, Clock, ShieldCheck, CheckCircle2, Terminal, Eye, Mail, List, FileText, Database, Shield, Sliders, Calculator, Zap } from 'lucide-react';
+import { 
+  Send, Play, Pause, RotateCcw, Clock, ShieldCheck, CheckCircle2, 
+  Terminal, Eye, Mail, List, FileText, Database, Shield, Sliders, Calculator, Zap 
+} from 'lucide-react';
 
 export default function SendingQueueView({
   recipients = [],
@@ -30,7 +33,7 @@ export default function SendingQueueView({
   const remainingCount = readyList.length + (sendingItem ? 1 : 0);
 
   // Interval & Smart ETA Calculation
-  const currentIntervalSec = Math.max(2, campaignConfig?.intervalSeconds || 7);
+  const currentIntervalSec = Math.max(2, campaignConfig?.intervalSeconds || 5);
   const totalEtaSeconds = Math.max(0, remainingCount * currentIntervalSec);
   const etaMinutes = Math.floor(totalEtaSeconds / 60);
   const etaSecondsRem = totalEtaSeconds % 60;
@@ -46,7 +49,7 @@ export default function SendingQueueView({
   // Handler: Change Target Total Campaign Minutes -> auto-calculates required Delay Seconds
   const handleTargetMinutesChange = (targetMins) => {
     const mins = Math.max(1, parseInt(targetMins) || 5);
-    const count = remainingCount > 0 ? remainingCount : (totalCount > 0 ? totalCount : 50);
+    const count = remainingCount > 0 ? remainingCount : (totalCount > 0 ? totalCount : 5);
     const requiredSecPerEmail = Math.max(2, Math.round((mins * 60) / count));
     if (setCampaignConfig) {
       setCampaignConfig(prev => ({ ...prev, intervalSeconds: requiredSecPerEmail }));
@@ -54,75 +57,92 @@ export default function SendingQueueView({
   };
 
   return (
-    <div className="space-y-6 font-sans">
-      {/* Control Header Card */}
-      <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-5">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12 font-sans text-white bg-[#050505] p-4 sm:p-6 lg:p-8 min-h-screen select-none">
+      
+      {/* 1. Main Control Header Card - Vantablack Monochromatic */}
+      <div className="bg-[#121212] p-6 sm:p-8 rounded-[24px] border border-zinc-800 shadow-md space-y-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                campaignStatus === 'SENDING' ? 'bg-blue-100 text-blue-800 border border-blue-300' :
-                campaignStatus === 'PAUSED' ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className={`px-3 py-1 rounded-lg text-xs font-bold font-mono border uppercase tracking-wider ${
+                campaignStatus === 'SENDING' 
+                  ? 'bg-white text-black font-extrabold border-white' : 
+                campaignStatus === 'PAUSED' 
+                  ? 'bg-zinc-800 text-amber-300 border-zinc-700' 
+                  : 'bg-zinc-800 text-emerald-400 border-zinc-700'
               }`}>
-                {campaignStatus === 'SENDING' ? 'DISPATCH QUEUE ACTIVE' : campaignStatus}
+                {campaignStatus === 'SENDING' ? 'DISPATCH QUEUE ACTIVE' : campaignStatus || 'IDLE'}
               </span>
-              <span className="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200 flex items-center gap-1">
-                <Zap className="w-3.5 h-3.5 text-indigo-600 fill-indigo-600" />
+              <span className="text-xs font-mono font-bold text-zinc-300 bg-zinc-900 px-3 py-1 rounded-lg border border-zinc-800 flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-white" />
                 <span>{currentIntervalSec}s Delay / Email</span>
               </span>
             </div>
-            <h2 className="text-xl font-bold text-gray-900">Campaign Dispatch Engine & Live Pacing Console</h2>
-            <p className="text-xs text-gray-500 mt-0.5">
+
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight pt-1">
+              Campaign Dispatch Engine & Live Pacing Console
+            </h2>
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
               Sends individual messages sequentially via Gmail SMTP with customizable pacing delays to safeguard sender reputation.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          {/* Top Control Buttons */}
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
             <button
               onClick={onSendSingleTest}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-4 py-2.5 rounded-lg border border-gray-300 transition-colors"
+              className="bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl border border-zinc-700 transition-colors cursor-pointer"
             >
               Send 1 Test Email
             </button>
 
             {campaignStatus === 'SENDING' ? (
-              <button onClick={onPauseQueue} className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-colors shadow-sm">
-                <Pause className="w-4 h-4 inline mr-1" />
-                Pause Queue
+              <button 
+                onClick={onPauseQueue} 
+                className="bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl border border-zinc-700 flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Pause className="w-4 h-4 text-amber-400" />
+                <span>Pause Queue</span>
               </button>
             ) : (
               <button 
                 onClick={onStartQueue} 
-                className="bg-black hover:bg-gray-800 text-white text-xs font-bold px-6 py-2.5 rounded-lg shadow-sm transition-colors"
+                className="bg-white hover:bg-zinc-200 text-black text-xs font-extrabold px-6 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
               >
-                <Play className="w-4 h-4 inline mr-1 fill-white" />
-                {campaignStatus === 'PAUSED' ? 'Resume Queue' : 'Start Dispatch Queue'} ({readyList.length > 0 ? readyList.length : totalCount})
+                <Play className="w-4 h-4 text-black fill-black" />
+                <span>{campaignStatus === 'PAUSED' ? 'Resume Queue' : 'Start Dispatch Queue'} ({readyList.length > 0 ? readyList.length : totalCount})</span>
               </button>
             )}
 
-            <button onClick={onResetQueue} className="p-2.5 border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors" title="Reset Queue">
-              <RotateCcw className="w-4 h-4" />
+            <button 
+              onClick={onResetQueue} 
+              className="p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-zinc-800 transition-colors cursor-pointer" 
+              title="Reset Queue"
+            >
+              <RotateCcw className="w-4 h-4 text-white" />
             </button>
           </div>
         </div>
 
-        {/* Smart Pacing Delay & Smart ETA Calculator Control Bar */}
-        <div className="bg-gradient-to-r from-gray-900 to-indigo-950 p-4 rounded-xl text-white space-y-3 shadow-md border border-gray-800">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* 2. Smart Pacing Delay & Smart ETA Controls Card */}
+        <div className="bg-black p-5 rounded-2xl text-white space-y-4 border border-zinc-800 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Calculator className="w-4 h-4 text-indigo-400" />
-              <span className="font-extrabold text-xs tracking-tight">Smart Pacing & Campaign ETA Controls</span>
+              <Calculator className="w-4 h-4 text-white" />
+              <span className="font-extrabold text-xs tracking-tight text-white">Smart Pacing & Campaign ETA Controls</span>
             </div>
 
             {/* Quick Interval Preset Buttons */}
             <div className="flex items-center gap-1.5 text-xs">
-              <span className="text-gray-400 text-[11px] font-medium mr-1">Presets:</span>
+              <span className="text-zinc-400 text-[11px] font-semibold mr-1">Presets:</span>
               {[5, 8, 10, 15, 30, 60].map(sec => (
                 <button
                   key={sec}
                   onClick={() => handleDelayChange(sec)}
-                  className={`px-2.5 py-1 rounded text-[11px] font-bold font-mono transition-colors ${
-                    currentIntervalSec === sec ? 'bg-indigo-600 text-white shadow-xs' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    currentIntervalSec === sec 
+                      ? 'bg-white text-black font-extrabold shadow-xs' 
+                      : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
                   }`}
                 >
                   {sec}s
@@ -133,10 +153,10 @@ export default function SendingQueueView({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 text-xs">
             {/* Input A: Delay Seconds per Email */}
-            <div className="bg-black/40 p-3 rounded-lg border border-white/10 flex items-center justify-between gap-3">
+            <div className="bg-[#121212] p-3.5 rounded-xl border border-zinc-800 flex items-center justify-between gap-3">
               <div>
-                <label className="text-[11px] text-gray-400 font-bold block">Delay Between Emails (Seconds)</label>
-                <span className="text-[10px] text-gray-500">Auto-calculates total campaign ETA duration</span>
+                <label className="text-xs font-semibold text-white block">Delay Between Emails (Seconds)</label>
+                <span className="text-[10px] text-zinc-400">Auto-calculates total campaign ETA duration</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <input
@@ -145,17 +165,17 @@ export default function SendingQueueView({
                   max="300"
                   value={currentIntervalSec}
                   onChange={e => handleDelayChange(e.target.value)}
-                  className="w-16 bg-white text-black font-mono font-bold text-sm px-2 py-1 rounded outline-none text-center"
+                  className="w-16 bg-black border border-zinc-800 text-white font-mono font-bold text-xs px-2 py-1 rounded-lg outline-none text-center focus:border-zinc-500"
                 />
-                <span className="font-mono text-xs font-bold text-indigo-300">sec</span>
+                <span className="font-mono text-xs font-bold text-zinc-400">sec</span>
               </div>
             </div>
 
             {/* Input B: Target Campaign Duration in Minutes */}
-            <div className="bg-black/40 p-3 rounded-lg border border-white/10 flex items-center justify-between gap-3">
+            <div className="bg-[#121212] p-3.5 rounded-xl border border-zinc-800 flex items-center justify-between gap-3">
               <div>
-                <label className="text-[11px] text-gray-400 font-bold block">Set Target Total Campaign Time</label>
-                <span className="text-[10px] text-gray-500">Auto-calculates required delay seconds per email</span>
+                <label className="text-xs font-semibold text-white block">Set Target Total Campaign Time</label>
+                <span className="text-[10px] text-zinc-400">Auto-calculates required delay seconds per email</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <input
@@ -164,53 +184,53 @@ export default function SendingQueueView({
                   max="1440"
                   value={Math.max(1, Math.round(totalEtaSeconds / 60))}
                   onChange={e => handleTargetMinutesChange(e.target.value)}
-                  className="w-16 bg-white text-black font-mono font-bold text-sm px-2 py-1 rounded outline-none text-center"
+                  className="w-16 bg-black border border-zinc-800 text-white font-mono font-bold text-xs px-2 py-1 rounded-lg outline-none text-center focus:border-zinc-500"
                 />
-                <span className="font-mono text-xs font-bold text-indigo-300">mins</span>
+                <span className="font-mono text-xs font-bold text-zinc-400">mins</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Real Time Sent & Open Stats Banner */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs">
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3.5 flex items-center justify-between">
+        {/* 3. Real-Time Sent & Open Metric Cards (Clean Monochromatic Typography) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1 text-xs">
+          <div className="bg-black border border-zinc-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
             <div>
-              <span className="text-blue-700 font-bold block">Sent & Delivered</span>
-              <span className="text-2xl font-black text-blue-900 font-mono">{sentRecipientsCount}</span>
+              <span className="text-zinc-400 font-semibold block text-xs">Sent & Delivered</span>
+              <span className="text-2xl font-extrabold text-white font-sans mt-0.5 block">{sentRecipientsCount}</span>
             </div>
-            <CheckCircle2 className="w-6 h-6 text-blue-600" />
+            <CheckCircle2 className="w-6 h-6 text-white stroke-[1.75]" />
           </div>
 
-          <div className="bg-purple-50 border border-purple-200 rounded-xl p-3.5 flex items-center justify-between">
+          <div className="bg-black border border-zinc-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
             <div>
-              <span className="text-purple-700 font-bold block">Opened (Tracking Pixel)</span>
-              <span className="text-2xl font-black text-purple-900 font-mono">{openedRecipientsCount}</span>
+              <span className="text-zinc-400 font-semibold block text-xs">Opened (Tracking Pixel)</span>
+              <span className="text-2xl font-extrabold text-white font-sans mt-0.5 block">{openedRecipientsCount}</span>
             </div>
-            <Eye className="w-6 h-6 text-purple-600" />
+            <Eye className="w-6 h-6 text-white stroke-[1.75]" />
           </div>
 
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 flex items-center justify-between">
+          <div className="bg-black border border-zinc-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
             <div>
-              <span className="text-emerald-700 font-bold block">Live Open Rate %</span>
-              <span className="text-2xl font-black text-emerald-900 font-mono">{openRatePercent}%</span>
+              <span className="text-zinc-400 font-semibold block text-xs">Live Open Rate %</span>
+              <span className="text-2xl font-extrabold text-emerald-400 font-sans mt-0.5 block">{openRatePercent}%</span>
             </div>
-            <ShieldCheck className="w-6 h-6 text-emerald-600" />
+            <ShieldCheck className="w-6 h-6 text-emerald-400 stroke-[1.75]" />
           </div>
         </div>
 
         {/* Progress Bar & Calculated ETA Banner */}
         {totalCount > 0 && (
-          <div className="space-y-2 pt-2">
-            <div className="flex justify-between text-xs font-semibold text-gray-600">
+          <div className="space-y-2 pt-2 border-t border-zinc-800">
+            <div className="flex justify-between text-xs font-medium text-zinc-400">
               <span>Progress: {sentRecipientsCount} of {totalCount} processed</span>
-              <span className="font-mono font-bold text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+              <span className="font-mono text-xs font-bold text-white bg-black px-2.5 py-0.5 rounded-lg border border-zinc-800">
                 ETA: ~{etaMinutes}m {etaSecondsRem}s remaining ({remainingCount} emails at {currentIntervalSec}s delay)
               </span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-3 p-0.5 border border-gray-200">
+            <div className="w-full bg-black rounded-full h-2.5 p-0.5 border border-zinc-800">
               <div 
-                className="bg-black h-2 rounded-full transition-all duration-300"
+                className="bg-white h-1.5 rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -218,31 +238,31 @@ export default function SendingQueueView({
         )}
       </div>
 
-      {/* Live Console Output Card */}
-      <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+      {/* 4. Live Pacing Console Log Output Card */}
+      <div className="bg-[#121212] p-6 sm:p-8 rounded-[24px] border border-zinc-800 shadow-md space-y-4">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
           <div className="flex items-center gap-2">
-            <Terminal className="w-4 h-4 text-gray-700" />
-            <h3 className="font-bold text-xs text-gray-900">Live Pacing Console Log ({logs.length})</h3>
+            <Terminal className="w-4 h-4 text-white" />
+            <h3 className="font-extrabold text-sm text-white">Live Pacing Console Log ({logs.length})</h3>
           </div>
-          <span className="text-xs text-gray-500 font-mono">
+          <span className="text-xs text-zinc-400 font-mono">
             {logs.length} events recorded
           </span>
         </div>
 
-        <div className="bg-[#0B0C12] text-gray-200 p-4 rounded-xl overflow-y-auto h-80 space-y-2 text-xs font-mono border border-gray-800">
+        <div className="bg-black text-zinc-300 p-4 rounded-xl overflow-y-auto h-80 space-y-2 text-xs font-mono border border-zinc-800 shadow-inner">
           {logs.length === 0 ? (
-            <div className="text-gray-500 italic py-12 text-center">
+            <div className="text-zinc-500 italic py-12 text-center">
               Console idle. Click "Start Dispatch Queue" to trigger Nodemailer pacing engine.
             </div>
           ) : (
             logs.map((log, idx) => (
-              <div key={idx} className="flex items-start gap-2 border-b border-gray-800/60 pb-1">
-                <span className="text-gray-500">[{log.timestamp}]</span>
+              <div key={idx} className="flex items-start gap-2 border-b border-zinc-900 pb-1">
+                <span className="text-zinc-500">[{log.timestamp}]</span>
                 <span className={
                   log.type === 'success' ? 'text-emerald-400 font-bold' :
-                  log.type === 'error' ? 'text-red-400 font-bold' :
-                  log.type === 'sending' ? 'text-blue-300' : 'text-gray-300'
+                  log.type === 'error' ? 'text-rose-400 font-bold' :
+                  log.type === 'sending' ? 'text-zinc-200 font-bold' : 'text-zinc-400'
                 }>
                   {log.message}
                 </span>

@@ -12,7 +12,7 @@ export default function SkillBridgeWhatsAppView({ currentOrg }) {
         </div>
         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
           <MessageCircle className="w-8 h-8 text-emerald-400" />
-          SkillBridge WhatsApp – Business Messaging
+          Sendaat WhatsApp – Business Messaging
         </h1>
         <p className="text-slate-400 text-sm max-w-2xl">
           Official Meta WhatsApp Cloud API infrastructure. Send approved HSM broadcast templates, track read receipts, and manage student replies for {currentOrg.name}.

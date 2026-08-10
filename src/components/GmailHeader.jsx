@@ -28,7 +28,7 @@ export default function GmailHeader({
           </div>
           <div className="flex flex-col">
             <span className="font-bold text-lg text-gray-900 tracking-tight flex items-center gap-1.5 font-sans">
-              SkillBridge <span className="text-blue-600">Mail</span>
+              Sendaat <span className="text-blue-600">Mail</span>
             </span>
           </div>
         </div>

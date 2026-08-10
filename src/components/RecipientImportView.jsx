@@ -1,377 +1,322 @@
 import React, { useState } from 'react';
-import { Users, FileText, Upload, Plus, Trash2, Search, Sparkles, CheckCircle2, AlertCircle, FileSpreadsheet, ArrowRight, X, UserCheck } from 'lucide-react';
-import { extractFirstNameFromEmail } from '../utils/nameParser';
+import { 
+  Upload, FileText, Check, AlertCircle, Trash2, UserPlus, 
+  HelpCircle, CheckCircle2, RefreshCw, X, Download, ShieldCheck, Mail
+} from 'lucide-react';
 
-export default function RecipientImportView({ recipients = [], setRecipients, onLoadSkillBridgeData }) {
+export default function RecipientImportView({ 
+  recipients = [], 
+  setRecipients, 
+  onLoadSkillBridgeData, 
+  currentOrg 
+}) {
+  const [pasteText, setPasteText] = useState('');
+  const [parseSuccessMsg, setParseSuccessMsg] = useState('');
+  const [dragActive, setDragActive] = useState(false);
+  const [importTab, setImportTab] = useState('paste'); // 'paste' | 'file' | 'list'
+
   const safeRecipients = Array.isArray(recipients) ? recipients : [];
-  const [activeSubTab, setActiveSubTab] = useState('note');
-  const [noteText, setNoteText] = useState(
-    `john.doe@university.edu John Doe - Mathematics Tutor\nmary.smith@cambridge.org Mary Smith - Python Developer\npeter.jones@mit.edu Peter Jones - UI/UX Designer\nsarah.connor@stanford.edu Sarah Connor - English Tutor`
-  );
-  const [searchTerm, setSearchTerm] = useState('');
 
-  // Form states
-  const [manualEmail, setManualEmail] = useState('');
-  const [manualFirstName, setManualFirstName] = useState('');
-  const [manualLastName, setManualLastName] = useState('');
-  const [manualRole, setManualRole] = useState('');
+  // Smart Note Parser Function
+  const parseRawNotes = () => {
+    if (!pasteText.trim()) return;
 
-  // Smart Note Parser
-  const parseNoteText = () => {
-    if (!noteText.trim()) return;
+    const lines = pasteText.split('\n');
+    const newParsed = [];
+    const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
 
-    const lines = noteText.split('\n');
-    const newRecipients = [];
-
-    lines.forEach((line, index) => {
-      const trimmed = line.trim();
-      if (!trimmed) return;
-
-      const emailMatch = trimmed.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
-      if (emailMatch) {
-        const email = emailMatch[1];
-        const remaining = trimmed.replace(email, '').trim().replace(/^[-:,\s]+|[-:,\s]+$/g, '');
+    lines.forEach((line, idx) => {
+      const emailsFound = line.match(emailRegex);
+      if (emailsFound && emailsFound.length > 0) {
+        const email = emailsFound[0].trim().toLowerCase();
         
-        let firstName = extractFirstNameFromEmail(email);
-        let lastName = '';
-        let role = 'Student';
+        let cleaned = line.replace(email, '').trim();
+        let name = '';
+        let role = 'Candidate';
+        let company = currentOrg?.name || 'Sendaat Network';
 
-        if (remaining) {
-          const parts = remaining.split(/[-|]/);
-          const namePart = parts[0].trim();
-          const rolePart = parts[1] ? parts[1].trim() : 'Student';
-
-          const nameWords = namePart.split(/\s+/);
-          firstName = (nameWords[0] && nameWords[0] !== 'Friend') ? nameWords[0] : extractFirstNameFromEmail(email);
-          lastName = nameWords.slice(1).join(' ') || '';
-          role = rolePart;
+        if (cleaned.includes('-')) {
+          const parts = cleaned.split('-');
+          name = parts[0].trim();
+          role = parts[1].trim();
+        } else if (cleaned.includes(',')) {
+          const parts = cleaned.split(',');
+          name = parts[0].trim();
+          role = parts[1].trim();
+        } else {
+          name = cleaned.trim() || email.split('@')[0];
         }
 
-        newRecipients.push({
-          id: `note-${Date.now()}-${index}`,
+        const nameParts = name.split(' ');
+        const firstName = nameParts[0] || 'Candidate';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        newParsed.push({
+          id: `imp-${Date.now()}-${idx}-${Math.random().toString(36).substr(2, 4)}`,
           email,
           firstName,
           lastName,
-          company: 'SkillBridge Network',
+          company,
           role,
-          status: 'Ready'
+          status: 'Ready',
+          organization_id: currentOrg?.id || 'org_sendaat_1001'
         });
       }
     });
 
-    if (newRecipients.length > 0) {
-      setRecipients(prev => {
-        const existing = Array.isArray(prev) ? prev : [];
-        const existingEmails = new Set(existing.map(r => r?.email?.toLowerCase()));
-        const uniqueNew = newRecipients.filter(r => !existingEmails.has(r.email.toLowerCase()));
-        return [...existing, ...uniqueNew];
-      });
-      setNoteText('');
-    }
-  };
+    if (newParsed.length > 0) {
+      const existingEmails = new Set(safeRecipients.map(r => r.email.toLowerCase()));
+      const uniqueNew = newParsed.filter(r => !existingEmails.has(r.email.toLowerCase()));
 
-  const handleAddManual = (e) => {
-    e.preventDefault();
-    if (!manualEmail.trim()) return;
-
-    const email = manualEmail.trim();
-    const newRec = {
-      id: `manual-${Date.now()}`,
-      email,
-      firstName: manualFirstName.trim() || extractFirstNameFromEmail(email),
-      lastName: manualLastName.trim() || '',
-      company: 'SkillBridge Network',
-      role: manualRole.trim() || 'Student',
-      status: 'Ready'
-    };
-
-    setRecipients(prev => [...(Array.isArray(prev) ? prev : []), newRec]);
-    setManualEmail('');
-    setManualFirstName('');
-    setManualLastName('');
-    setManualRole('');
-  };
-
-  const handleCsvFileUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result;
-      if (typeof content === 'string') {
-        const lines = content.split('\n');
-        const parsedRecs = [];
-        lines.forEach((line, idx) => {
-          const cols = line.split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
-          if (cols[0] && cols[0].includes('@')) {
-            parsedRecs.push({
-              id: `csv-${Date.now()}-${idx}`,
-              email: cols[0],
-              firstName: cols[1] || extractFirstNameFromEmail(cols[0]),
-              lastName: cols[2] || '',
-              company: cols[3] || 'SkillBridge',
-              role: cols[4] || 'Student',
-              status: 'Ready'
-            });
-          }
-        });
-        if (parsedRecs.length > 0) {
-          setRecipients(prev => [...(Array.isArray(prev) ? prev : []), ...parsedRecs]);
-        }
+      if (uniqueNew.length > 0) {
+        setRecipients(prev => [...(Array.isArray(prev) ? prev : []), ...uniqueNew]);
+        setParseSuccessMsg(`Successfully extracted ${uniqueNew.length} new contact(s)!`);
+        setPasteText('');
+      } else {
+        setParseSuccessMsg('All extracted contacts are already in your Audience list.');
       }
-    };
-    reader.readAsText(file);
-  };
+    } else {
+      setParseSuccessMsg('No valid email addresses found in the text.');
+    }
 
-  const removeRecipient = (id) => {
-    setRecipients(prev => (Array.isArray(prev) ? prev : []).filter(r => r.id !== id));
+    setTimeout(() => setParseSuccessMsg(''), 4000);
   };
 
   const clearAllRecipients = () => {
-    React.startTransition(() => {
+    if (confirm('Are you sure you want to remove all contacts from your Audience list?')) {
       setRecipients([]);
-    });
+    }
   };
 
-  const filteredRecipients = safeRecipients.filter(r => 
-    (r?.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (r?.firstName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (r?.role || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setPasteText(event.target.result);
+        setImportTab('paste');
+      };
+      reader.readAsText(file);
+    }
+  };
 
   return (
-    <div className="space-y-6 font-sans p-2">
-      {/* Import Controls Card (High Contrast Light Background) */}
-      <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-sm space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 pb-5">
-          <div>
-            <span className="bg-blue-100 text-blue-900 border border-blue-300 text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-              Data Import Hub
+    <div className="space-y-6 max-w-7xl mx-auto pb-12 font-sans text-white bg-[#050505] p-4 sm:p-6 lg:p-8 min-h-screen select-none">
+      
+      {/* 1. Header Banner */}
+      <div className="bg-[#121212] p-6 sm:p-8 rounded-[24px] border border-zinc-800 shadow-md space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="bg-zinc-800 text-zinc-300 border border-zinc-700 text-[11px] font-mono font-bold px-3 py-1 rounded-lg uppercase tracking-wider">
+              Step 2: Audience Hub
             </span>
-            <h2 className="text-2xl font-black text-gray-900 tracking-tight mt-1.5">
-              Recipient Import & Smart Note Parser
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight pt-1">
+              Recipient Import & Audience Roster
             </h2>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Import applicant rosters from notes, CSV files, or manual entries.
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
+              Import applicant rosters from notes, CSV files, or manual entries for <strong className="text-white">{currentOrg?.name || 'Sendaat Enterprise'}</strong>.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Clean Load Sample Dataset (5) button - NO star logo, NO 50 */}
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={onLoadSkillBridgeData}
-              className="bg-black hover:bg-gray-800 text-white font-bold text-xs px-4.5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 transition-colors"
+              className="bg-white hover:bg-zinc-200 text-black font-extrabold text-xs px-4.5 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-yellow-300" />
-              <span>Load Sample Dataset (50)</span>
+              <span>Load Sample Dataset (5)</span>
             </button>
 
             {safeRecipients.length > 0 && (
               <button
                 onClick={clearAllRecipients}
-                className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors"
+                className="bg-rose-950/40 hover:bg-rose-950/70 text-rose-400 border border-rose-800/40 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-4 h-4 text-rose-400" />
                 <span>Clear All ({safeRecipients.length})</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* Input Sub-Tab Switcher */}
-        <div className="flex gap-2">
+        {/* Tab Selector */}
+        <div className="pt-3 flex gap-2 border-t border-zinc-800">
           <button
-            onClick={() => setActiveSubTab('note')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
-              activeSubTab === 'note' 
-                ? 'bg-black text-white shadow-sm' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            onClick={() => setImportTab('paste')}
+            className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
+              importTab === 'paste' ? 'bg-white text-black font-extrabold shadow-xs' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
             }`}
           >
             <FileText className="w-4 h-4" />
-            <span>Paste from Note / Text</span>
+            <span>Smart Note Parser</span>
           </button>
 
           <button
-            onClick={() => setActiveSubTab('csv')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
-              activeSubTab === 'csv' 
-                ? 'bg-black text-white shadow-sm' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            onClick={() => setImportTab('file')}
+            className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
+              importTab === 'file' ? 'bg-white text-black font-extrabold shadow-xs' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
             }`}
           >
-            <FileSpreadsheet className="w-4 h-4" />
-            <span>Upload CSV / Excel</span>
+            <Upload className="w-4 h-4" />
+            <span>Upload CSV / Text File</span>
           </button>
 
           <button
-            onClick={() => setActiveSubTab('manual')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
-              activeSubTab === 'manual' 
-                ? 'bg-black text-white shadow-sm' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            onClick={() => setImportTab('list')}
+            className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
+              importTab === 'list' ? 'bg-white text-black font-extrabold shadow-xs' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
             }`}
           >
-            <Plus className="w-4 h-4" />
-            <span>Add Single Recipient</span>
+            <UserPlus className="w-4 h-4" />
+            <span>Audience Roster ({safeRecipients.length})</span>
           </button>
         </div>
+      </div>
 
-        {/* SubTab 1: Note Text */}
-        {activeSubTab === 'note' && (
-          <div className="space-y-4 pt-2">
-            <p className="text-xs font-semibold text-gray-700">
-              Paste raw notes containing emails and names. Example: <code className="bg-gray-100 text-blue-800 font-mono text-xs px-2 py-0.5 rounded border border-gray-300">john@gmail.com John Doe - Math Tutor</code>
+      {/* 2. Notification Box */}
+      {parseSuccessMsg && (
+        <div className="p-4 bg-zinc-900 border border-zinc-700 text-white text-xs rounded-xl font-bold flex items-center gap-2 animate-fade-in">
+          <Check className="w-4 h-4 text-emerald-400 stroke-[2.5]" />
+          <span>{parseSuccessMsg}</span>
+        </div>
+      )}
+
+      {/* 3. TAB CONTENT */}
+      {importTab === 'paste' && (
+        <div className="bg-[#121212] p-6 sm:p-8 rounded-[24px] border border-zinc-800 shadow-xs space-y-4">
+          <div className="space-y-1">
+            <h3 className="font-extrabold text-base text-white flex items-center gap-2">
+              <FileText className="w-4 h-4 text-white" />
+              <span>Smart Note & Text Roster Extraction</span>
+            </h3>
+            <p className="text-xs text-zinc-400">
+              Paste raw candidate lists. Example: <code className="bg-black text-zinc-300 font-mono text-xs px-2 py-0.5 rounded border border-zinc-800">john@gmail.com John Doe - Math Tutor</code>
             </p>
-            <textarea
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              rows={4}
-              placeholder="Paste raw email notes here..."
-              className="w-full bg-white border border-gray-300 rounded-xl p-4 text-xs font-mono text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black leading-relaxed"
-            />
-            <div className="flex justify-end">
-              <button
-                onClick={parseNoteText}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-xs flex items-center gap-2"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>Extract Emails & Add to Roster</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* SubTab 2: CSV Drag & Drop */}
-        {activeSubTab === 'csv' && (
-          <div className="border-2 border-dashed border-gray-300 hover:border-black rounded-2xl p-10 text-center transition-all bg-gray-50/50">
-            <Upload className="w-12 h-12 text-blue-600 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-gray-900 mb-1">Drag & Drop CSV File</h3>
-            <p className="text-xs text-gray-500 mb-5">Supported formats: .csv, .txt (Email, First Name, Last Name, Company, Role)</p>
-            <label className="bg-black hover:bg-gray-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer inline-flex items-center gap-2">
-              <span>Choose File</span>
-              <input type="file" accept=".csv,.txt" onChange={handleCsvFileUpload} className="hidden" />
-            </label>
-          </div>
-        )}
-
-        {/* SubTab 3: Manual Add */}
-        {activeSubTab === 'manual' && (
-          <form onSubmit={handleAddManual} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
-            <input
-              type="email"
-              required
-              placeholder="Email address *"
-              value={manualEmail}
-              onChange={e => setManualEmail(e.target.value)}
-              className="bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-xs text-gray-900 outline-none focus:border-black"
-            />
-            <input
-              type="text"
-              placeholder="First name (e.g. John)"
-              value={manualFirstName}
-              onChange={e => setManualFirstName(e.target.value)}
-              className="bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-xs text-gray-900 outline-none focus:border-black"
-            />
-            <input
-              type="text"
-              placeholder="Last name (e.g. Doe)"
-              value={manualLastName}
-              onChange={e => setManualLastName(e.target.value)}
-              className="bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-xs text-gray-900 outline-none focus:border-black"
-            />
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Role (e.g. Tutor)"
-                value={manualRole}
-                onChange={e => setManualRole(e.target.value)}
-                className="bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-xs text-gray-900 outline-none focus:border-black flex-1"
-              />
-              <button type="submit" className="bg-black hover:bg-gray-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl shrink-0">
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
-
-      {/* Recipient Data Table Card (High Contrast White Card) */}
-      <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-sm space-y-5">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <h3 className="text-base font-extrabold text-gray-900">Active Recipient Roster</h3>
-            <span className="bg-gray-100 text-gray-800 font-mono font-bold text-xs px-3 py-1 rounded-full border border-gray-200">
-              {filteredRecipients.length} / {safeRecipients.length} Loaded
-            </span>
           </div>
 
-          <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Filter by name, email, role..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-gray-300 rounded-xl pl-10 pr-4 py-2 text-xs text-gray-900 outline-none focus:border-black"
-            />
+          <textarea
+            rows={8}
+            value={pasteText}
+            onChange={(e) => setPasteText(e.target.value)}
+            placeholder="john.doe@university.edu John Doe - Mathematics Tutor&#10;mary.smith@cambridge.org Mary Smith - Python Developer"
+            className="w-full bg-black border border-zinc-800 text-white rounded-xl p-4 text-xs font-mono focus:outline-none focus:border-zinc-500 resize-none leading-relaxed"
+          />
+
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-xs text-zinc-400">
+              Paste a note above or click "Load Sample Dataset (5)".
+            </p>
+
+            <button
+              onClick={parseRawNotes}
+              disabled={!pasteText.trim()}
+              className="bg-white hover:bg-zinc-200 disabled:opacity-40 text-black font-extrabold text-xs px-5 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
+            >
+              Parse & Add to Audience
+            </button>
           </div>
         </div>
+      )}
 
-        {filteredRecipients.length === 0 ? (
-          <div className="text-center py-16 border border-gray-200 rounded-2xl bg-gray-50/50">
-            <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-sm font-bold text-gray-800">No recipients found.</p>
-            <p className="text-xs text-gray-500 mt-1">Paste a note above or click "Load Sample Dataset (50)".</p>
+      {importTab === 'file' && (
+        <div className="bg-[#121212] p-6 sm:p-8 rounded-[24px] border border-zinc-800 shadow-xs space-y-4">
+          <h3 className="font-extrabold text-base text-white flex items-center gap-2">
+            <Upload className="w-4 h-4 text-white" />
+            <span>Upload CSV or TXT File</span>
+          </h3>
+
+          <div
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-2xl p-12 text-center transition-colors ${
+              dragActive ? 'border-white bg-zinc-900' : 'border-zinc-800 bg-black'
+            }`}
+          >
+            <Upload className="w-10 h-10 text-white mx-auto mb-3" />
+            <h4 className="text-sm font-bold text-white">Drag and drop your candidate roster file here</h4>
+            <p className="text-xs text-zinc-400 mt-1">Supports .csv, .txt, or exported contacts list</p>
           </div>
-        ) : (
-          <div className="overflow-x-auto border border-gray-200 rounded-xl">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50 text-gray-700 font-bold border-b border-gray-200">
-                <tr>
-                  <th className="px-5 py-3.5">Recipient Name</th>
-                  <th className="px-5 py-3.5">Email Address</th>
-                  <th className="px-5 py-3.5">Skill / Role</th>
-                  <th className="px-5 py-3.5">Status</th>
-                  <th className="px-5 py-3.5 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 font-mono">
-                {filteredRecipients.slice(0, 100).map((r) => (
-                  <tr key={r.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3.5 font-sans font-bold text-gray-900 flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-lg bg-purple-900 text-white font-black flex items-center justify-center text-xs">
-                        {r.firstName ? r.firstName.charAt(0) : 'S'}
-                      </div>
-                      <span>{r.firstName} {r.lastName}</span>
-                    </td>
-                    <td className="px-5 py-3.5 text-blue-700 font-semibold">{r.email}</td>
-                    <td className="px-5 py-3.5 text-gray-700 font-sans">{r.role}</td>
-                    <td className="px-5 py-3.5 font-sans">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        r.status === 'Sent' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
-                        r.status === 'Sending' ? 'bg-blue-100 text-blue-800 border border-blue-300' :
-                        r.status === 'Failed' ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-gray-100 text-gray-800 border border-gray-300'
-                      }`}>
-                        {r.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      <button
-                        onClick={() => removeRecipient(r.id)}
-                        className="text-gray-400 hover:text-rose-600 p-1.5 transition-colors"
-                        title="Remove Recipient"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </td>
+        </div>
+      )}
+
+      {/* 4. Audience Roster Table */}
+      {importTab === 'list' && (
+        <div className="bg-[#121212] p-6 rounded-[24px] border border-zinc-800 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <h3 className="font-extrabold text-base text-white flex items-center gap-2">
+              <UserPlus className="w-4 h-4 text-white" />
+              <span>Current Audience Roster ({safeRecipients.length})</span>
+            </h3>
+            <button
+              onClick={onLoadSkillBridgeData}
+              className="px-3.5 py-1.5 bg-white text-black font-extrabold text-xs rounded-xl hover:bg-zinc-200 transition-all cursor-pointer"
+            >
+              Load Sample Dataset (5)
+            </button>
+          </div>
+
+          {safeRecipients.length === 0 ? (
+            <div className="p-8 text-center bg-black rounded-xl border border-zinc-800 text-zinc-400 text-xs font-mono">
+              No contacts loaded in Audience roster yet. Click "Load Sample Dataset (5)" above to populate instantly.
+            </div>
+          ) : (
+            <div className="overflow-x-auto border border-zinc-800 rounded-xl">
+              <table className="w-full text-left text-xs font-sans">
+                <thead className="bg-black text-zinc-400 font-mono text-[11px] uppercase tracking-wider border-b border-zinc-800">
+                  <tr>
+                    <th className="p-3">#</th>
+                    <th className="p-3">Full Name</th>
+                    <th className="p-3">Email Address</th>
+                    <th className="p-3">Role</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3 text-right">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                </thead>
+                <tbody className="divide-y divide-zinc-800 text-zinc-300">
+                  {safeRecipients.map((r, i) => (
+                    <tr key={r.id || i} className="hover:bg-zinc-900/60 transition-colors">
+                      <td className="p-3 font-mono text-zinc-500">{i + 1}</td>
+                      <td className="p-3 font-bold text-white">{r.firstName} {r.lastName}</td>
+                      <td className="p-3 font-mono text-zinc-300">{r.email}</td>
+                      <td className="p-3 text-zinc-400">{r.role || 'Candidate'}</td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-800 text-zinc-200 border border-zinc-700">
+                          {r.status || 'Ready'}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right">
+                        <button
+                          onClick={() => setRecipients(safeRecipients.filter(item => item.id !== r.id))}
+                          className="p-1 hover:bg-rose-950/60 text-rose-400 rounded-lg transition-colors"
+                          title="Delete Contact"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
     </div>
   );
 }

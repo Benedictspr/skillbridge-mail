@@ -59,13 +59,13 @@ export default function AppRightPanel({ recipients, setRecipients, activeTab, se
   return (
     <>
       {/* Right Sidebar Icon Column */}
-      <aside className="w-14 bg-[#D4F1E8] border-l border-black/10 py-4 flex flex-col items-center justify-between shrink-0 hidden lg:flex select-none">
+      <aside className="w-14 bg-[#0F172A] border-l border-slate-800/80 py-4 flex flex-col items-center justify-between shrink-0 hidden lg:flex select-none text-white">
         <div className="space-y-4">
           {/* Calendar Icon */}
           <button 
             onClick={() => setActiveDrawer(activeDrawer === 'calendar' ? null : 'calendar')}
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-              activeDrawer === 'calendar' ? 'bg-blue-600 text-white shadow-md' : 'hover:bg-black/10 text-blue-600'
+              activeDrawer === 'calendar' ? 'bg-blue-600 text-white shadow-md' : 'hover:bg-slate-800 text-blue-400'
             }`} 
             title="Campaign Schedule & Calendar"
           >

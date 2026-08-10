@@ -20,7 +20,7 @@ export default function GmailSidebar({
         {/* Mobile Header X Close */}
         {isOpenMobile && (
           <div className="flex items-center justify-between px-2 pb-2 border-b border-[#E0E3E7] md:hidden">
-            <span className="font-bold text-sm text-gray-900">SkillBridge Mail Navigation</span>
+            <span className="font-bold text-sm text-gray-900">Sendaat Mail Navigation</span>
             <button onClick={onCloseMobile} className="p-1 hover:bg-gray-200 rounded-full">
               <X className="w-5 h-5 text-gray-600" />
             </button>

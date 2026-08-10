@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Sparkles, CheckCircle, ArrowDown, Smartphone, Monitor, Code, 
-  ShieldCheck, Send, Clock, BarChart3, AlertCircle, Play, Eye, RefreshCw
+  ShieldCheck, Send, Clock, BarChart3, AlertCircle, Play, Eye, RefreshCw, Info
 } from 'lucide-react';
 
 export default function CampaignLifecycleView({ 

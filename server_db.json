@@ -1256,12 +1256,57 @@
     },
     "sb-1": {
       "status": "Sent",
-      "sentAt": "2026-08-04T01:14:46.795Z",
+      "sentAt": "2026-08-10T23:52:45.795Z",
       "opened": false,
-      "messageId": "sandbox-1785806086795"
+      "messageId": "sandbox-1786405965797"
+    },
+    "test-api-1786403887725": {
+      "status": "Sent",
+      "sentAt": "2026-08-10T23:18:07.847Z",
+      "opened": false,
+      "messageId": "sandbox-1786403887847"
+    },
+    "sb-2": {
+      "status": "Sent",
+      "sentAt": "2026-08-10T23:52:56.966Z",
+      "opened": false,
+      "messageId": "sandbox-1786405976966"
     }
   },
   "sentHistoryLog": [
+    {
+      "id": "sent-1786405976967-e95l",
+      "recipientId": "sb-2",
+      "to": "mary.smith@cambridge.org",
+      "recipientName": "Mary Smith",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-10T23:52:56.966Z",
+      "status": "Sent (Sandbox)",
+      "mode": "sandbox",
+      "messageId": "sandbox-1786405976967"
+    },
+    {
+      "id": "sent-1786405965797-qzqp",
+      "recipientId": "sb-1",
+      "to": "john.doe@university.edu",
+      "recipientName": "John Doe",
+      "subject": "Remote Opportunity for Students",
+      "sentAt": "2026-08-10T23:52:45.795Z",
+      "status": "Sent (Sandbox)",
+      "mode": "sandbox",
+      "messageId": "sandbox-1786405965797"
+    },
+    {
+      "id": "sent-1786403887849-diqd",
+      "recipientId": "test-api-1786403887725",
+      "to": "m4verickjack@gmail.com",
+      "recipientName": "m4verickjack@gmail.com",
+      "subject": "API Integration Test Dispatch",
+      "sentAt": "2026-08-10T23:18:07.847Z",
+      "status": "Sent (Sandbox)",
+      "mode": "sandbox",
+      "messageId": "sandbox-1786403887850"
+    },
     {
       "id": "sent-1785806086795-lw18",
       "recipientId": "sb-1",
@@ -3944,8 +3989,43 @@
     }
   ],
   "storedSmtpConfig": {
-    "user": "invalid@gmail.com",
-    "pass": "wrongpass",
-    "mode": "gmail"
-  }
+    "user": "shaptsevjkonikevich@gmail.com",
+    "pass": "smjpsmbbqhjvovcp",
+    "mode": "sandbox"
+  },
+  "registeredUsers": [
+    {
+      "id": "usr_default_admin",
+      "email": "benedict@sendaat.io",
+      "password": "Password123!",
+      "name": "Benedict Vance",
+      "company": "Sendaat Enterprise",
+      "role": "Infrastructure Lead",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150",
+      "onboardingCompleted": true,
+      "twoFactorEnabled": false
+    },
+    {
+      "id": "usr_maverick",
+      "email": "m4verickjack@gmail.com",
+      "password": "Password123!",
+      "name": "Maverick Jack",
+      "company": "Sendaat Enterprise",
+      "role": "Workspace Owner",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150",
+      "onboardingCompleted": true,
+      "twoFactorEnabled": false
+    },
+    {
+      "id": "usr_smtp_owner",
+      "email": "shaptsevjkonikevich@gmail.com",
+      "password": "Password123!",
+      "name": "Sendaat Admin",
+      "company": "Sendaat Network",
+      "role": "Platform Admin",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150",
+      "onboardingCompleted": true,
+      "twoFactorEnabled": false
+    }
+  ]
 }

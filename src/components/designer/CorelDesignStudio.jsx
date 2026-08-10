@@ -536,9 +536,10 @@ export default function CorelDesignStudio({
           </button>
 
           {setEditorMode && (
-            <div className="flex bg-slate-900 p-0.5 rounded-lg border border-slate-800 text-[10px] font-black">
-              <button onClick={() => setEditorMode('visual')} className={`px-2.5 py-1 rounded-md ${editorMode === 'visual' ? 'bg-teal-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}>VISUAL DROP</button>
-              <button onClick={() => setEditorMode('corel')} className={`px-2.5 py-1 rounded-md ${editorMode === 'corel' ? 'bg-teal-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}>DESIGN STUDIO (BETA)</button>
+            <div className="flex bg-black p-0.5 rounded-lg border border-zinc-800 text-[10px] font-extrabold">
+              <button onClick={() => setEditorMode('visual')} className={`px-2.5 py-1 rounded-md transition-colors ${editorMode === 'visual' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'}`}>Visual</button>
+              <button onClick={() => setEditorMode('design')} className={`px-2.5 py-1 rounded-md transition-colors ${editorMode === 'design' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'}`}>Design</button>
+              <button onClick={() => setEditorMode('text')} className={`px-2.5 py-1 rounded-md transition-colors ${editorMode === 'text' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'}`}>Text</button>
             </div>
           )}
 

@@ -108,7 +108,7 @@ export default function SmtpSettingsModal({ isOpen, onClose, smtpConfig, setSmtp
                 <label className="font-bold text-gray-700 block mb-1">Your Gmail Address</label>
                 <input
                   type="email"
-                  placeholder="outreach@skillbridge.org"
+                  placeholder="outreach@sendaat.io"
                   value={smtpConfig.user || ''}
                   onChange={e => setSmtpConfig(prev => ({ ...prev, user: e.target.value }))}
                   className="w-full bg-white border border-gray-300 rounded-lg p-2.5 outline-none focus:border-black font-sans text-xs text-gray-900"

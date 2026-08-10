@@ -30,7 +30,7 @@ export default function GmailMintHeader({
             <path d="M1.5 6.5L12 13.5L22.5 6.5" stroke="#34A853" strokeWidth="1.5" />
           </svg>
           <span className="font-bold text-xl text-gray-800 tracking-tight font-sans">
-            Gmail <span className="text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full ml-1 border border-blue-200">SkillBridge</span>
+            Gmail <span className="text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full ml-1 border border-blue-200">Sendaat</span>
           </span>
         </div>
       </div>

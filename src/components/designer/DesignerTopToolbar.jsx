@@ -116,20 +116,26 @@ export default function DesignerTopToolbar({
           )}
         </div>
 
-        {/* Mode Switcher Segment */}
+        {/* Interwoven Mode Switcher Segment */}
         {editorMode && setEditorMode && (
-          <div className="hidden lg:flex bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-[10px] font-extrabold">
+          <div className="hidden lg:flex bg-black p-0.5 rounded-lg border border-zinc-800 text-[10px] font-extrabold">
             <button
               onClick={() => setEditorMode('visual')}
-              className={`px-2 py-0.5 rounded transition-colors ${editorMode === 'visual' ? 'bg-teal-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
+              className={`px-2.5 py-1 rounded transition-colors ${editorMode === 'visual' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'}`}
             >
-              VISUAL
+              Visual
+            </button>
+            <button
+              onClick={() => setEditorMode('design')}
+              className={`px-2.5 py-1 rounded transition-colors ${editorMode === 'design' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'}`}
+            >
+              Design
             </button>
             <button
               onClick={() => setEditorMode('text')}
-              className={`px-2 py-0.5 rounded transition-colors ${editorMode === 'text' ? 'bg-teal-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
+              className={`px-2.5 py-1 rounded transition-colors ${editorMode === 'text' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'}`}
             >
-              TEXT
+              Text
             </button>
           </div>
         )}
