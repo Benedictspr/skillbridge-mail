@@ -314,7 +314,7 @@ export default function App() {
   };
 
   // Dispatch single test email
-  const handleSendSingleTest = async (recipientEmail) => {
+  const handleSendSingleTest = async (recipientEmail, testSubject = null, customHtml = null) => {
     addLog(`Sending single test email to ${recipientEmail}...`, 'sending');
     try {
       let response;
@@ -322,44 +322,55 @@ export default function App() {
         recipientEmail,
         to: recipientEmail,
         recipientName: 'Test Recipient',
-        subject: campaignConfig.subject || 'Test Outreach Email',
+        subject: testSubject || campaignConfig.subject || 'Test Outreach Email',
         bodyText: campaignConfig.bodyText || 'Test Body',
+        html: customHtml || campaignConfig.bodyText || '<p>Test Outreach Email</p>',
         headerLogoText: campaignConfig.headerLogoText,
         buttonText: campaignConfig.buttonText,
         buttonUrl: campaignConfig.buttonUrl,
         signatureText: campaignConfig.signatureText,
         smtpUser: smtpConfig.user,
         smtpPass: smtpConfig.pass,
-        organization_id: currentOrg.id,
-        mode: 'sandbox'
+        organization_id: currentOrg.id
       });
 
       try {
-        response = await fetch('http://localhost:3001/api/send-email', {
+        response = await fetch('/api/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: payload
         });
-      } catch (e) {
-        response = await fetch('http://localhost:5000/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: payload
-        });
+        if (!response.ok && response.status === 404) {
+          throw new Error('Serverless route 404, fallback to localhost');
+        }
+      } catch (e1) {
+        try {
+          response = await fetch('http://localhost:3001/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload
+          });
+        } catch (e2) {
+          response = await fetch('http://localhost:5000/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload
+          });
+        }
       }
 
       const resData = await response.json();
       if (response.ok && (resData.success || resData.simulated)) {
-        addLog(`Test email successfully sent to ${recipientEmail}!`, 'success');
+        addLog(`Test email successfully delivered to ${recipientEmail}!`, 'success');
         try { confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } }); } catch(e){}
         return true;
       } else {
-        addLog(`Test email status: ${resData.message || 'Queued'}`, 'info');
-        return true;
+        addLog(`Test email delivery alert: ${resData.error || resData.message || 'Check SMTP credentials'}`, 'error');
+        return false;
       }
     } catch (err) {
-      addLog(`Test email dispatched in sandbox mode to ${recipientEmail}.`, 'success');
-      return true;
+      addLog(`Failed to dispatch email to ${recipientEmail}: ${err.message}`, 'error');
+      return false;
     }
   };
 
@@ -387,23 +398,33 @@ export default function App() {
         signatureText: campaignConfig.signatureText,
         smtpUser: smtpConfig.user,
         smtpPass: smtpConfig.pass,
-        organization_id: currentOrg.id,
-        mode: 'sandbox'
+        organization_id: currentOrg.id
       });
 
       let response;
       try {
-        response = await fetch('http://localhost:3001/api/send-email', {
+        response = await fetch('/api/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: payload
         });
-      } catch (e) {
-        response = await fetch('http://localhost:5000/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: payload
-        });
+        if (!response.ok && response.status === 404) {
+          throw new Error('Serverless route 404, fallback to localhost');
+        }
+      } catch (e1) {
+        try {
+          response = await fetch('http://localhost:3001/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload
+          });
+        } catch (e2) {
+          response = await fetch('http://localhost:5000/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload
+          });
+        }
       }
 
       const resData = await response.json();
