@@ -21,14 +21,14 @@ export default function VisualEmailDesigner({
   setEditorMode
 }) {
   // 1. Core State
-  const [projectName, setProjectName] = useState('SkillBridge Student Outreach Campaign');
+  const [projectName, setProjectName] = useState('Sendaat Email Studio');
   const [saveStatus, setSaveStatus] = useState('Saved');
   const [isStartModalOpen, setIsStartModalOpen] = useState(() => {
-    return !localStorage.getItem('skillbridge_email_designer_data');
+    return !localStorage.getItem('sendaat_email_designer_data');
   });
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isSendTestOpen, setIsSendTestOpen] = useState(false);
-  const [testRecipientEmail, setTestRecipientEmail] = useState('john.doe@university.edu');
+  const [testRecipientEmail, setTestRecipientEmail] = useState('user@sendaat.io');
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [testSentSuccess, setTestSentSuccess] = useState(false);
 
@@ -48,7 +48,7 @@ export default function VisualEmailDesigner({
   // Canvas Email Model Data
   const [emailData, setEmailData] = useState(() => {
     try {
-      const saved = localStorage.getItem('skillbridge_email_designer_data');
+      const saved = localStorage.getItem('sendaat_email_designer_data');
       return saved ? JSON.parse(saved) : TEMPLATES_LIST[0];
     } catch (e) {
       return TEMPLATES_LIST[0];
@@ -58,7 +58,7 @@ export default function VisualEmailDesigner({
   // Saved Custom Templates stored in localStorage
   const [mySavedTemplates, setMySavedTemplates] = useState(() => {
     try {
-      const saved = localStorage.getItem('skillbridge_my_saved_templates');
+      const saved = localStorage.getItem('sendaat_my_saved_templates');
       return saved ? JSON.parse(saved) : [];
     } catch (e) {
       return [];
@@ -99,7 +99,7 @@ export default function VisualEmailDesigner({
     // Trigger Autosave
     setSaveStatus('Saving...');
     const timer = setTimeout(() => {
-      localStorage.setItem('skillbridge_email_designer_data', JSON.stringify(emailData));
+      localStorage.setItem('sendaat_email_designer_data', JSON.stringify(emailData));
       setSaveStatus('Saved');
     }, 600);
     return () => clearTimeout(timer);
@@ -126,9 +126,9 @@ export default function VisualEmailDesigner({
   const handleUndo = () => {
     if (historyIndex > 0) {
       isUndoRedoAction.current = true;
-      const prev = history[historyIndex - 1];
-      setHistoryIndex(historyIndex - 1);
-      setEmailData(prev);
+      const prevIndex = historyIndex - 1;
+      setHistoryIndex(prevIndex);
+      setEmailData(history[prevIndex]);
     }
   };
 
@@ -136,31 +136,30 @@ export default function VisualEmailDesigner({
   const handleRedo = () => {
     if (historyIndex < history.length - 1) {
       isUndoRedoAction.current = true;
-      const next = history[historyIndex + 1];
-      setHistoryIndex(historyIndex + 1);
-      setEmailData(next);
+      const nextIndex = historyIndex + 1;
+      setHistoryIndex(nextIndex);
+      setEmailData(history[nextIndex]);
     }
   };
 
   // Drag Component onto Canvas
-  const handleDragStartComponent = (e, type) => {
-    e.dataTransfer.setData('skillbridge_cmp_type', type);
+  const handleDragStartComponent = (e, cmpType) => {
+    e.dataTransfer.setData('sendaat_cmp_type', cmpType);
   };
 
   // Drop Component Action
-  const handleDropComponent = (cmpType, secId, colId) => {
+  const handleDropComponent = (cmpType, targetSecId, targetColId) => {
     const newCmp = createDefaultComponent(cmpType);
 
-    setEmailData(prev => ({
-      ...prev,
-      sections: prev.sections.map(sec => {
-        if (sec.id !== secId) return sec;
+    setEmailData(prev => {
+      const nextSecs = prev.sections.map(sec => {
+        if (sec.id !== targetSecId) return sec;
         return {
           ...sec,
           rows: sec.rows.map(row => ({
             ...row,
             columns: row.columns.map(col => {
-              if (col.id !== colId && col.id !== sec.rows[0]?.columns[0]?.id) return col;
+              if (targetColId && col.id !== targetColId) return col;
               return {
                 ...col,
                 components: [...col.components, newCmp]
@@ -168,19 +167,20 @@ export default function VisualEmailDesigner({
             })
           }))
         };
-      })
-    }));
+      });
+      return { ...prev, sections: nextSecs };
+    });
 
     setSelectedId(newCmp.id);
     setSelectedType('component');
   };
 
-  // Select Blank Email
+  // Select Blank Canvas
   const handleSelectBlank = () => {
     const blankModel = {
       id: 'blank-email',
       name: 'Blank Canvas Email',
-      body: { bg: '#F8FAFC', width: 640, fontFamily: 'Inter, sans-serif' },
+      body: { bg: '#FFFFFF', width: 640, fontFamily: 'Inter, sans-serif' },
       sections: [
         {
           id: `sec-${Date.now()}`,
@@ -223,11 +223,11 @@ export default function VisualEmailDesigner({
     const aiModel = {
       id: `ai-${Date.now()}`,
       name: `AI Generated: ${prompt.slice(0, 20)}...`,
-      body: { bg: '#F8FAFC', width: 640, fontFamily: 'Inter, sans-serif' },
+      body: { bg: '#FFFFFF', width: 640, fontFamily: 'Inter, sans-serif' },
       sections: [
         {
           id: `sec-ai-1`,
-          bg: '#0F172A',
+          bg: '#09090B',
           paddingTop: 36,
           paddingBottom: 36,
           paddingLeft: 24,
@@ -240,7 +240,7 @@ export default function VisualEmailDesigner({
                   id: `c-ai-1`,
                   width: '100%',
                   components: [
-                    { id: `cmp-badge`, type: 'badge', text: 'AI GENERATED OUTREACH', bg: '#1E293B', color: '#38BDF8', border: '#334155', align: 'center' },
+                    { id: `cmp-badge`, type: 'badge', text: 'SENDAAT AI OUTREACH', bg: '#000000', color: '#FFFFFF', border: '#27272A', align: 'center' },
                     { id: `cmp-h1`, type: 'heading', text: 'Exclusive Career Opportunity for {{first_name}}', color: '#FFFFFF', size: 26, weight: '800', align: 'center', paddingTop: 12 }
                   ]
                 }
@@ -264,7 +264,7 @@ export default function VisualEmailDesigner({
                   width: '100%',
                   components: [
                     { id: `cmp-p1`, type: 'text', content: `Hi {{first_name}},\n\nBased on your profile at {{company}}, we would love to introduce a remote role tailored to your background in {{role}}.`, color: '#334155', size: 16, lineHeight: '1.6' },
-                    { id: `cmp-btn`, type: 'button', text: 'Apply Now via Telegram', url: 'https://t.me/+AB0OloYpE7I1NTVk', bg: '#007C89', color: '#FFFFFF', borderRadius: 8, paddingV: 14, paddingH: 32, align: 'center', paddingTop: 24 }
+                    { id: `cmp-btn`, type: 'button', text: 'Apply Now →', url: 'https://sendaat.io', bg: '#050505', color: '#FFFFFF', borderRadius: 9999, paddingV: 14, paddingH: 32, align: 'center', paddingTop: 24 }
                   ]
                 }
               ]
@@ -327,7 +327,7 @@ export default function VisualEmailDesigner({
     });
   };
 
-  // REAL-TIME EXPORT ACTIONS
+  // Real-Time Export Actions
   const handleExportHtml = (type) => {
     const compiledHtml = exportToHtml(emailData);
     if (type === 'download') {
@@ -347,7 +347,7 @@ export default function VisualEmailDesigner({
     }
   };
 
-  // REAL-TIME SAVE CUSTOM TEMPLATE
+  // Real-Time Save Custom Template
   const handleSaveAsTemplate = () => {
     const newTmpl = {
       ...emailData,
@@ -357,7 +357,7 @@ export default function VisualEmailDesigner({
     };
     const updated = [newTmpl, ...mySavedTemplates];
     setMySavedTemplates(updated);
-    localStorage.setItem('skillbridge_my_saved_templates', JSON.stringify(updated));
+    localStorage.setItem('sendaat_my_saved_templates', JSON.stringify(updated));
     showToast('Template saved to "My Templates" drawer in real-time!');
   };
 
@@ -380,9 +380,9 @@ export default function VisualEmailDesigner({
   };
 
   return (
-    <div className="fixed inset-0 z-[99999] bg-slate-950 text-slate-100 flex flex-col h-screen w-screen overflow-hidden font-sans">
+    <div className="fixed inset-0 z-[99999] bg-[#050505] text-white flex flex-col h-screen w-screen overflow-hidden font-sans">
       
-      {/* Top Region: Apple/Linear Toolbar */}
+      {/* Top Region: Vantablack Toolbar */}
       <DesignerTopToolbar
         projectName={projectName}
         setProjectName={setProjectName}
@@ -407,10 +407,11 @@ export default function VisualEmailDesigner({
             }));
           }
           showToast('Email layout published to active campaign queue!');
+          if (onStartQueue) onStartQueue();
         }}
         isFullscreen={isFullscreen}
         onToggleFullscreen={handleToggleFullscreen}
-        onCloseStudio={onCloseStudio || (() => {})}
+        onCloseStudio={onCloseStudio}
         isLeftSidebarOpen={isLeftSidebarOpen}
         onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
         isRightPanelOpen={isRightPanelOpen}
@@ -430,7 +431,7 @@ export default function VisualEmailDesigner({
           onSelectTemplate={handleSelectTemplate}
           mySavedTemplates={mySavedTemplates}
           onApplyBrandAsset={(type, val) => {
-            if (type === 'color') {
+            if (type === 'bg-color') {
               setEmailData(prev => ({ ...prev, body: { ...prev.body, bg: val } }));
             }
           }}
@@ -441,10 +442,10 @@ export default function VisualEmailDesigner({
         {!isLeftSidebarOpen && (
           <button
             onClick={() => setIsLeftSidebarOpen(true)}
-            className="absolute top-4 left-4 z-40 bg-slate-900/90 backdrop-blur border border-slate-700 hover:border-teal-500 text-teal-400 p-2.5 rounded-xl shadow-2xl transition-all hover:scale-110 flex items-center gap-1.5 text-xs font-bold"
+            className="absolute top-4 left-4 z-40 bg-[#09090B] border border-zinc-700 text-white p-2.5 rounded-xl shadow-2xl transition-all hover:scale-105 flex items-center gap-1.5 text-xs font-bold cursor-pointer"
             title="Expand Components Library"
           >
-            <PanelLeftOpen className="w-4 h-4" />
+            <PanelLeftOpen className="w-4 h-4 text-white" />
             <span className="hidden sm:inline">Library</span>
           </button>
         )}
@@ -469,10 +470,10 @@ export default function VisualEmailDesigner({
         {!isRightPanelOpen && (
           <button
             onClick={() => setIsRightPanelOpen(true)}
-            className="absolute top-4 right-4 z-40 bg-slate-900/90 backdrop-blur border border-slate-700 hover:border-teal-500 text-teal-400 p-2.5 rounded-xl shadow-2xl transition-all hover:scale-110 flex items-center gap-1.5 text-xs font-bold"
+            className="absolute top-4 right-4 z-40 bg-[#09090B] border border-zinc-700 text-white p-2.5 rounded-xl shadow-2xl transition-all hover:scale-105 flex items-center gap-1.5 text-xs font-bold cursor-pointer"
             title="Expand Properties Inspector"
           >
-            <PanelRightOpen className="w-4 h-4" />
+            <PanelRightOpen className="w-4 h-4 text-white" />
             <span className="hidden sm:inline">Inspector</span>
           </button>
         )}
@@ -491,8 +492,8 @@ export default function VisualEmailDesigner({
 
       {/* FLOATING REAL-TIME TOAST NOTIFICATION */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-[999999] bg-slate-900 border border-teal-500/60 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 animate-in slide-in-from-bottom-5 duration-200">
-          <CheckCircle2 className="w-4 h-4 text-teal-400" />
+        <div className="fixed bottom-6 right-6 z-[999999] bg-[#121212] border border-zinc-700 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 animate-fade-in">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -516,54 +517,54 @@ export default function VisualEmailDesigner({
 
       {/* 3. SEND TEST EMAIL MODAL */}
       {isSendTestOpen && (
-        <div className="fixed inset-0 z-[99999] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl text-slate-100">
+        <div className="fixed inset-0 z-[99999] bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#121212] border border-zinc-800 rounded-2xl p-6 max-w-md w-full shadow-2xl text-white">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold text-white">Send Real Test Email</h3>
-              <button onClick={() => setIsSendTestOpen(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setIsSendTestOpen(false)} className="text-zinc-400 hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+            <p className="text-xs text-zinc-400 mb-4 leading-relaxed font-normal">
               Send an actual test email compiled from your design directly to your inbox via configured SMTP relay.
             </p>
 
-            <form onSubmit={handleSendTestSubmit} className="space-y-4">
+            <form onSubmit={handleSendTestSubmit} className="space-y-4 font-sans">
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">Recipient Email Address</label>
+                <label className="text-xs font-semibold text-zinc-300 block mb-1">Recipient Email Address</label>
                 <input
                   type="email"
                   value={testRecipientEmail}
                   onChange={(e) => setTestRecipientEmail(e.target.value)}
                   placeholder="your.email@gmail.com"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-teal-500"
+                  className="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-zinc-500"
                   required
                 />
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setIsSendTestOpen(false)}
-                  className="px-4 py-2 text-xs text-slate-400 hover:text-white"
+                  className="px-4 py-2 text-xs text-zinc-400 hover:text-white cursor-pointer font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSendingTest}
-                  className="px-5 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2"
+                  className="px-5 py-2 bg-white hover:bg-zinc-200 text-black font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {isSendingTest ? (
                     <span>Sending...</span>
                   ) : testSentSuccess ? (
                     <>
-                      <Check className="w-4 h-4" /> Sent!
+                      <Check className="w-4 h-4 text-black" /> Sent!
                     </>
                   ) : (
                     <>
-                      <Send className="w-3.5 h-3.5" /> Dispatch Test Email
+                      <Send className="w-3.5 h-3.5 text-black" /> Dispatch Test Email
                     </>
                   )}
                 </button>
@@ -588,23 +589,23 @@ function createDefaultComponent(type) {
     case 'text':
       return { id, type: 'text', content: 'New text block. Double click on canvas to edit content.', size: 16, color: '#334155', align: 'left' };
     case 'button':
-      return { id, type: 'button', text: 'Click Here Now', url: 'https://t.me/+AB0OloYpE7I1NTVk', bg: '#007C89', color: '#FFFFFF', borderRadius: 8, paddingV: 14, paddingH: 32, align: 'center' };
+      return { id, type: 'button', text: 'Click Here Now', url: 'https://sendaat.io', bg: '#050505', color: '#FFFFFF', borderRadius: 9999, paddingV: 14, paddingH: 32, align: 'center' };
     case 'image':
       return { id, type: 'image', url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80', alt: 'Sample Image', width: '100%', borderRadius: 8, align: 'center' };
     case 'badge':
-      return { id, type: 'badge', text: 'FEATURED TAG', bg: '#EFF6FF', color: '#3B82F6', border: '#BFDBFE', align: 'left' };
+      return { id, type: 'badge', text: 'FEATURED TAG', bg: '#000000', color: '#FFFFFF', border: '#27272A', align: 'left' };
     case 'divider':
       return { id, type: 'divider', style: 'solid', color: '#E2E8F0' };
     case 'spacer':
       return { id, type: 'spacer', height: 24 };
     case 'callout':
-      return { id, type: 'callout', title: 'Important Note', content: 'This callout box brings key information to light.', bg: '#F8FAFC', border: '#007C89', color: '#0F172A' };
+      return { id, type: 'callout', title: 'Important Note', content: 'This callout box brings key information to light.', bg: '#09090B', border: '#27272A', color: '#FFFFFF' };
     case 'countdown':
-      return { id, type: 'countdown', label: 'LIMITED TIME OFFER:', bg: '#1E2937' };
+      return { id, type: 'countdown', label: 'LIMITED TIME OFFER:', bg: '#09090B' };
     case 'social':
       return { id, type: 'social', platforms: ['telegram', 'twitter', 'linkedin', 'instagram', 'github'], align: 'center' };
     case 'footer':
-      return { id, type: 'footer', text: 'SkillBridge Network • Unsubscribe', color: '#94A3B8', size: 12, align: 'center' };
+      return { id, type: 'footer', text: 'Sendaat Network • Unsubscribe', color: '#A1A1AA', size: 12, align: 'center' };
     default:
       return { id, type: 'text', content: 'Content block' };
   }

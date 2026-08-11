@@ -76,9 +76,9 @@ export default function DesignerCanvas({
   return (
     <div
       ref={containerRef}
-      className="flex-1 bg-slate-950/90 overflow-auto relative flex flex-col items-center py-12 px-6 min-h-[calc(100vh-3.5rem)] select-none"
+      className="flex-1 bg-[#050505] overflow-auto relative flex flex-col items-center py-12 px-6 min-h-[calc(100vh-3.5rem)] select-none"
       style={{
-        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)',
+        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
         backgroundSize: '24px 24px'
       }}
       onClick={(e) => {

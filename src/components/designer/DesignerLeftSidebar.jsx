@@ -91,25 +91,25 @@ export default function DesignerLeftSidebar({
   };
 
   return (
-    <div className="w-72 sm:w-80 bg-slate-900 border-r border-slate-800/80 flex flex-col h-[calc(100vh-3.5rem)] z-30 select-none transition-all duration-300 relative flex-shrink-0">
+    <div className="w-72 sm:w-80 bg-[#121212] border-r border-zinc-800 flex flex-col h-[calc(100vh-3.5rem)] z-30 select-none transition-all duration-300 relative flex-shrink-0 text-white font-sans">
       
       {/* Clean Drawer Header */}
-      <div className="p-3 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
-        <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Components & Library</span>
+      <div className="p-3 border-b border-zinc-800 bg-[#09090B] flex items-center justify-between">
+        <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Components & Library</span>
         <button
           onClick={onToggleOpen}
-          className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+          className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
           title="Collapse Left Sidebar"
         >
-          <PanelLeftClose className="w-4 h-4 text-teal-400" />
+          <PanelLeftClose className="w-4 h-4 text-white" />
         </button>
       </div>
 
       {/* Sidebar Navigation Tabs */}
-      <div className="grid grid-cols-6 border-b border-slate-800 bg-slate-950 p-1 text-[11px] font-semibold text-slate-400">
+      <div className="grid grid-cols-6 border-b border-zinc-800 bg-[#09090B] p-1 text-[11px] font-semibold text-zinc-400">
         <button
           onClick={() => setActiveTab('components')}
-          className={`py-2 flex flex-col items-center gap-1 rounded-md transition-colors ${activeTab === 'components' ? 'bg-slate-800 text-teal-400 font-bold' : 'hover:text-slate-200'}`}
+          className={`py-2 flex flex-col items-center gap-1 rounded-lg transition-all cursor-pointer ${activeTab === 'components' ? 'bg-white text-black font-extrabold shadow-xs' : 'hover:text-white'}`}
           title="Components Catalog"
         >
           <Box className="w-4 h-4" />
@@ -117,7 +117,7 @@ export default function DesignerLeftSidebar({
         </button>
         <button
           onClick={() => setActiveTab('templates')}
-          className={`py-2 flex flex-col items-center gap-1 rounded-md transition-colors ${activeTab === 'templates' ? 'bg-slate-800 text-teal-400 font-bold' : 'hover:text-slate-200'}`}
+          className={`py-2 flex flex-col items-center gap-1 rounded-lg transition-all cursor-pointer ${activeTab === 'templates' ? 'bg-white text-black font-extrabold shadow-xs' : 'hover:text-white'}`}
           title="Templates Catalog"
         >
           <Grid className="w-4 h-4" />
@@ -125,7 +125,7 @@ export default function DesignerLeftSidebar({
         </button>
         <button
           onClick={() => setActiveTab('my-templates')}
-          className={`py-2 flex flex-col items-center gap-1 rounded-md transition-colors ${activeTab === 'my-templates' ? 'bg-slate-800 text-teal-400 font-bold' : 'hover:text-slate-200'}`}
+          className={`py-2 flex flex-col items-center gap-1 rounded-lg transition-all cursor-pointer ${activeTab === 'my-templates' ? 'bg-white text-black font-extrabold shadow-xs' : 'hover:text-white'}`}
           title="My Saved Templates"
         >
           <Bookmark className="w-4 h-4" />
@@ -133,7 +133,7 @@ export default function DesignerLeftSidebar({
         </button>
         <button
           onClick={() => setActiveTab('brand')}
-          className={`py-2 flex flex-col items-center gap-1 rounded-md transition-colors ${activeTab === 'brand' ? 'bg-slate-800 text-teal-400 font-bold' : 'hover:text-slate-200'}`}
+          className={`py-2 flex flex-col items-center gap-1 rounded-lg transition-all cursor-pointer ${activeTab === 'brand' ? 'bg-white text-black font-extrabold shadow-xs' : 'hover:text-white'}`}
           title="Brand Assets"
         >
           <Palette className="w-4 h-4" />
@@ -141,7 +141,7 @@ export default function DesignerLeftSidebar({
         </button>
         <button
           onClick={() => setActiveTab('images')}
-          className={`py-2 flex flex-col items-center gap-1 rounded-md transition-colors ${activeTab === 'images' ? 'bg-slate-800 text-teal-400 font-bold' : 'hover:text-slate-200'}`}
+          className={`py-2 flex flex-col items-center gap-1 rounded-lg transition-all cursor-pointer ${activeTab === 'images' ? 'bg-white text-black font-extrabold shadow-xs' : 'hover:text-white'}`}
           title="Stock & Media Upload"
         >
           <ImageIcon className="w-4 h-4" />
@@ -149,7 +149,7 @@ export default function DesignerLeftSidebar({
         </button>
         <button
           onClick={() => setActiveTab('ai')}
-          className={`py-2 flex flex-col items-center gap-1 rounded-md transition-colors ${activeTab === 'ai' ? 'bg-indigo-900/60 text-indigo-400 font-bold' : 'hover:text-slate-200'}`}
+          className={`py-2 flex flex-col items-center gap-1 rounded-lg transition-all cursor-pointer ${activeTab === 'ai' ? 'bg-white text-black font-extrabold shadow-xs' : 'hover:text-white'}`}
           title="AI Assistant"
         >
           <Wand2 className="w-4 h-4" />
@@ -158,14 +158,14 @@ export default function DesignerLeftSidebar({
       </div>
 
       {/* Drawer Body Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 font-sans">
 
         {/* 1. COMPONENTS DRAWER */}
         {activeTab === 'components' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Drag Components</h3>
-              <span className="text-[10px] text-slate-500 font-medium">14 elements</span>
+              <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Drag Components</h3>
+              <span className="text-[10px] text-zinc-500 font-medium">14 elements</span>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
@@ -176,13 +176,13 @@ export default function DesignerLeftSidebar({
                     key={item.type}
                     draggable
                     onDragStart={(e) => onDragStartComponent(e, item.type)}
-                    className="group bg-slate-950 border border-slate-800/90 hover:border-teal-500/60 rounded-xl p-3 cursor-grab active:cursor-grabbing transition-all hover:shadow-lg hover:-translate-y-0.5"
+                    className="group bg-black border border-zinc-800 hover:border-zinc-500 hover:bg-zinc-900 rounded-xl p-3 cursor-grab active:cursor-grabbing transition-all hover:shadow-lg"
                   >
-                    <div className="w-7 h-7 rounded-lg bg-slate-900 group-hover:bg-teal-500/10 text-slate-400 group-hover:text-teal-400 flex items-center justify-center mb-2 transition-colors">
+                    <div className="w-7 h-7 rounded-lg bg-zinc-900 text-white flex items-center justify-center mb-2 transition-colors">
                       <IconComponent className="w-4 h-4" />
                     </div>
-                    <div className="text-xs font-bold text-slate-200 group-hover:text-white">{item.name}</div>
-                    <div className="text-[10px] text-slate-500 truncate mt-0.5">{item.desc}</div>
+                    <div className="text-xs font-bold text-white">{item.name}</div>
+                    <div className="text-[10px] text-zinc-400 truncate mt-0.5">{item.desc}</div>
                   </div>
                 );
               })}
@@ -194,13 +194,13 @@ export default function DesignerLeftSidebar({
         {activeTab === 'templates' && (
           <div className="space-y-4">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
               <input
                 type="text"
                 value={templateSearch}
                 onChange={(e) => setTemplateSearch(e.target.value)}
-                placeholder="Search 50+ templates..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-teal-500"
+                placeholder="Search templates..."
+                className="w-full bg-black border border-zinc-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500"
               />
             </div>
 
@@ -209,7 +209,7 @@ export default function DesignerLeftSidebar({
                 <button
                   key={cat}
                   onClick={() => setActiveCat(cat)}
-                  className={`px-2.5 py-1 rounded text-[10px] font-semibold whitespace-nowrap transition-colors ${activeCat === cat ? 'bg-teal-500/20 text-teal-400 border border-teal-500/40' : 'bg-slate-950 text-slate-400 hover:text-slate-200'}`}
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold whitespace-nowrap transition-colors cursor-pointer ${activeCat === cat ? 'bg-white text-black font-extrabold' : 'bg-black text-zinc-400 hover:text-white border border-zinc-800'}`}
                 >
                   {cat}
                 </button>
@@ -221,17 +221,17 @@ export default function DesignerLeftSidebar({
                 <div
                   key={tmpl.id}
                   onClick={() => onSelectTemplate(tmpl)}
-                  className="group bg-slate-950 border border-slate-800 hover:border-teal-500/60 rounded-xl overflow-hidden cursor-pointer transition-all hover:shadow-md"
+                  className="group bg-black border border-zinc-800 hover:border-zinc-500 rounded-xl overflow-hidden cursor-pointer transition-all"
                 >
-                  <div className="h-28 relative bg-slate-900">
+                  <div className="h-28 relative bg-zinc-900">
                     <img src={tmpl.thumbnail} alt={tmpl.name} className="w-full h-full object-cover opacity-75 group-hover:opacity-100 transition-opacity" />
-                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-slate-950/80 text-[9px] font-bold text-teal-400 uppercase">
+                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/80 text-[9px] font-bold text-white uppercase">
                       {tmpl.category}
                     </span>
                   </div>
                   <div className="p-3">
-                    <div className="text-xs font-bold text-slate-200 group-hover:text-teal-300">{tmpl.name}</div>
-                    <div className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">{tmpl.description}</div>
+                    <div className="text-xs font-bold text-white">{tmpl.name}</div>
+                    <div className="text-[10px] text-zinc-400 line-clamp-1 mt-0.5">{tmpl.description}</div>
                   </div>
                 </div>
               ))}
@@ -242,23 +242,23 @@ export default function DesignerLeftSidebar({
         {/* 3. MY SAVED TEMPLATES */}
         {activeTab === 'my-templates' && (
           <div className="space-y-3">
-            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">My Custom Templates</h3>
+            <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">My Custom Templates</h3>
             {mySavedTemplates.length === 0 ? (
-              <div className="text-center py-8 px-4 bg-slate-950 border border-slate-800 rounded-xl">
-                <Bookmark className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                <div className="text-xs font-semibold text-slate-400">No saved templates yet</div>
-                <div className="text-[10px] text-slate-500 mt-1">Click "Save Template" in the toolbar to save your custom designs.</div>
+              <div className="text-center py-8 px-4 bg-black border border-zinc-800 rounded-xl">
+                <Bookmark className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
+                <div className="text-xs font-semibold text-zinc-400">No saved templates yet</div>
+                <div className="text-[10px] text-zinc-500 mt-1">Click "Save Template" in the toolbar to save your custom designs.</div>
               </div>
             ) : (
               <div className="space-y-2">
-                {mySavedTemplates.map((tmpl, idx) => (
+                {mySavedTemplates.map((saved, idx) => (
                   <div
                     key={idx}
-                    onClick={() => onSelectTemplate(tmpl)}
-                    className="p-3 bg-slate-950 border border-slate-800 hover:border-teal-500/60 rounded-xl cursor-pointer transition-all"
+                    onClick={() => onSelectTemplate(saved.data)}
+                    className="p-3 bg-black border border-zinc-800 hover:border-zinc-500 rounded-xl cursor-pointer transition-all"
                   >
-                    <div className="text-xs font-bold text-slate-200">{tmpl.name || `Custom Template #${idx + 1}`}</div>
-                    <div className="text-[10px] text-slate-500 mt-0.5">Saved {new Date(tmpl.savedAt || Date.now()).toLocaleDateString()}</div>
+                    <div className="font-bold text-xs text-white">{saved.name || `Template ${idx + 1}`}</div>
+                    <div className="text-[10px] text-zinc-400 mt-0.5">Saved on {new Date(saved.savedAt || Date.now()).toLocaleDateString()}</div>
                   </div>
                 ))}
               </div>
@@ -269,18 +269,17 @@ export default function DesignerLeftSidebar({
         {/* 4. BRAND ASSETS */}
         {activeTab === 'brand' && (
           <div className="space-y-4">
-            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Brand Palette & Styles</h3>
-            
-            <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-3">
-              <div className="text-xs font-semibold text-slate-400">SkillBridge Primary Colors</div>
-              <div className="flex gap-2">
-                {['#007C89', '#0F172A', '#4F46E5', '#0D9488', '#EF4444', '#F59E0B'].map(hex => (
+            <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Brand Palette & Assets</h3>
+            <div className="p-3 bg-black border border-zinc-800 rounded-xl space-y-3">
+              <div className="text-xs font-medium text-zinc-400">Quick Palette Color Applier</div>
+              <div className="flex items-center gap-2">
+                {['#050505', '#FFFFFF', '#09090B', '#121212', '#27272A', '#3F3F46'].map(color => (
                   <button
-                    key={hex}
-                    onClick={() => onApplyBrandAsset('color', hex)}
-                    className="w-8 h-8 rounded-lg border border-slate-700/80 shadow-inner flex items-center justify-center hover:scale-110 transition-transform"
-                    style={{ backgroundColor: hex }}
-                    title={`Apply ${hex}`}
+                    key={color}
+                    onClick={() => onApplyBrandAsset('bg-color', color)}
+                    className="w-6 h-6 rounded-full border border-zinc-700 shadow-xs hover:scale-110 transition-transform cursor-pointer"
+                    style={{ backgroundColor: color }}
+                    title={`Apply ${color}`}
                   />
                 ))}
               </div>
@@ -288,124 +287,67 @@ export default function DesignerLeftSidebar({
           </div>
         )}
 
-        {/* 5. MEDIA & LOCAL IMAGE UPLOAD (SVG, GIF, PNG, JPG) */}
+        {/* 5. MEDIA UPLOAD */}
         {activeTab === 'images' && (
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Upload Media Files</label>
-              <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-800 hover:border-teal-500 rounded-xl p-4 cursor-pointer bg-slate-950 transition-colors group">
-                <Upload className="w-6 h-6 text-teal-400 mb-1 group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold text-slate-200">Click to Upload Image</span>
-                <span className="text-[10px] text-slate-500 mt-0.5">Supports SVG, GIF, PNG, JPG, WebP</span>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*,.svg,.gif,.png,.jpg,.jpeg,.webp"
-                  onChange={handleLocalImageUpload}
-                  className="hidden"
-                />
+            <div className="p-4 bg-black border border-zinc-800 border-dashed rounded-xl text-center">
+              <Upload className="w-6 h-6 text-zinc-400 mx-auto mb-2" />
+              <label className="text-xs font-bold text-white hover:underline cursor-pointer">
+                Upload Custom Image
+                <input type="file" accept="image/*" onChange={handleLocalImageUpload} className="hidden" />
               </label>
+              <div className="text-[10px] text-zinc-500 mt-1">PNG, JPG, SVG or GIF</div>
             </div>
 
             {uploadedMediaList.length > 0 && (
               <div className="space-y-2">
-                <div className="text-xs font-bold text-slate-300">My Uploaded Media</div>
-                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-                  {uploadedMediaList.map((item, i) => (
+                <div className="text-xs font-bold text-zinc-300 uppercase">Uploaded Assets</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {uploadedMediaList.map((m, idx) => (
                     <div
-                      key={i}
-                      onClick={() => onApplyBrandAsset('image-url', item.url)}
-                      className="group relative h-20 rounded-lg overflow-hidden border border-slate-800 cursor-pointer hover:border-teal-500"
+                      key={idx}
+                      onClick={() => onApplyBrandAsset('image-url', m.url)}
+                      className="group relative h-20 bg-black border border-zinc-800 rounded-lg overflow-hidden cursor-pointer hover:border-zinc-500"
                     >
-                      <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                        <span className="text-[9px] font-bold text-white bg-teal-600 px-2 py-0.5 rounded">Insert</span>
-                      </div>
+                      <img src={m.url} alt={m.name} className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>
               </div>
             )}
-
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-300">Custom Image Web URL</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={customImageUrl}
-                  onChange={(e) => setCustomImageUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-teal-500"
-                />
-                <button
-                  onClick={() => customImageUrl && onApplyBrandAsset('image-url', customImageUrl)}
-                  className="px-3 py-1.5 bg-teal-600 text-white rounded-lg text-xs font-bold"
-                >
-                  Insert
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-xs font-bold text-slate-300">Unsplash Library</div>
-              <input
-                type="text"
-                value={stockSearch}
-                onChange={(e) => setStockSearch(e.target.value)}
-                placeholder="Search photos..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
-              />
-
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                {filteredStock.map((img, i) => (
-                  <div
-                    key={i}
-                    onClick={() => onApplyBrandAsset('image-url', img.url)}
-                    className="group relative h-24 rounded-lg overflow-hidden border border-slate-800 cursor-pointer hover:border-teal-500"
-                  >
-                    <img src={img.url} alt={img.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                    <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                      <span className="text-[10px] font-bold text-white bg-teal-600 px-2 py-1 rounded">Insert</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         )}
 
         {/* 6. AI ASSISTANT */}
         {activeTab === 'ai' && (
           <div className="space-y-4">
-            <div className="bg-indigo-950/40 border border-indigo-500/30 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-wider mb-2">
-                <Sparkles className="w-4 h-4" /> AI Email Copilot
+            <div className="p-4 bg-black border border-zinc-800 rounded-xl space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-white">
+                <Wand2 className="w-4 h-4 text-white" />
+                <span>AI Layout Generator</span>
               </div>
-              <p className="text-xs text-slate-300 mb-3 leading-relaxed">
-                Enter a topic or objective to automatically construct responsive email sections with optimized copywriting.
+              <p className="text-[11px] text-zinc-400 leading-relaxed font-normal">
+                Describe the email section or layout you want to add, and AI will generate it automatically.
               </p>
-
-              <form onSubmit={handleAiSubmit} className="space-y-3">
+              <form onSubmit={handleAiSubmit} className="space-y-2">
                 <textarea
-                  rows={3}
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
-                  placeholder="e.g. Add a customer testimonial section with 5 stars and student quotes..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                  placeholder="e.g. A 2-column feature highlight with icon badges and CTA button..."
+                  rows={3}
+                  className="w-full bg-[#121212] border border-zinc-800 rounded-xl p-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 resize-none font-sans"
                 />
-
                 <button
                   type="submit"
                   disabled={isGenerating || !aiPrompt.trim()}
-                  className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs rounded-lg shadow-md transition-all flex items-center justify-center gap-2"
+                  className="w-full py-2 bg-white hover:bg-zinc-200 text-black font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   {isGenerating ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Generating...
-                    </>
+                    <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                   ) : (
                     <>
-                      <Wand2 className="w-3.5 h-3.5" /> Generate Content Block
+                      <Sparkles className="w-3.5 h-3.5 text-black" />
+                      <span>Generate Layout</span>
                     </>
                   )}
                 </button>
@@ -415,7 +357,6 @@ export default function DesignerLeftSidebar({
         )}
 
       </div>
-
     </div>
   );
 }
