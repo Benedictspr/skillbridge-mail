@@ -26,6 +26,7 @@ import {
   INITIAL_SUPPRESSION_LIST 
 } from './mockData';
 import { extractFirstNameFromEmail } from './utils/nameParser';
+import { getRegisteredUsers, registerUser } from './utils/userStore';
 
 export default function App() {
   // 0. User Authentication & Onboarding State
@@ -40,6 +41,49 @@ export default function App() {
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isOnboardingWizardOpen, setIsOnboardingWizardOpen] = useState(false);
+  const [verificationNotice, setVerificationNotice] = useState('');
+
+  // 1-Click Magic Link Email Verification Handler
+  useEffect(() => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const verifyCode = urlParams.get('verify_code');
+      const verifyEmail = urlParams.get('email');
+      
+      if (verifyCode && verifyEmail) {
+        const cleanEmail = decodeURIComponent(verifyEmail).trim().toLowerCase();
+        
+        const users = getRegisteredUsers();
+        let userRecord = users.find(u => u.email.toLowerCase() === cleanEmail);
+        
+        if (!userRecord) {
+          userRecord = registerUser({
+            name: cleanEmail.split('@')[0],
+            email: cleanEmail,
+            company: `${cleanEmail.split('@')[0]}'s Workspace`,
+            password: 'Password123!',
+            role: 'Workspace Owner',
+            isEmailVerified: true
+          });
+        } else {
+          userRecord.isEmailVerified = true;
+        }
+
+        setCurrentUser(userRecord);
+        setVerificationNotice(`Email address ${cleanEmail} verified successfully via Magic Link! Welcome to Sendaat Workspace.`);
+        
+        try {
+          confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+        } catch (e) {}
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+
+        setTimeout(() => setVerificationNotice(''), 7000);
+      }
+    } catch (err) {
+      console.error('Magic URL verification error:', err);
+    }
+  }, []);
 
   useEffect(() => {
     if (currentUser) {
@@ -497,6 +541,20 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans selection:bg-zinc-800 transition-colors duration-200">
+      {verificationNotice && (
+        <div className="w-full bg-emerald-950 border-b border-emerald-800 text-emerald-200 text-xs px-4 py-3 font-medium flex items-center justify-between animate-fade-in">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span>{verificationNotice}</span>
+          </div>
+          <button 
+            onClick={() => setVerificationNotice('')}
+            className="text-emerald-400 hover:text-white text-xs font-bold"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       <AppHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
