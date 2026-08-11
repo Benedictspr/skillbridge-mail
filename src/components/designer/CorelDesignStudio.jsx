@@ -656,39 +656,39 @@ export default function CorelDesignStudio({
           </button>
 
           {setEditorMode && (
-            <div className="flex items-center p-1 bg-zinc-950 border border-zinc-800 rounded-xl font-sans shadow-inner">
+            <div className="flex items-center p-0.5 bg-zinc-950 border border-zinc-800 rounded-lg font-sans shadow-inner" title="Switch Editor Workspaces">
               <button
                 onClick={() => setEditorMode('visual')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`p-1.5 rounded-md transition-all cursor-pointer flex items-center justify-center ${
                   editorMode === 'visual'
-                    ? 'bg-white text-black shadow-md font-extrabold scale-102'
+                    ? 'bg-white text-black shadow-md font-extrabold scale-105'
                     : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
                 }`}
+                title="Visual Drag & Drop Studio (Visual)"
               >
-                <LayoutTemplate className="w-3.5 h-3.5 text-black" />
-                <span>Visual</span>
+                <LayoutTemplate className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setEditorMode('design')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`p-1.5 rounded-md transition-all cursor-pointer flex items-center justify-center ${
                   editorMode === 'design'
-                    ? 'bg-white text-black shadow-md font-extrabold scale-102'
+                    ? 'bg-white text-black shadow-md font-extrabold scale-105'
                     : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
                 }`}
+                title="Vector Design Studio Canvas (Design)"
               >
-                <Palette className="w-3.5 h-3.5 text-black" />
-                <span>Design</span>
+                <Palette className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setEditorMode('text')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`p-1.5 rounded-md transition-all cursor-pointer flex items-center justify-center ${
                   editorMode === 'text'
-                    ? 'bg-white text-black shadow-md font-extrabold scale-102'
+                    ? 'bg-white text-black shadow-md font-extrabold scale-105'
                     : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
                 }`}
+                title="Plain Text & Form Editor Mode (Text)"
               >
-                <FileText className="w-3.5 h-3.5 text-black" />
-                <span>Text</span>
+                <FileText className="w-4 h-4" />
               </button>
             </div>
           )}

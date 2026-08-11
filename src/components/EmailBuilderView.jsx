@@ -158,27 +158,27 @@ export default function EmailBuilderView({
       {/* Sleek Interwoven Mode Sub-Nav Bar */}
       <div className="bg-[#121212] text-white p-4 rounded-2xl border border-zinc-800 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex items-center p-1 bg-black border border-zinc-800 rounded-xl font-sans font-extrabold text-xs shadow-inner">
+          <div className="flex items-center p-0.5 bg-black border border-zinc-800 rounded-lg font-sans font-extrabold text-xs shadow-inner" title="Switch Editor Workspaces">
             <button
               onClick={() => setEditorMode('visual')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${editorMode === 'visual' ? 'bg-white text-black font-extrabold shadow-md scale-102' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
+              className={`p-1.5 rounded-md transition-all flex items-center justify-center cursor-pointer ${editorMode === 'visual' ? 'bg-white text-black font-extrabold shadow-md scale-105' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
+              title="Visual Drag & Drop Studio (Visual)"
             >
-              <LayoutTemplate className="w-3.5 h-3.5 text-black" />
-              <span>Visual</span>
+              <LayoutTemplate className="w-4 h-4" />
             </button>
             <button
               onClick={() => setEditorMode('design')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${editorMode === 'design' ? 'bg-white text-black font-extrabold shadow-md scale-102' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
+              className={`p-1.5 rounded-md transition-all flex items-center justify-center cursor-pointer ${editorMode === 'design' ? 'bg-white text-black font-extrabold shadow-md scale-105' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
+              title="Vector Design Studio Canvas (Design)"
             >
-              <Palette className="w-3.5 h-3.5 text-black" />
-              <span>Design</span>
+              <Palette className="w-4 h-4" />
             </button>
             <button
               onClick={() => setEditorMode('text')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${editorMode === 'text' ? 'bg-white text-black font-extrabold shadow-md scale-102' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
+              className={`p-1.5 rounded-md transition-all flex items-center justify-center cursor-pointer ${editorMode === 'text' ? 'bg-white text-black font-extrabold shadow-md scale-105' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
+              title="Plain Text & Form Editor Mode (Text)"
             >
-              <FileText className="w-3.5 h-3.5 text-black" />
-              <span>Text</span>
+              <FileText className="w-4 h-4" />
             </button>
           </div>
           <span className="text-xs text-zinc-400 hidden sm:inline">Standard Form & Direct Text Editor</span>
