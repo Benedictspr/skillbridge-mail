@@ -3,7 +3,7 @@ import {
   Undo2, Redo2, Eye, Smartphone, Monitor, Download, Send, Bookmark, 
   Rocket, CheckCircle2, ChevronDown, ZoomIn, ZoomOut, Edit2, Check,
   Code, Sparkles, FileText, Minimize2, Maximize2, X, PanelLeftClose, 
-  PanelLeftOpen, Sliders, ChevronLeft, ChevronRight, FileJson, Maximize
+  PanelLeftOpen, Sliders, ChevronLeft, ChevronRight, FileJson, Maximize, LayoutTemplate, Palette
 } from 'lucide-react';
 
 export default function DesignerTopToolbar({
@@ -129,39 +129,42 @@ export default function DesignerTopToolbar({
         </div>
 
         {/* Workspace Mode Switcher (Visual / Design / Text) */}
-        <div className="flex items-center p-0.5 bg-black border border-zinc-800 rounded-lg ml-1 font-sans" title="Switch Editor Workspaces">
+        <div className="flex items-center p-1 bg-zinc-950 border border-zinc-800 rounded-xl ml-1 font-sans shadow-inner" title="Switch Editor Workspaces">
           <button
             onClick={() => setEditorMode('visual')}
-            className={`px-3 py-0.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               editorMode === 'visual'
-                ? 'bg-white text-black shadow-xs font-semibold'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-white text-black shadow-md font-extrabold scale-102'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
             }`}
             title="Visual Drag & Drop Email Studio"
           >
-            Visual
+            <LayoutTemplate className="w-3.5 h-3.5 text-zinc-900" />
+            <span>Visual</span>
           </button>
           <button
             onClick={() => setEditorMode('design')}
-            className={`px-3 py-0.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               editorMode === 'design'
-                ? 'bg-white text-black shadow-xs font-semibold'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-white text-black shadow-md font-extrabold scale-102'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
             }`}
             title="Vector Design Studio Canvas"
           >
-            Design
+            <Palette className="w-3.5 h-3.5 text-zinc-900" />
+            <span>Design</span>
           </button>
           <button
             onClick={() => setEditorMode('text')}
-            className={`px-3 py-0.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               editorMode === 'text'
-                ? 'bg-white text-black shadow-xs font-semibold'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-white text-black shadow-md font-extrabold scale-102'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
             }`}
             title="Plain Text & Form Editor Mode"
           >
-            Text
+            <FileText className="w-3.5 h-3.5 text-zinc-900" />
+            <span>Text</span>
           </button>
         </div>
       </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Eye, Copy, Check, User, Mail, Send, Tag, Zap, RefreshCw, 
   Sparkles, FileText, Layers, ShieldCheck, Palette, LayoutGrid, 
-  Upload, Type, Image as ImageIcon, Code2
+  Upload, Type, Image as ImageIcon, Code2, LayoutTemplate
 } from 'lucide-react';
 import { EMAIL_TEMPLATES } from '../mockData';
 import { extractFirstNameFromEmail } from '../utils/nameParser';
@@ -158,24 +158,27 @@ export default function EmailBuilderView({
       {/* Sleek Interwoven Mode Sub-Nav Bar */}
       <div className="bg-[#121212] text-white p-4 rounded-2xl border border-zinc-800 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="bg-black p-1 rounded-xl border border-zinc-800 flex items-center gap-1 font-extrabold text-xs">
+          <div className="flex items-center p-1 bg-black border border-zinc-800 rounded-xl font-sans font-extrabold text-xs shadow-inner">
             <button
               onClick={() => setEditorMode('visual')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${editorMode === 'visual' ? 'bg-white text-black font-bold shadow-xs' : 'text-zinc-400 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${editorMode === 'visual' ? 'bg-white text-black font-extrabold shadow-md scale-102' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
             >
-              Visual
+              <LayoutTemplate className="w-3.5 h-3.5 text-black" />
+              <span>Visual</span>
             </button>
             <button
               onClick={() => setEditorMode('design')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${editorMode === 'design' ? 'bg-white text-black font-bold shadow-xs' : 'text-zinc-400 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${editorMode === 'design' ? 'bg-white text-black font-extrabold shadow-md scale-102' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
             >
-              Design
+              <Palette className="w-3.5 h-3.5 text-black" />
+              <span>Design</span>
             </button>
             <button
               onClick={() => setEditorMode('text')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${editorMode === 'text' ? 'bg-white text-black font-bold shadow-xs' : 'text-zinc-400 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${editorMode === 'text' ? 'bg-white text-black font-extrabold shadow-md scale-102' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
             >
-              Text
+              <FileText className="w-3.5 h-3.5 text-black" />
+              <span>Text</span>
             </button>
           </div>
           <span className="text-xs text-zinc-400 hidden sm:inline">Standard Form & Direct Text Editor</span>

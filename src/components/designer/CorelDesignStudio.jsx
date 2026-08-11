@@ -836,10 +836,40 @@ export default function CorelDesignStudio({
           </button>
 
           {setEditorMode && (
-            <div className="flex bg-black p-0.5 rounded-lg border border-zinc-800 text-[10px] font-extrabold">
-              <button onClick={() => setEditorMode('visual')} className={`px-2.5 py-1 rounded-md transition-colors ${editorMode === 'visual' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'}`}>Visual</button>
-              <button onClick={() => setEditorMode('design')} className={`px-2.5 py-1 rounded-md transition-colors ${editorMode === 'design' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'}`}>Design</button>
-              <button onClick={() => setEditorMode('text')} className={`px-2.5 py-1 rounded-md transition-colors ${editorMode === 'text' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'}`}>Text</button>
+            <div className="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-xl font-sans shadow-inner">
+              <button
+                onClick={() => setEditorMode('visual')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  editorMode === 'visual'
+                    ? 'bg-white text-slate-950 shadow-md font-extrabold scale-102'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                <LayoutTemplate className="w-3.5 h-3.5 text-slate-950" />
+                <span>Visual</span>
+              </button>
+              <button
+                onClick={() => setEditorMode('design')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  editorMode === 'design'
+                    ? 'bg-white text-slate-950 shadow-md font-extrabold scale-102'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                <Palette className="w-3.5 h-3.5 text-slate-950" />
+                <span>Design</span>
+              </button>
+              <button
+                onClick={() => setEditorMode('text')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  editorMode === 'text'
+                    ? 'bg-white text-slate-950 shadow-md font-extrabold scale-102'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5 text-slate-950" />
+                <span>Text</span>
+              </button>
             </div>
           )}
 

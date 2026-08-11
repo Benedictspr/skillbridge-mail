@@ -34,13 +34,6 @@ export default function DashboardView({
             Select an operational stage below to compose emails, manage rosters, dispatch with anti-spam protection, or analyze telemetry.
           </p>
         </div>
-
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs font-semibold shadow-xs">
-            <ShieldCheck className="w-4 h-4 text-white" />
-            <span>Sender Score: <strong className="text-white font-bold">{currentOrg.reputationScore}/100</strong></span>
-          </div>
-        </div>
       </div>
 
       {/* 2. Main 4 Action Boxes Grid (Monochromatic Vantablack Style, NO Top-Right Icons, Fits 1 Page) */}
