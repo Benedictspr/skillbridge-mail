@@ -4,8 +4,9 @@
 // ----------------------------------------------------------------------
 
 export const FONT_CATALOG = [
-  // SYSTEM FONTS
-  { name: 'Inter (Default)', family: 'Inter, system-ui, sans-serif', type: 'system' },
+  // ONBOARDING & SYSTEM FONTS
+  { name: 'Google Sans (Default)', family: '"Google Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif', type: 'system' },
+  { name: 'Inter', family: 'Inter, system-ui, sans-serif', type: 'system' },
   { name: 'Arial / Helvetica', family: 'Arial, Helvetica, sans-serif', type: 'system' },
   { name: 'Georgia (Serif)', family: 'Georgia, serif', type: 'system' },
   { name: 'Times New Roman', family: '"Times New Roman", Times, serif', type: 'system' },

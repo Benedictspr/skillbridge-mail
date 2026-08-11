@@ -205,40 +205,38 @@ export default function SignupForm({ onSignupSuccess, onSwitchToLogin }) {
   };
 
   // Register user record and log in
-  const finalizeRegistration = (is2FAEnabled, activeSecret) => {
+  const finalizeRegistration = async (is2FAEnabled, activeSecret) => {
     setIsLoading(true);
-    setTimeout(() => {
-      try {
-        const userRecord = registerUser({
-          name: fullName.trim(),
-          email: email.trim().toLowerCase(),
-          company: companyName.trim(),
-          password: password,
-          role: 'Workspace Owner',
-          isEmailVerified: true,
-          twoFactorEnabled: is2FAEnabled,
-          twoFactorSecret: activeSecret
-        });
+    try {
+      const userRecord = await registerUser({
+        name: fullName.trim(),
+        email: email.trim().toLowerCase(),
+        company: companyName.trim(),
+        password: password,
+        role: 'Workspace Owner',
+        isEmailVerified: true,
+        twoFactorEnabled: is2FAEnabled,
+        twoFactorSecret: activeSecret
+      });
 
-        fetch('http://localhost:3001/api/send-welcome-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: userRecord.email,
-            name: userRecord.name,
-            company: userRecord.company,
-            smtpUser: smtpUser || undefined,
-            smtpPass: smtpPass || undefined
-          })
-        }).catch(err => console.error('[WELCOME EMAIL SEND ERROR]', err));
+      fetch('http://localhost:3001/api/send-welcome-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userRecord.email,
+          name: userRecord.name,
+          company: userRecord.company,
+          smtpUser: smtpUser || undefined,
+          smtpPass: smtpPass || undefined
+        })
+      }).catch(err => console.error('[WELCOME EMAIL SEND ERROR]', err));
 
-        setIsLoading(false);
-        onSignupSuccess(userRecord);
-      } catch (err) {
-        setIsLoading(false);
-        setErrorMsg(err.message || 'Registration failed.');
-      }
-    }, 600);
+      setIsLoading(false);
+      onSignupSuccess(userRecord);
+    } catch (err) {
+      setIsLoading(false);
+      setErrorMsg(err.message || 'Registration failed. Please try again.');
+    }
   };
 
   return (

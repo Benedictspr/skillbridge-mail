@@ -3,7 +3,7 @@ import {
   Plus, Trash2, Copy, Lock, Unlock, ArrowUp, ArrowDown, Move, 
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Tag,
   Eye, EyeOff, Sparkles, ChevronDown, Check, MousePointerClick, Play, Film, X,
-  Type, Palette, Sliders, Wand2, Edit3, ExternalLink
+  Type, Palette, Sliders, Wand2, Edit3, ExternalLink, Box, Columns, ShieldCheck, Quote, List, Menu, Code, HelpCircle
 } from 'lucide-react';
 import { UniformSocialIcon } from './socialIcons';
 import { FONT_CATALOG } from './fonts';
@@ -15,8 +15,8 @@ export default function DesignerCanvas({
   setSelectedId,
   selectedType,
   setSelectedType,
-  zoomLevel,
-  previewDevice,
+  zoomLevel = 100,
+  previewDevice = 'desktop',
   onDropComponent,
   onDuplicateBlock,
   onDeleteBlock,
@@ -27,8 +27,8 @@ export default function DesignerCanvas({
   const [activeVideoModalUrl, setActiveVideoModalUrl] = useState(null);
 
   const containerRef = useRef(null);
-  const body = emailData.body || { bg: '#F8FAFC', width: 640, fontFamily: 'Inter, sans-serif' };
-  const sections = emailData.sections || [];
+  const body = emailData?.body || { bg: '#FFFFFF', width: 640, fontFamily: 'Inter, sans-serif' };
+  const sections = emailData?.sections || [];
 
   const scale = zoomLevel / 100;
   const canvasWidth = previewDevice === 'mobile' ? 375 : body.width;
@@ -45,7 +45,7 @@ export default function DesignerCanvas({
   const handleDrop = (e, secId, colId) => {
     e.preventDefault();
     setDragOverSecId(null);
-    const cmpType = e.dataTransfer.getData('skillbridge_cmp_type');
+    const cmpType = e.dataTransfer.getData('sendaat_cmp_type') || e.dataTransfer.getData('skillbridge_cmp_type');
     if (cmpType) {
       onDropComponent(cmpType, secId, colId);
     }
@@ -73,10 +73,47 @@ export default function DesignerCanvas({
     }));
   };
 
+  const handleDuplicateComponent = (cmpId) => {
+    setEmailData(prev => {
+      let dupCmp = null;
+      prev.sections.forEach(sec => {
+        sec.rows.forEach(row => {
+          row.columns.forEach(col => {
+            const found = col.components.find(c => c.id === cmpId);
+            if (found) dupCmp = found;
+          });
+        });
+      });
+
+      if (!dupCmp) return prev;
+
+      const newCmp = {
+        ...dupCmp,
+        id: `cmp-${Date.now()}`
+      };
+
+      const nextSecs = prev.sections.map(sec => ({
+        ...sec,
+        rows: sec.rows.map(row => ({
+          ...row,
+          columns: row.columns.map(col => {
+            const idx = col.components.findIndex(c => c.id === cmpId);
+            if (idx === -1) return col;
+            const nextCmps = [...col.components];
+            nextCmps.splice(idx + 1, 0, newCmp);
+            return { ...col, components: nextCmps };
+          })
+        }))
+      }));
+
+      return { ...prev, sections: nextSecs };
+    });
+  };
+
   return (
     <div
       ref={containerRef}
-      className="flex-1 bg-[#050505] overflow-auto relative flex flex-col items-center py-12 px-6 min-h-[calc(100vh-3.5rem)] select-none"
+      className="flex-1 bg-[#050505] overflow-y-auto relative flex flex-col items-center py-10 px-6 h-[calc(100vh-3rem)] select-none font-sans"
       style={{
         backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
         backgroundSize: '24px 24px'
@@ -89,9 +126,9 @@ export default function DesignerCanvas({
       }}
     >
       
-      {/* Zoom / Device Container Frame */}
+      {/* Zoom / Responsive Device Canvas Frame */}
       <div
-        className="transition-all duration-200 shadow-2xl rounded-2xl border border-slate-800 bg-white relative"
+        className="transition-all duration-200 shadow-2xl rounded-2xl border border-zinc-800 bg-white relative"
         style={{
           width: `${canvasWidth}px`,
           transform: `scale(${scale})`,
@@ -106,231 +143,327 @@ export default function DesignerCanvas({
           style={{ backgroundColor: body.bg, fontFamily: body.fontFamily || 'Inter, sans-serif' }}
         >
 
-          {/* SECTIONS TREE */}
-          {sections.map((sec, secIdx) => {
-            const isSecSelected = selectedId === sec.id;
-            const isDragOver = dragOverSecId === sec.id;
-
-            return (
-              <div
-                key={sec.id}
-                onDragOver={(e) => handleDragOver(e, sec.id)}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, sec.id, sec.rows[0]?.columns[0]?.id)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedId(sec.id);
-                  setSelectedType('section');
-                }}
-                className={`relative group/sec transition-all ${isSecSelected ? 'outline outline-2 outline-teal-500 outline-offset-[-2px] z-20' : 'hover:outline hover:outline-1 hover:outline-teal-400/50 hover:outline-offset-[-1px]'} ${isDragOver ? 'bg-teal-500/10 outline outline-2 outline-dashed outline-teal-400' : ''}`}
-                style={{
-                  backgroundColor: sec.bg || 'transparent',
-                  paddingTop: `${sec.paddingTop ?? 32}px`,
-                  paddingBottom: `${sec.paddingBottom ?? 32}px`,
-                  paddingLeft: `${sec.paddingLeft ?? 24}px`,
-                  paddingRight: `${sec.paddingRight ?? 24}px`
-                }}
-              >
-
-                {/* Section Action Overlay Header */}
-                <div className={`absolute top-2 right-2 flex items-center gap-1 bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-lg p-1 text-white shadow-xl opacity-0 group-hover/sec:opacity-100 transition-opacity z-30 ${isSecSelected ? 'opacity-100' : ''}`}>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider px-1.5">Section #{secIdx + 1}</span>
-                  
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onMoveBlock(sec.id, 'up'); }}
-                    disabled={secIdx === 0}
-                    className="p-1 hover:bg-slate-800 rounded disabled:opacity-30"
-                    title="Move Up"
-                  >
-                    <ArrowUp className="w-3 h-3 text-slate-300" />
-                  </button>
-
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onMoveBlock(sec.id, 'down'); }}
-                    disabled={secIdx === sections.length - 1}
-                    className="p-1 hover:bg-slate-800 rounded disabled:opacity-30"
-                    title="Move Down"
-                  >
-                    <ArrowDown className="w-3 h-3 text-slate-300" />
-                  </button>
-
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onDuplicateBlock(sec.id); }}
-                    className="p-1 hover:bg-slate-800 rounded text-slate-300 hover:text-white"
-                    title="Duplicate Section"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </button>
-
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onDeleteBlock(sec.id); }}
-                    className="p-1 hover:bg-red-500/20 rounded text-red-400 hover:text-red-300"
-                    title="Delete Section"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </div>
-
-                {/* ROWS & COLUMNS */}
-                {(sec.rows || []).map((row) => (
-                  <div key={row.id} className="flex flex-wrap -mx-2">
-                    {(row.columns || []).map((col) => (
-                      <div
-                        key={col.id}
-                        className="px-2 flex-1 min-w-[200px]"
-                        style={{ flexBasis: col.width || '100%' }}
-                      >
-                        
-                        {/* COMPONENTS INSIDE COLUMN */}
-                        {(col.components || []).map((cmp) => {
-                          const isCmpSelected = selectedId === cmp.id;
-                          const isTextType = ['heading', 'text', 'paragraph', 'button', 'badge', 'callout', 'footer'].includes(cmp.type);
-
-                          return (
-                            <div
-                              key={cmp.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedId(cmp.id);
-                                setSelectedType('component');
-                              }}
-                              className={`relative group/cmp transition-all rounded-lg ${isCmpSelected ? 'outline outline-2 outline-teal-500 outline-offset-1 z-30' : 'hover:outline hover:outline-1 hover:outline-teal-400/60'}`}
-                            >
-                              
-                              {/* CORELDRAW / FIGMA FLOATING QUICK TEXT FORMATTING TOOLBAR */}
-                              {isCmpSelected && (
-                                <div
-                                  className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-900/95 backdrop-blur-md border border-teal-500/60 rounded-xl px-2 py-1 shadow-2xl flex items-center gap-1.5 z-50 text-white animate-in fade-in duration-150 whitespace-nowrap"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {/* Font Family Quick Select */}
-                                  <select
-                                    value={cmp.fontFamily || FONT_CATALOG[0].family}
-                                    onChange={(e) => handleUpdateComponentProp(cmp.id, 'fontFamily', e.target.value)}
-                                    className="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-[10px] font-semibold text-slate-200 focus:outline-none max-w-[90px] truncate"
-                                    title="Font Family"
-                                  >
-                                    {FONT_CATALOG.map(f => (
-                                      <option key={f.name} value={f.family}>{f.name}</option>
-                                    ))}
-                                  </select>
-
-                                  <div className="w-px h-3 bg-slate-800 my-auto" />
-
-                                  {/* Font Size Quick Buttons */}
-                                  <div className="flex items-center gap-0.5">
-                                    <button
-                                      onClick={() => handleUpdateComponentProp(cmp.id, 'size', Math.max(10, (cmp.size || 16) - 2))}
-                                      className="w-5 h-5 rounded bg-slate-950 hover:bg-slate-800 text-[11px] font-bold text-slate-300 flex items-center justify-center border border-slate-800"
-                                      title="Decrease Size"
-                                    >
-                                      –
-                                    </button>
-                                    <span className="text-[10px] font-bold text-teal-400 px-1">{cmp.size || 16}px</span>
-                                    <button
-                                      onClick={() => handleUpdateComponentProp(cmp.id, 'size', Math.min(72, (cmp.size || 16) + 2))}
-                                      className="w-5 h-5 rounded bg-slate-950 hover:bg-slate-800 text-[11px] font-bold text-slate-300 flex items-center justify-center border border-slate-800"
-                                      title="Increase Size"
-                                    >
-                                      +
-                                    </button>
-                                  </div>
-
-                                  <div className="w-px h-3 bg-slate-800 my-auto" />
-
-                                  {/* Bold Toggle */}
-                                  <button
-                                    onClick={() => handleUpdateComponentProp(cmp.id, 'weight', cmp.weight === '700' ? '400' : '700')}
-                                    className={`p-1 rounded text-xs transition-colors ${cmp.weight === '700' ? 'bg-teal-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
-                                    title="Bold Toggle"
-                                  >
-                                    <Bold className="w-3 h-3" />
-                                  </button>
-
-                                  {/* Color Picker Swatch */}
-                                  <label className="relative flex items-center cursor-pointer" title="Text Color">
-                                    <input
-                                      type="color"
-                                      value={cmp.color || '#0F172A'}
-                                      onChange={(e) => handleUpdateComponentProp(cmp.id, 'color', e.target.value)}
-                                      className="sr-only"
-                                    />
-                                    <span className="w-4 h-4 rounded-full border border-slate-700 shadow-sm" style={{ backgroundColor: cmp.color || '#0F172A' }} />
-                                  </label>
-
-                                  <div className="w-px h-3 bg-slate-800 my-auto" />
-
-                                  {/* Alignment Selector */}
-                                  <div className="flex bg-slate-950 p-0.5 rounded border border-slate-800">
-                                    {['left', 'center', 'right'].map(align => (
-                                      <button
-                                        key={align}
-                                        onClick={() => handleUpdateComponentProp(cmp.id, 'align', align)}
-                                        className={`p-0.5 rounded transition-colors ${cmp.align === align ? 'bg-slate-800 text-teal-400' : 'text-slate-400'}`}
-                                      >
-                                        {align === 'left' && <AlignLeft className="w-3 h-3" />}
-                                        {align === 'center' && <AlignCenter className="w-3 h-3" />}
-                                        {align === 'right' && <AlignRight className="w-3 h-3" />}
-                                      </button>
-                                    ))}
-                                  </div>
-
-                                  {/* Insert Tag Quick Button */}
-                                  <button
-                                    onClick={() => {
-                                      const currentVal = cmp.text || cmp.content || '';
-                                      handleUpdateComponentProp(cmp.id, 'text', currentVal + ' {{first_name}}');
-                                    }}
-                                    className="px-1.5 py-0.5 bg-slate-950 hover:bg-slate-800 text-teal-400 text-[9px] font-mono font-bold rounded border border-slate-800"
-                                    title="Insert {{first_name}}"
-                                  >
-                                    +Name
-                                  </button>
-
-                                  <div className="w-px h-3 bg-slate-800 my-auto" />
-
-                                  {/* Delete Component Button */}
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); onDeleteBlock(cmp.id); }}
-                                    className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded"
-                                    title="Delete Element"
-                                  >
-                                    <Trash2 className="w-3 h-3" />
-                                  </button>
-                                </div>
-                              )}
-
-                              {/* COMPONENT RENDERER */}
-                              <ComponentCanvasView
-                                cmp={cmp}
-                                isEditing={editingTextId === cmp.id}
-                                onStartEdit={() => setEditingTextId(cmp.id)}
-                                onTextChange={(val) => handleUpdateComponentProp(cmp.id, 'text', val)}
-                                onOpenVideoModal={(url) => setActiveVideoModalUrl(url)}
-                              />
-
-                            </div>
-                          );
-                        })}
-
-                      </div>
-                    ))}
-                  </div>
-                ))}
-
-                {/* Dropzone Placeholder inside Section */}
-                <div
-                  onDrop={(e) => handleDrop(e, sec.id, sec.rows[0]?.columns[0]?.id)}
-                  className="mt-3 border-2 border-dashed border-slate-300 hover:border-teal-500/80 rounded-xl p-3 text-center transition-colors cursor-pointer group/dp"
-                >
-                  <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-400 group-hover/dp:text-teal-600">
-                    <Plus className="w-4 h-4" /> Drop component here
-                  </div>
-                </div>
-
+          {/* EMPTY CANVAS EXPERIENCE */}
+          {sections.length === 0 ? (
+            <div className="p-12 text-center my-12 space-y-6">
+              <div className="w-16 h-16 rounded-2xl bg-zinc-100 text-zinc-800 flex items-center justify-center mx-auto border border-zinc-300 shadow-inner">
+                <Box className="w-8 h-8" />
               </div>
-            );
-          })}
+              <div>
+                <h2 className="text-xl font-bold text-zinc-900">Start Building Your Email Design</h2>
+                <p className="text-sm text-zinc-500 max-w-md mx-auto mt-1 leading-relaxed">
+                  Drag components from the left library tab, or choose a layout shortcut below to initialize your canvas.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={() => {
+                    const heroSec = {
+                      id: `sec-${Date.now()}`,
+                      bg: '#09090B',
+                      paddingTop: 40,
+                      paddingBottom: 40,
+                      paddingLeft: 24,
+                      paddingRight: 24,
+                      rows: [{
+                        id: `r-${Date.now()}`,
+                        columns: [{
+                          id: `c-${Date.now()}`,
+                          width: '100%',
+                          components: [
+                            { id: `cmp-1`, type: 'badge', text: 'ANNOUNCEMENT', bg: '#000000', color: '#FFFFFF', border: '#27272A', align: 'center' },
+                            { id: `cmp-2`, type: 'heading', text: 'Welcome to Sendaat Email Studio', color: '#FFFFFF', size: 28, weight: '800', align: 'center' },
+                            { id: `cmp-3`, type: 'text', content: 'Craft visual emails with Mailchimp & Canva precision.', color: '#A1A1AA', size: 15, align: 'center' },
+                            { id: `cmp-4`, type: 'button', text: 'Explore Platform →', url: 'https://sendaat.io', bg: '#FFFFFF', color: '#000000', borderRadius: 9999, align: 'center' }
+                          ]
+                        }]
+                      }]
+                    };
+                    setEmailData(prev => ({ ...prev, sections: [heroSec] }));
+                  }}
+                  className="px-4 py-2 bg-black text-white hover:bg-zinc-800 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4 text-white" /> Quick Add Hero Section
+                </button>
+
+                <button
+                  onClick={() => {
+                    const colSec = {
+                      id: `sec-${Date.now()}`,
+                      bg: '#FFFFFF',
+                      paddingTop: 32,
+                      paddingBottom: 32,
+                      paddingLeft: 24,
+                      paddingRight: 24,
+                      rows: [{
+                        id: `r-${Date.now()}`,
+                        columns: [
+                          {
+                            id: `c-1`,
+                            width: '50%',
+                            components: [
+                              { id: `cmp-col-1`, type: 'heading', text: 'Feature One', size: 18, color: '#0F172A' },
+                              { id: `cmp-col-2`, type: 'text', content: 'Highlight your primary feature with compelling description text.', size: 14, color: '#475569' }
+                            ]
+                          },
+                          {
+                            id: `c-2`,
+                            width: '50%',
+                            components: [
+                              { id: `cmp-col-3`, type: 'heading', text: 'Feature Two', size: 18, color: '#0F172A' },
+                              { id: `cmp-col-4`, type: 'text', content: 'Complement with a secondary feature block.', size: 14, color: '#475569' }
+                            ]
+                          }
+                        ]
+                      }]
+                    };
+                    setEmailData(prev => ({ ...prev, sections: [colSec] }));
+                  }}
+                  className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Columns className="w-4 h-4 text-zinc-700" /> Quick Add 2-Column Split
+                </button>
+              </div>
+            </div>
+          ) : (
+
+            /* SECTIONS TREE */
+            sections.map((sec, secIdx) => {
+              const isSecSelected = selectedId === sec.id;
+              const isDragOver = dragOverSecId === sec.id;
+
+              return (
+                <div
+                  key={sec.id}
+                  onDragOver={(e) => handleDragOver(e, sec.id)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, sec.id, sec.rows[0]?.columns[0]?.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedId(sec.id);
+                    setSelectedType('section');
+                  }}
+                  className={`relative group/sec transition-all ${isSecSelected ? 'outline outline-2 outline-emerald-500 outline-offset-[-2px] z-20' : 'hover:outline hover:outline-1 hover:outline-emerald-400/50 hover:outline-offset-[-1px]'} ${isDragOver ? 'bg-emerald-500/10 outline outline-2 outline-dashed outline-emerald-400' : ''}`}
+                  style={{
+                    backgroundColor: sec.bg || 'transparent',
+                    paddingTop: `${sec.paddingTop ?? 32}px`,
+                    paddingBottom: `${sec.paddingBottom ?? 32}px`,
+                    paddingLeft: `${sec.paddingLeft ?? 24}px`,
+                    paddingRight: `${sec.paddingRight ?? 24}px`
+                  }}
+                >
+
+                  {/* Section Action Overlay Bar */}
+                  <div className={`absolute top-2 right-2 flex items-center gap-1 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-xl p-1 text-white shadow-xl opacity-0 group-hover/sec:opacity-100 transition-opacity z-30 ${isSecSelected ? 'opacity-100' : ''}`}>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider px-1.5">Section #{secIdx + 1}</span>
+                    
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onMoveBlock(sec.id, 'up'); }}
+                      disabled={secIdx === 0}
+                      className="p-1 hover:bg-slate-800 rounded-lg disabled:opacity-30 transition-colors cursor-pointer"
+                      title="Move Section Up"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5 text-slate-300" />
+                    </button>
+
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onMoveBlock(sec.id, 'down'); }}
+                      disabled={secIdx === sections.length - 1}
+                      className="p-1 hover:bg-slate-800 rounded-lg disabled:opacity-30 transition-colors cursor-pointer"
+                      title="Move Section Down"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5 text-slate-300" />
+                    </button>
+
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDuplicateBlock(sec.id); }}
+                      className="p-1 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white transition-colors cursor-pointer"
+                      title="Duplicate Section"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDeleteBlock(sec.id); }}
+                      className="p-1 hover:bg-rose-500/20 rounded-lg text-rose-400 hover:text-rose-300 transition-colors cursor-pointer"
+                      title="Delete Section"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* ROWS & COLUMNS */}
+                  {(sec.rows || []).map((row) => (
+                    <div key={row.id} className="flex flex-wrap -mx-2">
+                      {(row.columns || []).map((col) => (
+                        <div
+                          key={col.id}
+                          className="px-2 flex-1 min-w-[200px]"
+                          style={{ flexBasis: col.width || '100%' }}
+                        >
+                          
+                          {/* COMPONENTS INSIDE COLUMN */}
+                          {(col.components || []).map((cmp) => {
+                            const isCmpSelected = selectedId === cmp.id;
+
+                            return (
+                              <div
+                                key={cmp.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedId(cmp.id);
+                                  setSelectedType('component');
+                                }}
+                                className={`relative group/cmp transition-all rounded-lg ${isCmpSelected ? 'outline outline-2 outline-emerald-500 outline-offset-1 z-30' : 'hover:outline hover:outline-1 hover:outline-emerald-400/60'}`}
+                              >
+                                
+                                {/* FLOATING CONTEXTUAL FORMATTING TOOLBAR */}
+                                {isCmpSelected && (
+                                  <div
+                                    className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-950/95 backdrop-blur-md border border-emerald-500/60 rounded-xl px-2.5 py-1 shadow-2xl flex items-center gap-1.5 z-50 text-white animate-in fade-in duration-150 whitespace-nowrap"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {/* Font Family Quick Select */}
+                                    <select
+                                      value={cmp.fontFamily || FONT_CATALOG[0].family}
+                                      onChange={(e) => handleUpdateComponentProp(cmp.id, 'fontFamily', e.target.value)}
+                                      className="bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-[10px] font-semibold text-slate-200 focus:outline-none max-w-[90px] truncate"
+                                      title="Font Family"
+                                    >
+                                      {FONT_CATALOG.map(f => (
+                                        <option key={f.name} value={f.family}>{f.name}</option>
+                                      ))}
+                                    </select>
+
+                                    <div className="w-px h-3 bg-slate-800 my-auto" />
+
+                                    {/* Font Size Quick Buttons */}
+                                    <div className="flex items-center gap-0.5">
+                                      <button
+                                        onClick={() => handleUpdateComponentProp(cmp.id, 'size', Math.max(10, (cmp.size || 16) - 2))}
+                                        className="w-5 h-5 rounded bg-slate-900 hover:bg-slate-800 text-[11px] font-bold text-slate-300 flex items-center justify-center border border-slate-800"
+                                        title="Decrease Text Size"
+                                      >
+                                        –
+                                      </button>
+                                      <span className="text-[10px] font-bold text-emerald-400 px-1">{cmp.size || 16}px</span>
+                                      <button
+                                        onClick={() => handleUpdateComponentProp(cmp.id, 'size', Math.min(72, (cmp.size || 16) + 2))}
+                                        className="w-5 h-5 rounded bg-slate-900 hover:bg-slate-800 text-[11px] font-bold text-slate-300 flex items-center justify-center border border-slate-800"
+                                        title="Increase Text Size"
+                                      >
+                                        +
+                                      </button>
+                                    </div>
+
+                                    <div className="w-px h-3 bg-slate-800 my-auto" />
+
+                                    {/* Bold Toggle */}
+                                    <button
+                                      onClick={() => handleUpdateComponentProp(cmp.id, 'weight', cmp.weight === '700' ? '400' : '700')}
+                                      className={`p-1 rounded text-xs transition-colors ${cmp.weight === '700' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+                                      title="Toggle Bold Weight"
+                                    >
+                                      <Bold className="w-3 h-3" />
+                                    </button>
+
+                                    {/* Color Picker Swatch */}
+                                    <label className="relative flex items-center cursor-pointer" title="Select Text Color">
+                                      <input
+                                        type="color"
+                                        value={cmp.color || '#0F172A'}
+                                        onChange={(e) => handleUpdateComponentProp(cmp.id, 'color', e.target.value)}
+                                        className="sr-only"
+                                      />
+                                      <span className="w-4 h-4 rounded-full border border-slate-700 shadow-sm" style={{ backgroundColor: cmp.color || '#0F172A' }} />
+                                    </label>
+
+                                    <div className="w-px h-3 bg-slate-800 my-auto" />
+
+                                    {/* Alignment Selector */}
+                                    <div className="flex bg-slate-900 p-0.5 rounded border border-slate-800">
+                                      {['left', 'center', 'right'].map(align => (
+                                        <button
+                                          key={align}
+                                          onClick={() => handleUpdateComponentProp(cmp.id, 'align', align)}
+                                          className={`p-0.5 rounded transition-colors ${cmp.align === align ? 'bg-slate-800 text-emerald-400' : 'text-slate-400'}`}
+                                          title={`Align ${align}`}
+                                        >
+                                          {align === 'left' && <AlignLeft className="w-3 h-3" />}
+                                          {align === 'center' && <AlignCenter className="w-3 h-3" />}
+                                          {align === 'right' && <AlignRight className="w-3 h-3" />}
+                                        </button>
+                                      ))}
+                                    </div>
+
+                                    {/* Insert {{first_name}} Tag Button */}
+                                    <button
+                                      onClick={() => {
+                                        const currentVal = cmp.text || cmp.content || '';
+                                        handleUpdateComponentProp(cmp.id, 'text', currentVal + ' {{first_name}}');
+                                      }}
+                                      className="px-1.5 py-0.5 bg-slate-900 hover:bg-slate-800 text-emerald-400 text-[9px] font-mono font-bold rounded border border-slate-800"
+                                      title="Insert {{first_name}} Merge Tag"
+                                    >
+                                      +Tag
+                                    </button>
+
+                                    <div className="w-px h-3 bg-slate-800 my-auto" />
+
+                                    {/* Duplicate Component Button */}
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleDuplicateComponent(cmp.id); }}
+                                      className="p-1 text-slate-300 hover:text-white hover:bg-slate-800 rounded"
+                                      title="Duplicate Component"
+                                    >
+                                      <Copy className="w-3 h-3" />
+                                    </button>
+
+                                    {/* Delete Component Button */}
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); onDeleteBlock(cmp.id); }}
+                                      className="p-1 text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 rounded"
+                                      title="Delete Component"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* COMPONENT RENDERER */}
+                                <ComponentCanvasView
+                                  cmp={cmp}
+                                  isEditing={editingTextId === cmp.id}
+                                  onStartEdit={() => setEditingTextId(cmp.id)}
+                                  onTextChange={(val) => handleUpdateComponentProp(cmp.id, 'text', val)}
+                                  onOpenVideoModal={(url) => setActiveVideoModalUrl(url)}
+                                />
+
+                              </div>
+                            );
+                          })}
+
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+
+                  {/* Dropzone Placeholder inside Section */}
+                  <div
+                    onDrop={(e) => handleDrop(e, sec.id, sec.rows[0]?.columns[0]?.id)}
+                    className="mt-3 border-2 border-dashed border-zinc-200 hover:border-emerald-500/80 rounded-xl p-3 text-center transition-colors cursor-pointer group/dp"
+                    title="Drag components here to insert into section"
+                  >
+                    <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-zinc-400 group-hover/dp:text-emerald-600">
+                      <Plus className="w-4 h-4" /> Drop component here
+                    </div>
+                  </div>
+
+                </div>
+              );
+            })
+          )}
 
         </div>
 
@@ -361,11 +494,12 @@ export default function DesignerCanvas({
               }
             ]
           };
-          setEmailData(prev => ({ ...prev, sections: [...prev.sections, newSec] }));
+          setEmailData(prev => ({ ...prev, sections: [...(prev.sections || []), newSec] }));
         }}
-        className="mt-6 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-teal-400 font-bold text-xs rounded-xl border border-slate-800 shadow-xl transition-all hover:scale-105 flex items-center gap-2"
+        className="mt-6 px-6 py-3 bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl border border-zinc-800 shadow-xl transition-all hover:scale-105 flex items-center gap-2 cursor-pointer"
+        title="Add New Section Container to Canvas"
       >
-        <Plus className="w-4 h-4" /> Add New Section
+        <Plus className="w-4 h-4 text-emerald-400" /> Add New Section
       </button>
 
       {/* VIDEO PREVIEW PLAYER MODAL */}
@@ -374,9 +508,9 @@ export default function DesignerCanvas({
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-4 relative shadow-2xl">
             <div className="flex justify-between items-center mb-3 px-2">
               <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                <Film className="w-4 h-4 text-teal-400" /> Video Preview Player
+                <Film className="w-4 h-4 text-emerald-400" /> Video Preview Player
               </h4>
-              <button onClick={() => setActiveVideoModalUrl(null)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setActiveVideoModalUrl(null)} className="text-slate-400 hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -401,7 +535,7 @@ export default function DesignerCanvas({
 }
 
 // ----------------------------------------------------------------------
-// COMPONENT CANVAS VIEW RENDERER WITH LIVE INTERACTIVITY
+// COMPONENT CANVAS VIEW RENDERER WITH LIVE INTERACTIVITY & EDITING
 // ----------------------------------------------------------------------
 function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpenVideoModal }) {
   const pt = cmp.paddingTop ?? 12;
@@ -444,7 +578,7 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
               onChange={(e) => onTextChange(e.target.value)}
               onBlur={() => onStartEdit(null)}
               autoFocus
-              className="w-full bg-teal-50 border border-teal-400 rounded px-2 py-1 font-bold text-gray-900 focus:outline-none"
+              className="w-full bg-emerald-50 border border-emerald-400 rounded px-2 py-1 font-bold text-gray-900 focus:outline-none"
               style={{ fontSize: `${cmp.size || 24}px`, ...fontStyle }}
             />
           ) : (
@@ -458,6 +592,7 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
                 ...fontStyle
               }}
               className="cursor-text"
+              title="Double-click to edit inline"
             >
               {cmp.text || 'Heading Title'}
             </h1>
@@ -467,6 +602,7 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
 
     case 'text':
     case 'paragraph':
+    case 'rich_text':
       return (
         <div style={{ paddingTop: `${pt}px`, paddingBottom: `${pb}px`, textAlign: cmp.align || 'left' }}>
           {isEditing ? (
@@ -476,7 +612,7 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
               onChange={(e) => onTextChange(e.target.value)}
               onBlur={() => onStartEdit(null)}
               autoFocus
-              className="w-full bg-teal-50 border border-teal-400 rounded p-2 text-gray-900 focus:outline-none font-sans"
+              className="w-full bg-emerald-50 border border-emerald-400 rounded p-2 text-gray-900 focus:outline-none font-sans"
               style={{ fontSize: `${cmp.size || 16}px`, ...fontStyle }}
             />
           ) : (
@@ -490,6 +626,7 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
                 ...fontStyle
               }}
               className="cursor-text"
+              title="Double-click to edit inline"
             >
               {cmp.content || cmp.text || 'Paragraph text block...'}
             </div>
@@ -506,7 +643,7 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
             style={{
               backgroundColor: cmp.bg || '#007C89',
               color: cmp.color || '#FFFFFF',
-              borderRadius: `${cmp.borderRadius || 8}px`,
+              borderRadius: cmp.borderRadius === 9999 ? '9999px' : `${cmp.borderRadius || 8}px`,
               padding: `${cmp.paddingV || 14}px ${cmp.paddingH || 32}px`,
               display: 'inline-block',
               fontWeight: 'bold',
@@ -514,6 +651,7 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
               ...fontStyle
             }}
             className="shadow-md hover:opacity-90 transition-opacity"
+            title={`Destination: ${cmp.url || 'Not set'}`}
           >
             {cmp.text || 'Click Here'}
           </a>
@@ -536,6 +674,43 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
         </div>
       );
 
+    case 'hero':
+      return (
+        <div
+          style={{
+            paddingTop: `${pt}px`,
+            paddingBottom: `${pb}px`,
+            backgroundColor: cmp.bg || '#09090B',
+            color: cmp.color || '#FFFFFF',
+            borderRadius: `${cmp.borderRadius || 12}px`,
+            textAlign: cmp.align || 'center'
+          }}
+          className="p-8 shadow-xl text-center"
+        >
+          <h1 style={{ fontSize: `${cmp.size || 28}px`, fontWeight: '800', margin: '0 0 12px 0', ...fontStyle }}>
+            {cmp.title || cmp.text || 'Hero Header Title'}
+          </h1>
+          <p style={{ fontSize: '15px', color: cmp.subtitleColor || '#A1A1AA', margin: '0 0 24px 0', lineHeight: '1.6' }}>
+            {cmp.subtitle || cmp.content || 'Engaging hero subtitle paragraph content goes here.'}
+          </p>
+          <a
+            href={cmp.buttonUrl || '#'}
+            onClick={(e) => e.preventDefault()}
+            style={{
+              backgroundColor: cmp.buttonBg || '#FFFFFF',
+              color: cmp.buttonColor || '#000000',
+              padding: '12px 28px',
+              borderRadius: '9999px',
+              fontWeight: 'bold',
+              textDecoration: 'none',
+              display: 'inline-block'
+            }}
+          >
+            {cmp.buttonText || 'Call To Action'}
+          </a>
+        </div>
+      );
+
     case 'image':
       return (
         <div style={{ paddingTop: `${pt}px`, paddingBottom: `${pb}px`, textAlign: cmp.align || 'center' }}>
@@ -550,10 +725,40 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
               className="inline-block max-w-full shadow-sm"
             />
           ) : (
-            <div className="bg-slate-100 border-2 border-dashed border-slate-300 rounded-xl p-8 text-center text-slate-400 font-semibold text-xs">
-              No Image Source Selected
+            <div className="bg-zinc-100 border-2 border-dashed border-zinc-300 rounded-xl p-8 text-center text-zinc-400 font-semibold text-xs">
+              No Image Source Selected (Click to edit in Right Panel)
             </div>
           )}
+        </div>
+      );
+
+    case 'quote':
+      return (
+        <div style={{ paddingTop: `${pt}px`, paddingBottom: `${pb}px` }}>
+          <blockquote
+            style={{
+              borderLeft: `4px solid ${cmp.border || '#3B82F6'}`,
+              backgroundColor: cmp.bg || '#F8FAFC',
+              color: cmp.color || '#334155',
+              ...fontStyle
+            }}
+            className="p-4 rounded-r-xl italic text-sm leading-relaxed"
+          >
+            "{cmp.text || cmp.content || 'Quote text block...'}"
+            {cmp.author && <div className="not-italic font-bold text-xs text-zinc-900 mt-2">— {cmp.author}</div>}
+          </blockquote>
+        </div>
+      );
+
+    case 'list':
+      const listItems = Array.isArray(cmp.items) ? cmp.items : (cmp.content ? cmp.content.split('\n') : ['First bullet point item', 'Second bullet point item', 'Third bullet point item']);
+      return (
+        <div style={{ paddingTop: `${pt}px`, paddingBottom: `${pb}px`, textAlign: cmp.align || 'left' }}>
+          <ul style={{ color: cmp.color || '#334155', fontSize: `${cmp.size || 15}px`, ...fontStyle }} className="list-disc list-inside space-y-1.5">
+            {listItems.map((item, idx) => (
+              <li key={idx}>{item}</li>
+            ))}
+          </ul>
         </div>
       );
 
@@ -588,25 +793,25 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
       return (
         <div style={{ paddingTop: `${pt}px`, paddingBottom: `${pb}px`, textAlign: cmp.align || 'center' }}>
           <div style={{ backgroundColor: cmp.bg || '#1E2937' }} className="p-5 rounded-2xl shadow-xl text-white">
-            <div className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-3">
+            <div className="text-xs font-bold text-zinc-300 uppercase tracking-widest mb-3">
               {cmp.label || 'PROMOTION ENDS IN:'}
             </div>
             <div className="flex justify-center gap-3 font-mono">
-              <div className="bg-slate-900/90 border border-slate-700 px-3 py-2 rounded-xl text-center">
+              <div className="bg-zinc-900/90 border border-zinc-700 px-3 py-2 rounded-xl text-center">
                 <span className="text-xl font-extrabold text-amber-400">{String(timeLeft.days).padStart(2, '0')}</span>
-                <span className="block text-[9px] text-slate-400 font-sans uppercase">Days</span>
+                <span className="block text-[9px] text-zinc-400 font-sans uppercase">Days</span>
               </div>
-              <div className="bg-slate-900/90 border border-slate-700 px-3 py-2 rounded-xl text-center">
+              <div className="bg-zinc-900/90 border border-zinc-700 px-3 py-2 rounded-xl text-center">
                 <span className="text-xl font-extrabold text-amber-400">{String(timeLeft.hours).padStart(2, '0')}</span>
-                <span className="block text-[9px] text-slate-400 font-sans uppercase">Hours</span>
+                <span className="block text-[9px] text-zinc-400 font-sans uppercase">Hours</span>
               </div>
-              <div className="bg-slate-900/90 border border-slate-700 px-3 py-2 rounded-xl text-center">
+              <div className="bg-zinc-900/90 border border-zinc-700 px-3 py-2 rounded-xl text-center">
                 <span className="text-xl font-extrabold text-amber-400">{String(timeLeft.minutes).padStart(2, '0')}</span>
-                <span className="block text-[9px] text-slate-400 font-sans uppercase">Mins</span>
+                <span className="block text-[9px] text-zinc-400 font-sans uppercase">Mins</span>
               </div>
-              <div className="bg-slate-900/90 border border-slate-700 px-3 py-2 rounded-xl text-center">
+              <div className="bg-zinc-900/90 border border-zinc-700 px-3 py-2 rounded-xl text-center">
                 <span className="text-xl font-extrabold text-amber-400">{String(timeLeft.seconds).padStart(2, '0')}</span>
-                <span className="block text-[9px] text-slate-400 font-sans uppercase">Secs</span>
+                <span className="block text-[9px] text-zinc-400 font-sans uppercase">Secs</span>
               </div>
             </div>
           </div>
@@ -631,13 +836,7 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
               className="w-full max-w-[540px] rounded-xl group-hover:scale-105 transition-transform"
             />
             <div className="absolute inset-0 bg-slate-950/50 group-hover:bg-slate-950/30 flex items-center justify-center transition-colors">
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenVideoModal(videoSrc);
-                }}
-                className="w-16 h-16 rounded-full bg-teal-500 hover:bg-teal-400 text-slate-950 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform cursor-pointer"
-              >
+              <div className="w-16 h-16 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform cursor-pointer">
                 <Play className="w-8 h-8 fill-current translate-x-0.5" />
               </div>
             </div>
@@ -672,11 +871,36 @@ function ComponentCanvasView({ cmp, isEditing, onStartEdit, onTextChange, onOpen
         </div>
       );
 
+    case 'navigation':
+    case 'menu':
+      const links = cmp.links || [{ label: 'Home', url: '#' }, { label: 'Features', url: '#' }, { label: 'Pricing', url: '#' }];
+      return (
+        <div style={{ paddingTop: `${pt}px`, paddingBottom: `${pb}px`, textAlign: cmp.align || 'center' }}>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            {links.map((link, idx) => (
+              <a key={idx} href={link.url} onClick={(e) => e.preventDefault()} className="text-sm font-semibold text-zinc-700 hover:text-black">
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 'custom_html':
+    case 'html':
+      return (
+        <div style={{ paddingTop: `${pt}px`, paddingBottom: `${pb}px` }}>
+          <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-mono text-emerald-400 overflow-x-auto">
+            {cmp.content || cmp.html || '<!-- Custom HTML Snippet -->'}
+          </div>
+        </div>
+      );
+
     case 'footer':
       return (
         <div style={{ paddingTop: `${pt}px`, paddingBottom: `${pb}px`, textAlign: cmp.align || 'center' }}>
           <div style={{ fontSize: `${cmp.size || 12}px`, color: cmp.color || '#94A3B8', ...fontStyle }}>
-            {cmp.text || 'SkillBridge Network • Unsubscribe'}
+            {cmp.text || 'Sendaat Email Studio • Unsubscribe'}
           </div>
         </div>
       );

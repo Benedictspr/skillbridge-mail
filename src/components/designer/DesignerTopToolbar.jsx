@@ -3,34 +3,34 @@ import {
   Undo2, Redo2, Eye, Smartphone, Monitor, Download, Send, Bookmark, 
   Rocket, CheckCircle2, ChevronDown, ZoomIn, ZoomOut, Edit2, Check,
   Code, Sparkles, FileText, Minimize2, Maximize2, X, PanelLeftClose, 
-  PanelLeftOpen, Sliders, ChevronLeft, ChevronRight
+  PanelLeftOpen, Sliders, ChevronLeft, ChevronRight, FileJson, Maximize
 } from 'lucide-react';
 
 export default function DesignerTopToolbar({
   projectName,
   setProjectName,
-  saveStatus,
-  canUndo,
-  canRedo,
+  saveStatus = 'Saved',
+  canUndo = false,
+  canRedo = false,
   onUndo,
   onRedo,
   onOpenPreview,
-  previewDevice,
+  previewDevice = 'desktop',
   setPreviewDevice,
-  zoomLevel,
+  zoomLevel = 100,
   setZoomLevel,
   onOpenSendTest,
   onExportHtml,
   onSaveAsTemplate,
   onPublish,
-  isFullscreen,
+  isFullscreen = false,
   onToggleFullscreen,
   onCloseStudio,
-  isLeftSidebarOpen,
+  isLeftSidebarOpen = true,
   onToggleLeftSidebar,
-  isRightPanelOpen,
+  isRightPanelOpen = true,
   onToggleRightPanel,
-  editorMode,
+  editorMode = 'visual',
   setEditorMode
 }) {
   const [isEditingName, setIsEditingName] = useState(false);
@@ -43,53 +43,36 @@ export default function DesignerTopToolbar({
     setIsEditingName(false);
   };
 
-  const zoomOptions = [25, 50, 75, 100, 125, 150, 200, 300, 400];
+  const zoomOptions = [25, 50, 75, 100, 125, 150, 200, 300];
+
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(300, prev + 25));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(25, prev - 25));
+  };
+
+  const handleFitScreen = () => {
+    setZoomLevel(100);
+  };
 
   return (
-    <div className="h-14 bg-[#09090B] border-b border-zinc-800 px-4 flex items-center justify-between gap-2 z-40 select-none w-full font-sans overflow-x-auto text-white">
+    <div className="h-12 bg-[#09090B] border-b border-zinc-800/80 px-3 flex items-center justify-between gap-2 z-40 select-none w-full font-sans overflow-x-auto text-white">
       
-      {/* LEFT REGION: Window Dots, Sidebar Toggle, Title, Mode Switcher */}
+      {/* LEFT REGION: Close X Button, Title, Save Status, Workspace Mode Switcher */}
       <div className="flex items-center gap-2 flex-shrink-0">
         
-        {/* macOS Window Control Dots */}
-        <div className="hidden sm:flex items-center gap-1 mr-1">
-          <button
-            onClick={onCloseStudio}
-            className="w-3 h-3 rounded-full bg-rose-500 hover:bg-rose-600 flex items-center justify-center text-[8px] text-black font-bold opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
-            title="Close / Cancel Studio"
-          >
-            ✕
-          </button>
-          <button
-            onClick={onToggleFullscreen}
-            className="w-3 h-3 rounded-full bg-amber-500 hover:bg-amber-600 flex items-center justify-center text-[8px] text-black font-bold opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
-            title="Minimize Studio View"
-          >
-            –
-          </button>
-          <button
-            onClick={onToggleFullscreen}
-            className="w-3 h-3 rounded-full bg-emerald-500 hover:bg-emerald-600 flex items-center justify-center text-[8px] text-black font-bold opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
-            title="Maximize Studio Fullscreen"
-          >
-            +
-          </button>
-        </div>
-
-        {/* Sidebar Toggle Icon Button */}
+        {/* Close Button Changed to 'X' */}
         <button
-          onClick={onToggleLeftSidebar}
-          className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
-            isLeftSidebarOpen 
-              ? 'bg-zinc-900 text-white border-zinc-700 hover:bg-zinc-800' 
-              : 'bg-white text-black border-white shadow-xs font-bold'
-          }`}
-          title={isLeftSidebarOpen ? "Collapse Components Drawer" : "Expand Components Drawer"}
+          onClick={onCloseStudio}
+          className="p-1.5 rounded-lg transition-colors cursor-pointer text-zinc-400 hover:text-white hover:bg-zinc-800/80"
+          title="Exit / Close Email Studio"
         >
-          {isLeftSidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+          <X className="w-4 h-4" />
         </button>
 
-        {/* Project Name Input */}
+        {/* Studio Title - Onboarding Typography (Google Sans, font-normal, text-sm) */}
         <div className="flex items-center gap-1.5">
           {isEditingName ? (
             <div className="flex items-center gap-1">
@@ -98,12 +81,14 @@ export default function DesignerTopToolbar({
                 value={tempName}
                 onChange={(e) => setTempName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
+                onBlur={handleSaveName}
                 autoFocus
-                className="bg-black border border-zinc-700 px-2 py-0.5 rounded-lg text-xs font-bold text-white outline-none w-48 font-sans"
+                className="bg-black border border-zinc-700 px-2 py-0.5 rounded-md text-sm font-normal text-white outline-none w-48 font-sans"
               />
               <button
                 onClick={handleSaveName}
-                className="p-1 rounded-md bg-white text-black hover:bg-zinc-200 transition-colors cursor-pointer"
+                className="p-1 rounded bg-white text-black hover:bg-zinc-200 transition-colors cursor-pointer"
+                title="Save Project Title"
               >
                 <Check className="w-3 h-3" />
               </button>
@@ -111,194 +96,259 @@ export default function DesignerTopToolbar({
           ) : (
             <div
               onClick={() => setIsEditingName(true)}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-zinc-900 border border-transparent hover:border-zinc-800 transition-all cursor-pointer group"
+              className="flex items-center gap-1.5 px-2 py-0.5 rounded-md hover:bg-zinc-900 transition-all cursor-pointer group"
               title="Click to rename design project"
             >
-              <span className="font-extrabold text-xs text-white max-w-[160px] sm:max-w-[200px] truncate tracking-tight font-sans">
+              <span className="font-normal text-sm text-white max-w-[160px] sm:max-w-[200px] truncate tracking-tight font-sans">
                 {projectName || 'Sendaat Email Studio'}
               </span>
               <Edit2 className="w-3 h-3 text-zinc-500 group-hover:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           )}
 
-          {/* Save Status Badge */}
-          <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black border border-zinc-800 text-[10px] font-mono text-zinc-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            {saveStatus}
+          {/* Real Save Status Badge - Onboarding Style */}
+          <span
+            className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[11px] font-normal transition-all font-sans ${
+              saveStatus === 'Saving...'
+                ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                : saveStatus === 'Save failed'
+                ? 'bg-rose-500/10 text-rose-300 border-rose-500/30'
+                : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+            }`}
+            title={`Auto-Save Status: ${saveStatus}`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              saveStatus === 'Saving...'
+                ? 'bg-amber-400 animate-ping'
+                : saveStatus === 'Save failed'
+                ? 'bg-rose-400'
+                : 'bg-emerald-400 animate-pulse'
+            }`} />
+            <span>{saveStatus}</span>
           </span>
         </div>
 
-        {/* Editor Mode Tabs (Visual / Design / Text) */}
-        <div className="flex items-center p-0.5 bg-black border border-zinc-800 rounded-xl ml-1">
+        {/* Workspace Mode Switcher (Visual / Design / Text) */}
+        <div className="flex items-center p-0.5 bg-black border border-zinc-800 rounded-lg ml-1 font-sans" title="Switch Editor Workspaces">
           <button
             onClick={() => setEditorMode('visual')}
-            className={`px-3 py-1 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+            className={`px-3 py-0.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
               editorMode === 'visual'
-                ? 'bg-white text-black shadow-xs'
+                ? 'bg-white text-black shadow-xs font-semibold'
                 : 'text-zinc-400 hover:text-white'
             }`}
+            title="Visual Drag & Drop Email Studio"
           >
             Visual
           </button>
           <button
             onClick={() => setEditorMode('design')}
-            className={`px-3 py-1 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+            className={`px-3 py-0.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
               editorMode === 'design'
-                ? 'bg-white text-black shadow-xs'
+                ? 'bg-white text-black shadow-xs font-semibold'
                 : 'text-zinc-400 hover:text-white'
             }`}
+            title="Vector Design Studio Canvas"
           >
             Design
           </button>
           <button
             onClick={() => setEditorMode('text')}
-            className={`px-3 py-1 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+            className={`px-3 py-0.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
               editorMode === 'text'
-                ? 'bg-white text-black shadow-xs'
+                ? 'bg-white text-black shadow-xs font-semibold'
                 : 'text-zinc-400 hover:text-white'
             }`}
+            title="Plain Text & Form Editor Mode"
           >
             Text
           </button>
         </div>
       </div>
 
-      {/* CENTER REGION: Undo / Redo & Zoom Controls */}
+      {/* CENTER REGION: Undo / Redo & Device View & Zoom Engine */}
       <div className="hidden lg:flex items-center gap-1.5 flex-shrink-0">
+        
+        {/* Undo Button */}
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
+          className={`p-1.5 rounded-lg transition-all cursor-pointer ${
             canUndo 
-              ? 'bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800' 
-              : 'bg-black border-zinc-900 text-zinc-600 opacity-50 cursor-not-allowed'
+              ? 'text-zinc-300 hover:text-white hover:bg-zinc-800' 
+              : 'text-zinc-600 opacity-40 cursor-not-allowed'
           }`}
           title="Undo Action (Ctrl+Z)"
         >
-          <Undo2 className="w-3.5 h-3.5" />
+          <Undo2 className="w-4 h-4" />
         </button>
 
+        {/* Redo Button */}
         <button
           onClick={onRedo}
           disabled={!canRedo}
-          className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
+          className={`p-1.5 rounded-lg transition-all cursor-pointer ${
             canRedo 
-              ? 'bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800' 
-              : 'bg-black border-zinc-900 text-zinc-600 opacity-50 cursor-not-allowed'
+              ? 'text-zinc-300 hover:text-white hover:bg-zinc-800' 
+              : 'text-zinc-600 opacity-40 cursor-not-allowed'
           }`}
-          title="Redo Action (Ctrl+Y)"
+          title="Redo Action (Ctrl+Y or Ctrl+Shift+Z)"
         >
-          <Redo2 className="w-3.5 h-3.5" />
+          <Redo2 className="w-4 h-4" />
         </button>
 
         <div className="h-4 w-px bg-zinc-800 mx-1" />
 
-        {/* Device Preview Switcher */}
-        <div className="flex items-center p-0.5 bg-black border border-zinc-800 rounded-xl">
+        {/* Device View Switcher */}
+        <div className="flex items-center p-0.5 bg-black border border-zinc-800 rounded-lg" title="Responsive Device Canvas View">
           <button
             onClick={() => setPreviewDevice('desktop')}
-            className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-              previewDevice === 'desktop' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-500 hover:text-white'
+            className={`p-1 rounded-md transition-all cursor-pointer ${
+              previewDevice === 'desktop' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-white'
             }`}
-            title="Desktop Canvas View"
+            title="Desktop Canvas View (640px)"
           >
             <Monitor className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setPreviewDevice('mobile')}
-            className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-              previewDevice === 'mobile' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-500 hover:text-white'
+            className={`p-1 rounded-md transition-all cursor-pointer ${
+              previewDevice === 'mobile' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-white'
             }`}
-            title="Mobile Canvas View (375px)"
+            title="Mobile Responsive View (375px)"
           >
             <Smartphone className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        {/* Zoom Selector */}
-        <div className="relative">
+        <div className="h-4 w-px bg-zinc-800 mx-1" />
+
+        {/* Zoom Engine */}
+        <div className="flex items-center gap-1 bg-black p-0.5 border border-zinc-800 rounded-lg">
           <button
-            onClick={() => setShowZoomMenu(!showZoomMenu)}
-            className="flex items-center gap-1 px-2.5 py-1 bg-black border border-zinc-800 hover:border-zinc-700 rounded-xl text-xs font-mono text-white transition-colors cursor-pointer"
+            onClick={handleZoomOut}
+            className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+            title="Zoom Out (Ctrl -)"
           >
-            <span>{zoomLevel}%</span>
-            <ChevronDown className="w-3 h-3 text-zinc-400" />
+            <ZoomOut className="w-3.5 h-3.5" />
           </button>
 
-          {showZoomMenu && (
-            <div className="absolute top-full left-0 mt-1 w-24 bg-[#121212] border border-zinc-800 rounded-xl shadow-2xl py-1 z-50 animate-fade-in">
-              {zoomOptions.map(z => (
+          <div className="relative">
+            <button
+              onClick={() => setShowZoomMenu(!showZoomMenu)}
+              className="flex items-center gap-1 px-1.5 py-0.5 hover:bg-zinc-800 rounded text-xs font-mono text-white transition-colors cursor-pointer"
+              title="Zoom Options"
+            >
+              <span>{zoomLevel}%</span>
+              <ChevronDown className="w-3 h-3 text-zinc-400" />
+            </button>
+
+            {showZoomMenu && (
+              <div className="absolute top-full left-0 mt-1 w-28 bg-[#121212] border border-zinc-800 rounded-lg shadow-2xl py-1 z-50 animate-fade-in font-sans">
                 <button
-                  key={z}
                   onClick={() => {
-                    setZoomLevel(z);
+                    handleFitScreen();
                     setShowZoomMenu(false);
                   }}
-                  className={`w-full text-left px-3 py-1 text-xs font-mono transition-colors cursor-pointer ${
-                    zoomLevel === z ? 'bg-white text-black font-bold' : 'text-zinc-300 hover:bg-zinc-800'
-                  }`}
+                  className="w-full text-left px-3 py-1 text-xs font-normal text-zinc-300 hover:bg-zinc-800 border-b border-zinc-800/80 flex items-center justify-between cursor-pointer"
                 >
-                  {z}%
+                  <span>Fit 100%</span>
+                  <Maximize className="w-3 h-3 text-zinc-400" />
                 </button>
-              ))}
-            </div>
-          )}
+                {zoomOptions.map(z => (
+                  <button
+                    key={z}
+                    onClick={() => {
+                      setZoomLevel(z);
+                      setShowZoomMenu(false);
+                    }}
+                    className={`w-full text-left px-3 py-1 text-xs font-mono transition-colors cursor-pointer ${
+                      zoomLevel === z ? 'bg-white text-black font-semibold' : 'text-zinc-300 hover:bg-zinc-800'
+                    }`}
+                  >
+                    {z}%
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={handleZoomIn}
+            className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+            title="Zoom In (Ctrl +)"
+          >
+            <ZoomIn className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
-      {/* RIGHT REGION: Actions & CTA Buttons */}
-      <div className="flex items-center gap-2 flex-shrink-0">
+      {/* RIGHT REGION: Action & CTA Buttons */}
+      <div className="flex items-center gap-1.5 flex-shrink-0 font-sans">
         
         {/* Preview Button */}
         <button
           onClick={onOpenPreview}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-xs font-bold text-white transition-all cursor-pointer shadow-xs"
+          className="flex items-center gap-1.5 px-3 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-medium text-white transition-all cursor-pointer font-sans"
+          title="Open Live Email Preview Studio"
         >
-          <Eye className="w-3.5 h-3.5" />
+          <Eye className="w-3.5 h-3.5 text-zinc-300" />
           <span className="hidden sm:inline">Preview</span>
         </button>
 
         {/* Send Test Button */}
         <button
           onClick={onOpenSendTest}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-xs font-bold text-white transition-all cursor-pointer shadow-xs"
+          className="flex items-center gap-1.5 px-3 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-medium text-white transition-all cursor-pointer font-sans"
+          title="Send Test Email"
         >
-          <Send className="w-3.5 h-3.5" />
+          <Send className="w-3.5 h-3.5 text-zinc-300" />
           <span className="hidden sm:inline">Send Test</span>
         </button>
 
-        {/* Export Code Dropdown */}
+        {/* Export Dropdown */}
         <div className="relative">
           <button
             onClick={() => setShowExportMenu(!showExportMenu)}
-            className="flex items-center gap-1 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-xs font-bold text-white transition-all cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-medium text-white transition-all cursor-pointer font-sans"
+            title="Export Options"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5 text-zinc-300" />
             <span className="hidden sm:inline">Export</span>
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           </button>
 
           {showExportMenu && (
-            <div className="absolute top-full right-0 mt-1 w-44 bg-[#121212] border border-zinc-800 rounded-xl shadow-2xl py-1 z-50 animate-fade-in font-sans">
+            <div className="absolute top-full right-0 mt-1 w-48 bg-[#121212] border border-zinc-800 rounded-lg shadow-2xl py-1 z-50 animate-fade-in font-sans">
               <button
                 onClick={() => {
                   onExportHtml('download');
                   setShowExportMenu(false);
                 }}
-                className="w-full text-left px-3.5 py-2 text-xs font-medium text-white hover:bg-zinc-800 flex items-center gap-2 transition-colors cursor-pointer"
+                className="w-full text-left px-3.5 py-1.5 text-xs font-normal text-white hover:bg-zinc-800 flex items-center gap-2 transition-colors cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5 text-zinc-400" />
-                <span>Download HTML</span>
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Download HTML File</span>
               </button>
               <button
                 onClick={() => {
                   onExportHtml('copy');
                   setShowExportMenu(false);
                 }}
-                className="w-full text-left px-3.5 py-2 text-xs font-medium text-white hover:bg-zinc-800 flex items-center gap-2 transition-colors cursor-pointer"
+                className="w-full text-left px-3.5 py-1.5 text-xs font-normal text-white hover:bg-zinc-800 flex items-center gap-2 transition-colors cursor-pointer"
               >
-                <Code className="w-3.5 h-3.5 text-zinc-400" />
-                <span>Copy Raw HTML</span>
+                <Code className="w-3.5 h-3.5 text-sky-400" />
+                <span>Copy Inline HTML</span>
+              </button>
+              <button
+                onClick={() => {
+                  onExportHtml('json');
+                  setShowExportMenu(false);
+                }}
+                className="w-full text-left px-3.5 py-1.5 text-xs font-normal text-white hover:bg-zinc-800 flex items-center gap-2 transition-colors cursor-pointer border-t border-zinc-800/80"
+              >
+                <FileJson className="w-3.5 h-3.5 text-amber-400" />
+                <span>Export JSON Document</span>
               </button>
             </div>
           )}
@@ -307,19 +357,21 @@ export default function DesignerTopToolbar({
         {/* Save Template Button */}
         <button
           onClick={onSaveAsTemplate}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-xs font-bold text-white transition-all cursor-pointer shadow-xs"
+          className="flex items-center gap-1.5 px-3 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-medium text-white transition-all cursor-pointer font-sans"
+          title="Save Template"
         >
-          <Bookmark className="w-3.5 h-3.5" />
+          <Bookmark className="w-3.5 h-3.5 text-zinc-300" />
           <span className="hidden md:inline">Save Template</span>
         </button>
 
         {/* Primary Action: Publish Email */}
         <button
           onClick={onPublish}
-          className="flex items-center gap-1.5 px-4 py-1.5 bg-white hover:bg-zinc-200 text-black font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-3.5 py-1 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-lg shadow-xs transition-all cursor-pointer font-sans"
+          title="Publish Email"
         >
           <Rocket className="w-3.5 h-3.5 text-black stroke-[2.5]" />
-          <span>Publish Email</span>
+          <span>Publish</span>
         </button>
       </div>
 

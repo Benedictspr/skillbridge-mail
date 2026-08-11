@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, ShieldAlert, ArrowRight, ShieldCheck, QrCode } from 'lucide-react';
-import { validateCredentials } from '../../utils/userStore';
+import { validateCredentials, validateCredentialsAsync } from '../../utils/userStore';
 
 export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwitchToSignup }) {
   const [email, setEmail] = useState('');
@@ -17,7 +17,7 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     const cleanEmail = email.trim();
     if (!cleanEmail || !cleanEmail.includes('@')) {
@@ -32,9 +32,9 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
     setErrorMsg('');
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const result = await validateCredentialsAsync(cleanEmail, password);
       setIsLoading(false);
-      const result = validateCredentials(cleanEmail, password);
 
       if (!result.success) {
         setErrorMsg(result.message);
@@ -47,7 +47,10 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
       } else {
         onLoginSuccess(result.user);
       }
-    }, 500);
+    } catch (err) {
+      setIsLoading(false);
+      setErrorMsg('Authentication error. Please try again.');
+    }
   };
 
   const loadLiveQrCode = async (userEmail) => {

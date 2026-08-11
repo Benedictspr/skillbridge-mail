@@ -1,4 +1,5 @@
-// Central User Registration & Authentication Storage helper
+// Central User Registration & Authentication Storage helper with Supabase Cloud Sync
+import { supabase } from './supabaseClient';
 
 const DEFAULT_USERS = [
   {
@@ -45,7 +46,6 @@ export function getRegisteredUsers() {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        // Ensure m4verickjack@gmail.com is present in existing list
         const hasMaverick = parsed.some(u => u.email.toLowerCase() === 'm4verickjack@gmail.com');
         if (!hasMaverick) {
           const merged = [...parsed, DEFAULT_USERS[1]];
@@ -59,12 +59,11 @@ export function getRegisteredUsers() {
     console.error('Error reading registered users:', e);
   }
   
-  // Seed default registered users
   localStorage.setItem('sendaat_registeredUsers', JSON.stringify(DEFAULT_USERS));
   return DEFAULT_USERS;
 }
 
-export function registerUser(newUser) {
+export async function registerUser(newUser) {
   const users = getRegisteredUsers();
   const cleanEmail = newUser.email.trim().toLowerCase();
   const existing = users.find(u => u.email.toLowerCase() === cleanEmail);
@@ -90,14 +89,26 @@ export function registerUser(newUser) {
   const updatedUsers = [...users, userRecord];
   localStorage.setItem('sendaat_registeredUsers', JSON.stringify(updatedUsers));
 
-  // Sync with backend DB
+  // Sync with Supabase Cloud DB for Cross-Device Access
   try {
-    fetch('http://localhost:3001/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userRecord)
-    }).catch(() => {});
-  } catch (e) {}
+    const { data, error } = await supabase.auth.signUp({
+      email: cleanEmail,
+      password: newUser.password,
+      options: {
+        data: {
+          name: userRecord.name,
+          company: userRecord.company,
+          role: userRecord.role
+        }
+      }
+    });
+
+    if (error && !error.message?.includes('already registered')) {
+      console.warn('Supabase Auth warning during signup:', error.message);
+    }
+  } catch (err) {
+    console.warn('Supabase cloud signup sync warning:', err);
+  }
 
   return userRecord;
 }
@@ -127,6 +138,53 @@ export function validateCredentials(email, password) {
   return { success: true, user };
 }
 
+// ASYNC VALIDATE CREDENTIALS WITH SUPABASE CLOUD BACKEND
+export async function validateCredentialsAsync(email, password) {
+  const cleanEmail = (email || '').trim().toLowerCase();
+
+  // 1. Try local storage check first
+  const localRes = validateCredentials(cleanEmail, password);
+  if (localRes.success) {
+    return localRes;
+  }
+
+  // 2. Query Supabase Cloud Authentication for cross-device logins
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: cleanEmail,
+      password: password
+    });
+
+    if (!error && data?.user) {
+      const meta = data.user.user_metadata || {};
+      const cloudUser = {
+        id: data.user.id || 'usr_' + Date.now(),
+        email: cleanEmail,
+        password: password,
+        name: meta.name || cleanEmail.split('@')[0],
+        company: meta.company || `${cleanEmail.split('@')[0]}'s Workspace`,
+        role: meta.role || 'Workspace Owner',
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
+        onboardingCompleted: false,
+        isEmailVerified: true,
+        twoFactorEnabled: false
+      };
+
+      // Cache locally on this device
+      const users = getRegisteredUsers();
+      if (!users.some(u => u.email.toLowerCase() === cleanEmail)) {
+        localStorage.setItem('sendaat_registeredUsers', JSON.stringify([...users, cloudUser]));
+      }
+
+      return { success: true, user: cloudUser };
+    }
+  } catch (err) {
+    console.warn('Supabase cloud authentication check warning:', err);
+  }
+
+  return localRes;
+}
+
 // 90 Days in milliseconds (3 months)
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
 
@@ -139,7 +197,6 @@ export function validatePasswordReuse(email, newPassword) {
     return { valid: true };
   }
 
-  // 1. Cannot reuse active current password
   if (user.password && user.password === newPassword) {
     return {
       valid: false,
@@ -147,7 +204,6 @@ export function validatePasswordReuse(email, newPassword) {
     };
   }
 
-  // 2. Cannot reuse any password used within the last 90 days (3 months)
   const history = Array.isArray(user.passwordHistory) ? user.passwordHistory : [];
   const now = Date.now();
 
@@ -201,6 +257,12 @@ export function updateUserPassword(email, newPassword) {
   }
 
   localStorage.setItem('sendaat_registeredUsers', JSON.stringify(updatedUsers));
+  
+  // Sync password update to Supabase
+  try {
+    supabase.auth.updateUser({ password: newPassword }).catch(() => {});
+  } catch (e) {}
+
   return true;
 }
 
