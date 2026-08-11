@@ -553,27 +553,29 @@ app.post('/api/send-reset-otp', async (req, res) => {
 
     const resetSubject = `Sendaat Password Reset Verification Code: ${otpCode}`;
     const resetHtml = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 0; background-color: #f8f9fa; border-radius: 24px; overflow: hidden; border: 1px solid #e1e3e1; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-        <div style="background: linear-gradient(135deg, #1F1F1F 0%, #303134 100%); padding: 32px; text-align: center; color: #ffffff;">
-          <div style="font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px;">Sendaat Security</div>
-          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #A8C7FA; font-weight: 600;">Password Recovery</div>
+      <div style="font-family: 'Google Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 0; background-color: #050505; border-radius: 24px; overflow: hidden; border: 1px solid #27272A;">
+        <div style="background-color: #09090B; padding: 32px; text-align: center; border-bottom: 1px solid #27272A;">
+          <div style="font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; color: #FFFFFF;">Sendaat Security</div>
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px; color: #A1A1AA; font-weight: 600;">Password Recovery Protocol</div>
         </div>
-        <div style="padding: 32px; background-color: #ffffff;">
-          <h2 style="color: #1f1f1f; font-size: 20px; font-weight: 500; margin-top: 0; margin-bottom: 12px;">Password Reset Code</h2>
-          <p style="color: #444746; font-size: 14px; line-height: 1.6; margin-top: 0; margin-bottom: 20px;">
-            You requested a password reset for your Sendaat account (<strong>${email}</strong>). Enter the verification code below:
+        <div style="padding: 32px; background-color: #121212; color: #FFFFFF;">
+          <h2 style="color: #FFFFFF; font-size: 20px; font-weight: 500; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.3px;">Password Reset Code</h2>
+          <p style="color: #A1A1AA; font-size: 14px; line-height: 1.6; margin-top: 0; margin-bottom: 20px;">
+            You requested a password reset for your Sendaat account (<strong style="color: #FFFFFF;">${email}</strong>). Enter the verification code below to proceed:
           </p>
-          <div style="background: #F0F4F9; border: 1.5px solid #D3E3FD; border-radius: 18px; padding: 20px; text-align: center; margin: 24px 0;">
-            <div style="font-size: 34px; font-weight: 800; letter-spacing: 10px; color: #0B57D0; font-family: 'SF Mono', Consolas, Monaco, monospace;">${otpCode}</div>
-            <div style="font-size: 11px; color: #5F6368; margin-top: 8px;">Valid for 15 minutes</div>
+          <div style="background-color: #000000; border: 1px solid #27272A; border-radius: 18px; padding: 20px; text-align: center; margin: 24px 0;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #A1A1AA; font-weight: 700; margin-bottom: 8px;">Verification Code</div>
+            <div style="font-size: 36px; font-weight: 800; letter-spacing: 12px; color: #FFFFFF; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace;">${otpCode}</div>
+            <div style="font-size: 11px; color: #A1A1AA; margin-top: 10px;">Valid for 15 minutes • Do not share this code</div>
           </div>
-          <p style="color: #747775; font-size: 12px; margin-bottom: 0;">
+          <p style="color: #A1A1AA; font-size: 12px; margin-bottom: 0; line-height: 1.5;">
             If you did not request a password reset, please secure your account immediately or disregard this email.
           </p>
         </div>
-        <div style="padding: 18px 32px; background-color: #f8f9fa; border-top: 1px solid #f1f3f4; text-align: center;">
-          <p style="color: #747775; font-size: 11px; margin: 0;">
-            Sendaat Enterprise Infrastructure Security Protocol
+        <div style="padding: 20px 32px; background-color: #050505; border-top: 1px solid #27272A; text-align: center;">
+          <p style="color: #71717A; font-size: 11px; margin: 0; line-height: 1.5;">
+            Sendaat Enterprise Infrastructure Security Protocol<br/>
+            High-Deliverability Email Infrastructure & Domain Protection
           </p>
         </div>
       </div>
@@ -626,31 +628,31 @@ app.post('/api/send-signup-otp', async (req, res) => {
     const signupSubject = `Verify your email for Sendaat: ${otpCode}`;
     const recipientName = name || email.split('@')[0];
     const signupHtml = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 0; background-color: #f8f9fa; border-radius: 24px; overflow: hidden; border: 1px solid #e1e3e1; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-        <div style="background: linear-gradient(135deg, #0B57D0 0%, #1A73E8 50%, #681DA8 100%); padding: 36px 32px; text-align: center; color: #ffffff;">
-          <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px;">Sendaat</div>
-          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.85; font-weight: 600;">Enterprise Security Protocol</div>
+      <div style="font-family: 'Google Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 0; background-color: #050505; border-radius: 24px; overflow: hidden; border: 1px solid #27272A;">
+        <div style="background-color: #09090B; padding: 36px 32px; text-align: center; border-bottom: 1px solid #27272A;">
+          <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; color: #FFFFFF;">Sendaat</div>
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px; color: #A1A1AA; font-weight: 600;">Enterprise Security Protocol</div>
         </div>
 
-        <div style="padding: 36px 32px; background-color: #ffffff;">
-          <h2 style="color: #1f1f1f; font-size: 22px; font-weight: 500; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.3px;">Confirm your email address</h2>
-          <p style="color: #444746; font-size: 14px; line-height: 1.6; margin-top: 0; margin-bottom: 24px;">
-            Welcome, <strong>${recipientName}</strong>! Use the 6-digit verification code below to confirm <strong>${email}</strong> and activate your Sendaat workspace.
+        <div style="padding: 36px 32px; background-color: #121212; color: #FFFFFF;">
+          <h2 style="color: #FFFFFF; font-size: 22px; font-weight: 500; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.3px;">Confirm your email address</h2>
+          <p style="color: #A1A1AA; font-size: 14px; line-height: 1.6; margin-top: 0; margin-bottom: 24px;">
+            Welcome, <strong style="color: #FFFFFF;">${recipientName}</strong>! Use the 6-digit verification code below to confirm <strong style="color: #FFFFFF;">${email}</strong> and activate your Sendaat workspace.
           </p>
 
-          <div style="background: linear-gradient(180deg, #F0F4F9 0%, #E8F0FE 100%); border: 1.5px solid #C2E7FF; border-radius: 20px; padding: 24px; text-align: center; margin: 28px 0; box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);">
-            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #0B57D0; font-weight: 700; margin-bottom: 8px;">Verification Code</div>
-            <div style="font-size: 38px; font-weight: 800; letter-spacing: 12px; color: #0B57D0; font-family: 'SF Mono', Consolas, Monaco, monospace; text-shadow: 0 1px 2px rgba(11,87,208,0.15);">${otpCode}</div>
-            <div style="font-size: 11px; color: #5F6368; margin-top: 10px;">Expires in 15 minutes • Do not share this code</div>
+          <div style="background-color: #000000; border: 1px solid #27272A; border-radius: 20px; padding: 24px; text-align: center; margin: 28px 0;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #A1A1AA; font-weight: 700; margin-bottom: 8px;">Verification Code</div>
+            <div style="font-size: 38px; font-weight: 800; letter-spacing: 12px; color: #FFFFFF; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace;">${otpCode}</div>
+            <div style="font-size: 11px; color: #A1A1AA; margin-top: 10px;">Expires in 15 minutes • Do not share this code</div>
           </div>
 
-          <p style="color: #5F6368; font-size: 12px; line-height: 1.5; margin-bottom: 0;">
+          <p style="color: #A1A1AA; font-size: 12px; line-height: 1.5; margin-bottom: 0;">
             If you did not initiate this request, you can safely ignore this email. Your account security remains guarded by Sendaat domain protection.
           </p>
         </div>
 
-        <div style="padding: 20px 32px; background-color: #f8f9fa; border-top: 1px solid #f1f3f4; text-align: center;">
-          <p style="color: #747775; font-size: 11px; margin: 0; line-height: 1.5;">
+        <div style="padding: 20px 32px; background-color: #050505; border-top: 1px solid #27272A; text-align: center;">
+          <p style="color: #71717A; font-size: 11px; margin: 0; line-height: 1.5;">
             Sendaat Enterprise Infrastructure Protocol • San Francisco, CA<br/>
             High-Deliverability Email Infrastructure & Domain Score Protection
           </p>
@@ -690,51 +692,51 @@ app.post('/api/send-welcome-email', async (req, res) => {
 
     const welcomeSubject = `Welcome to Sendaat Deliverability Engine, ${recipientName}! 🚀`;
     const welcomeHtml = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f8f9fa; border-radius: 24px; overflow: hidden; border: 1px solid #e1e3e1; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
-        <div style="background: linear-gradient(135deg, #0B57D0 0%, #1A73E8 40%, #7C3AED 100%); padding: 44px 36px; text-align: center; color: #ffffff;">
-          <div style="font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px;">Sendaat</div>
-          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; opacity: 0.9;">Deliverability Engine</div>
+      <div style="font-family: 'Google Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 0; background-color: #050505; border-radius: 24px; overflow: hidden; border: 1px solid #27272A;">
+        <div style="background-color: #09090B; padding: 44px 36px; text-align: center; border-bottom: 1px solid #27272A;">
+          <div style="font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; color: #FFFFFF;">Sendaat</div>
+          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; color: #A1A1AA;">Deliverability Engine</div>
         </div>
 
-        <div style="padding: 40px 36px; background-color: #ffffff;">
-          <h1 style="color: #1f1f1f; font-size: 26px; font-weight: 500; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.5px; text-align: center;">
+        <div style="padding: 40px 36px; background-color: #121212; color: #FFFFFF;">
+          <h1 style="color: #FFFFFF; font-size: 26px; font-weight: 500; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.5px; text-align: center;">
             Welcome aboard, ${recipientName}! 🚀
           </h1>
-          <p style="color: #444746; font-size: 15px; line-height: 1.6; text-align: center; margin-top: 0; margin-bottom: 28px;">
-            Your workspace <strong>${workspaceName}</strong> is fully verified and configured. You are now equipped with enterprise-grade deliverability, real-time domain score protection, and automated warmup.
+          <p style="color: #A1A1AA; font-size: 15px; line-height: 1.6; text-align: center; margin-top: 0; margin-bottom: 28px;">
+            Your workspace <strong style="color: #FFFFFF;">${workspaceName}</strong> is fully verified and configured. You are now equipped with enterprise-grade deliverability, real-time domain score protection, and automated warmup.
           </p>
 
-          <div style="background: #F0F4F9; border: 1px solid #D3E3FD; border-radius: 20px; padding: 24px; margin: 28px 0;">
-            <div style="color: #0B57D0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; text-align: center;">
+          <div style="background-color: #000000; border: 1px solid #27272A; border-radius: 20px; padding: 24px; margin: 28px 0;">
+            <div style="color: #FFFFFF; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; text-align: center;">
               Your Infrastructure Capabilities
             </div>
             
-            <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #E1E3E1;">
-              <div style="font-weight: 600; color: #1F1F1F; font-size: 14px;">⚡ 99.8% Inbox Placement</div>
-              <div style="color: #5F6368; font-size: 12px; margin-top: 2px;">Automated DKIM, SPF authentication, and IP warming ramps.</div>
+            <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #27272A;">
+              <div style="font-weight: 600; color: #FFFFFF; font-size: 14px;">⚡ 99.8% Inbox Placement</div>
+              <div style="color: #A1A1AA; font-size: 12px; margin-top: 2px;">Automated DKIM, SPF authentication, and IP warming ramps.</div>
             </div>
 
-            <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #E1E3E1;">
-              <div style="font-weight: 600; color: #1F1F1F; font-size: 14px;">🛡️ Scraped Address Shield</div>
-              <div style="color: #5F6368; font-size: 12px; margin-top: 2px;">Real-time hard bounce suppression guarding your sender reputation.</div>
+            <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #27272A;">
+              <div style="font-weight: 600; color: #FFFFFF; font-size: 14px;">🛡️ Scraped Address Shield</div>
+              <div style="color: #A1A1AA; font-size: 12px; margin-top: 2px;">Real-time hard bounce suppression guarding your sender reputation.</div>
             </div>
 
             <div>
-              <div style="font-weight: 600; color: #1F1F1F; font-size: 14px;">📬 Real-Time Gmail Inbox Sync</div>
-              <div style="color: #5F6368; font-size: 12px; margin-top: 2px;">Seamless IMAP/SMTP integration for reply tracking & campaign lifecycle.</div>
+              <div style="font-weight: 600; color: #FFFFFF; font-size: 14px;">📬 Real-Time Gmail Inbox Sync</div>
+              <div style="color: #A1A1AA; font-size: 12px; margin-top: 2px;">Seamless IMAP/SMTP integration for reply tracking & campaign lifecycle.</div>
             </div>
           </div>
 
           <div style="text-align: center; margin: 32px 0 16px 0;">
-            <a href="http://localhost:3000" target="_blank" style="background: linear-gradient(135deg, #0B57D0 0%, #0842A0 100%); color: #ffffff; font-weight: 600; padding: 16px 36px; text-decoration: none; border-radius: 30px; display: inline-block; font-size: 15px; box-shadow: 0 4px 12px rgba(11,87,208,0.25);">
+            <a href="http://localhost:3000" target="_blank" style="background-color: #FFFFFF; color: #000000; font-weight: 700; padding: 16px 36px; text-decoration: none; border-radius: 9999px; display: inline-block; font-size: 15px; box-shadow: 0 4px 12px rgba(255,255,255,0.1);">
               Open Sendaat Workspace →
             </a>
           </div>
         </div>
 
-        <div style="padding: 24px 36px; background-color: #f8f9fa; border-top: 1px solid #f1f3f4; text-align: center;">
-          <p style="color: #747775; font-size: 11px; margin: 0; line-height: 1.6;">
-            Account Email: <strong>${email}</strong> • Workspace: <strong>${workspaceName}</strong><br/>
+        <div style="padding: 24px 36px; background-color: #050505; border-top: 1px solid #27272A; text-align: center;">
+          <p style="color: #71717A; font-size: 11px; margin: 0; line-height: 1.6;">
+            Account Email: <strong style="color: #A1A1AA;">${email}</strong> • Workspace: <strong style="color: #A1A1AA;">${workspaceName}</strong><br/>
             Sendaat Enterprise Infrastructure Protocol • San Francisco, CA
           </p>
         </div>
