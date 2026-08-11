@@ -828,50 +828,85 @@ app.post('/api/send-reset-otp', async (req, res) => {
       return res.status(400).json({ error: 'Missing email or OTP code.' });
     }
 
-    const resetSubject = `Password Reset Verification Code: ${otpCode}`;
+    const user = smtpUser || storedSmtpConfig.user;
+    const pass = smtpPass || storedSmtpConfig.pass;
+
+    if (smtpUser && smtpPass) {
+      storedSmtpConfig = { user: smtpUser, pass: smtpPass, mode: 'gmail' };
+      saveDatabase();
+    }
+
+    const hashedCode = crypto.createHash('sha256').update(otpCode).digest('hex');
+    const resetSubject = `Security Verification Code | Sendaat Account Recovery`;
     const recipientName = email.split('@')[0];
+    const magicVerifyUrl = `http://localhost:5173/?verify_code=${otpCode}&email=${encodeURIComponent(email)}&mode=reset`;
+
     const resetHtml = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 0; background-color: #f8f9fa; border-radius: 24px; overflow: hidden; border: 1px solid #e1e3e1; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-        <div style="background: linear-gradient(135deg, #0B57D0 0%, #1A73E8 50%, #681DA8 100%); padding: 36px 32px; text-align: center; color: #ffffff;">
-          <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px;">Sendaat</div>
-          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.85; font-weight: 600;">Account Security</div>
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="color-scheme" content="dark light">
+        <meta name="supported-color-schemes" content="dark light">
+        <title>Sendaat Password Reset</title>
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #050505; color: #FFFFFF; font-family: 'Google Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <!-- Preheader Inbox Protection: Prevents raw code from showing in email preview list -->
+        <div style="display:none; font-size:1px; color:#050505; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
+          Sendaat Security Verification. Open this message to view your secure verification code. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
         </div>
 
-        <div style="padding: 36px 32px; background-color: #ffffff;">
-          <h2 style="color: #1f1f1f; font-size: 22px; font-weight: 500; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.3px;">Password Reset Request</h2>
-          <p style="color: #444746; font-size: 14px; line-height: 1.6; margin-top: 0; margin-bottom: 24px;">
-            Hello <strong>${recipientName}</strong>, use the 6-digit verification code below to reset your Sendaat password for <strong>${email}</strong>.
-          </p>
-
-          <div style="background: linear-gradient(180deg, #F0F4F9 0%, #E8F0FE 100%); border: 1.5px solid #C2E7FF; border-radius: 20px; padding: 24px; text-align: center; margin: 28px 0; box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);">
-            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #0B57D0; font-weight: 700; margin-bottom: 8px;">Reset Verification Code</div>
-            <div style="font-size: 38px; font-weight: 800; letter-spacing: 12px; color: #0B57D0; font-family: 'SF Mono', Consolas, Monaco, monospace; text-shadow: 0 1px 2px rgba(11,87,208,0.15);">${otpCode}</div>
-            <div style="font-size: 11px; color: #5F6368; margin-top: 10px;">Expires in 15 minutes • Do not share this code</div>
+        <div style="max-width: 560px; margin: 20px auto; padding: 0; background-color: #050505; border-radius: 24px; overflow: hidden; border: 1px solid #27272A;">
+          <div style="background-color: #09090B; padding: 36px 32px; text-align: center; border-bottom: 1px solid #27272A;">
+            <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; color: #FFFFFF;">Sendaat</div>
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px; color: #A1A1AA; font-weight: 600;">Account Security Protocol</div>
           </div>
 
-          <p style="color: #5F6368; font-size: 12px; line-height: 1.5; margin-bottom: 0;">
-            If you did not request a password reset, please secure your account immediately.
-          </p>
-        </div>
+          <div style="padding: 36px 32px; background-color: #121212; color: #FFFFFF;">
+            <h2 style="color: #FFFFFF; font-size: 22px; font-weight: 500; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.3px;">Password Reset Code</h2>
+            <p style="color: #A1A1AA; font-size: 14px; line-height: 1.6; margin-top: 0; margin-bottom: 24px;">
+              Hello <strong style="color: #FFFFFF;">${recipientName}</strong>! Open this message to view your 6-digit verification code below to reset your Sendaat password for <strong style="color: #FFFFFF;">${email}</strong>.
+            </p>
 
-        <div style="padding: 20px 32px; background-color: #f8f9fa; border-top: 1px solid #f1f3f4; text-align: center;">
-          <p style="color: #747775; font-size: 11px; margin: 0; line-height: 1.5;">
-            Sendaat Security Systems • San Francisco, CA
-          </p>
+            <div style="background-color: #000000; border: 1px solid #27272A; border-radius: 20px; padding: 24px; text-align: center; margin: 28px 0;">
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #A1A1AA; font-weight: 700; margin-bottom: 8px;">Reset Verification Code</div>
+              <div style="font-size: 38px; font-weight: 800; letter-spacing: 12px; color: #FFFFFF; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace;">${otpCode}</div>
+              <div style="font-size: 11px; color: #A1A1AA; margin-top: 10px;">Expires in 15 minutes • Do not share this code</div>
+
+              <div style="margin-top: 20px;">
+                <a href="${magicVerifyUrl}" target="_blank" style="background-color: #FFFFFF; color: #000000; font-weight: 700; padding: 14px 28px; text-decoration: none; border-radius: 9999px; display: inline-block; font-size: 13px;">
+                  Auto-Verify & Reset Password →
+                </a>
+              </div>
+            </div>
+
+            <p style="color: #A1A1AA; font-size: 12px; line-height: 1.5; margin-bottom: 0;">
+              If you did not request a password reset, please secure your account immediately. Your security remains guarded by Sendaat domain protection.
+            </p>
+          </div>
+
+          <div style="padding: 20px 32px; background-color: #050505; border-top: 1px solid #27272A; text-align: center;">
+            <p style="color: #71717A; font-size: 11px; margin: 0; line-height: 1.5;">
+              Sendaat Security Systems • San Francisco, CA<br/>
+              High-Deliverability Email Infrastructure & Domain Protection
+            </p>
+          </div>
         </div>
-      </div>
+      </body>
+      </html>
     `;
 
     const result = await sendMailWithFallback({
       to: email,
       subject: resetSubject,
       html: resetHtml,
-      user: smtpUser,
-      pass: smtpPass,
+      user,
+      pass,
       fromName: 'Sendaat Security'
     });
 
-    console.log(`[RESET OTP SENT] To: ${email} | Code: ${otpCode} | Sender: ${result.sender}`);
+    console.log(`[RESET OTP SENT] To: ${email} | Code SHA256 Hash: ${hashedCode.substring(0, 12)}... | Sender: ${result.sender}`);
     return res.json({ success: true, mode: 'gmail', message: `Password reset verification email dispatched to ${email}. Please check your inbox.` });
   } catch (err) {
     console.error('[RESET EMAIL ERROR]', err);
