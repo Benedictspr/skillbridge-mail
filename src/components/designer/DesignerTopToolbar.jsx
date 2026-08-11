@@ -292,32 +292,32 @@ export default function DesignerTopToolbar({
         {/* Preview Button */}
         <button
           onClick={onOpenPreview}
-          className="flex items-center gap-1.5 px-3 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-medium text-white transition-all cursor-pointer font-sans"
-          title="Open Live Email Preview Studio"
+          className="p-1.5 sm:px-2.5 sm:py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-medium text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+          title="Open Live Email Preview Studio (Preview)"
         >
           <Eye className="w-3.5 h-3.5 text-zinc-300" />
-          <span className="hidden sm:inline">Preview</span>
+          <span className="hidden xl:inline">Preview</span>
         </button>
 
         {/* Send Test Button */}
         <button
           onClick={onOpenSendTest}
-          className="flex items-center gap-1.5 px-3 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-medium text-white transition-all cursor-pointer font-sans"
-          title="Send Test Email"
+          className="p-1.5 sm:px-2.5 sm:py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-medium text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+          title="Send Inbox Test Email (Send Test)"
         >
           <Send className="w-3.5 h-3.5 text-zinc-300" />
-          <span className="hidden sm:inline">Send Test</span>
+          <span className="hidden xl:inline">Send Test</span>
         </button>
 
         {/* Export Dropdown */}
         <div className="relative">
           <button
             onClick={() => setShowExportMenu(!showExportMenu)}
-            className="flex items-center gap-1 px-3 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-medium text-white transition-all cursor-pointer font-sans"
-            title="Export Options"
+            className="p-1.5 sm:px-2.5 sm:py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-medium text-white transition-all cursor-pointer flex items-center gap-1 shadow-xs"
+            title="Export Options (HTML / JSON)"
           >
             <Download className="w-3.5 h-3.5 text-zinc-300" />
-            <span className="hidden sm:inline">Export</span>
+            <span className="hidden xl:inline">Export</span>
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           </button>
 
@@ -360,18 +360,18 @@ export default function DesignerTopToolbar({
         {/* Save Template Button */}
         <button
           onClick={onSaveAsTemplate}
-          className="flex items-center gap-1.5 px-3 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-medium text-white transition-all cursor-pointer font-sans"
-          title="Save Template"
+          className="p-1.5 sm:px-2.5 sm:py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-medium text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+          title="Save as Template"
         >
           <Bookmark className="w-3.5 h-3.5 text-zinc-300" />
-          <span className="hidden md:inline">Save Template</span>
+          <span className="hidden xl:inline">Save Template</span>
         </button>
 
         {/* Primary Action: Publish Email */}
         <button
           onClick={onPublish}
-          className="flex items-center gap-1.5 px-3.5 py-1 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-lg shadow-xs transition-all cursor-pointer font-sans"
-          title="Publish Email"
+          className="px-3 py-1 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-lg shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+          title="Publish Email to Live Campaign"
         >
           <Rocket className="w-3.5 h-3.5 text-black stroke-[2.5]" />
           <span>Publish</span>

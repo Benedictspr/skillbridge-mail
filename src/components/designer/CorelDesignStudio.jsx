@@ -1191,11 +1191,11 @@ export default function CorelDesignStudio({
                       <label className="text-xs font-semibold text-slate-300">Personalization Tag</label>
                       <select onChange={(e) => updateObject(primarySelected.id, 'text', primarySelected.text + ' ' + e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-teal-400 font-mono">
                         <option value="">+ Insert Personalization Tag</option>
-                        <option value="{{first_name}}">First Name ({{first_name}})</option>
-                        <option value="{{last_name}}">Last Name ({{last_name}})</option>
-                        <option value="{{company}}">Company ({{company}})</option>
-                        <option value="{{email}}">Recipient Email ({{email}})</option>
-                        <option value="{{unsubscribe_url}}">Unsubscribe URL ({{unsubscribe_url}})</option>
+                        <option value="{{first_name}}">First Name ({"{{first_name}}"})</option>
+                        <option value="{{last_name}}">Last Name ({"{{last_name}}"})</option>
+                        <option value="{{company}}">Company ({"{{company}}"})</option>
+                        <option value="{{email}}">Recipient Email ({"{{email}}"})</option>
+                        <option value="{{unsubscribe_url}}">Unsubscribe URL ({"{{unsubscribe_url}}"})</option>
                       </select>
                     </div>
 
