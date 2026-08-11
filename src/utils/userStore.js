@@ -127,7 +127,54 @@ export function validateCredentials(email, password) {
   return { success: true, user };
 }
 
+// 90 Days in milliseconds (3 months)
+const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+
+export function validatePasswordReuse(email, newPassword) {
+  const users = getRegisteredUsers();
+  const cleanEmail = (email || '').trim().toLowerCase();
+  const user = users.find(u => u.email.toLowerCase() === cleanEmail);
+
+  if (!user) {
+    return { valid: true };
+  }
+
+  // 1. Cannot reuse active current password
+  if (user.password && user.password === newPassword) {
+    return {
+      valid: false,
+      message: 'You cannot reuse your current active password. Please choose a new password.'
+    };
+  }
+
+  // 2. Cannot reuse any password used within the last 90 days (3 months)
+  const history = Array.isArray(user.passwordHistory) ? user.passwordHistory : [];
+  const now = Date.now();
+
+  const isReusedRecent = history.some(entry => {
+    if (entry && entry.password === newPassword) {
+      const ageMs = now - (entry.setAt || 0);
+      return ageMs < NINETY_DAYS_MS;
+    }
+    return false;
+  });
+
+  if (isReusedRecent) {
+    return {
+      valid: false,
+      message: 'You cannot reuse a password used within the last 3 months (90 days). Please choose a new password.'
+    };
+  }
+
+  return { valid: true };
+}
+
 export function updateUserPassword(email, newPassword) {
+  const check = validatePasswordReuse(email, newPassword);
+  if (!check.valid) {
+    throw new Error(check.message);
+  }
+
   const users = getRegisteredUsers();
   const cleanEmail = (email || '').trim().toLowerCase();
   
@@ -135,7 +182,16 @@ export function updateUserPassword(email, newPassword) {
   const updatedUsers = users.map(u => {
     if (u.email.toLowerCase() === cleanEmail) {
       found = true;
-      return { ...u, password: newPassword };
+      const history = Array.isArray(u.passwordHistory) ? u.passwordHistory : [];
+      const newHistory = [
+        { password: u.password, setAt: Date.now() },
+        ...history
+      ];
+      return { 
+        ...u, 
+        password: newPassword,
+        passwordHistory: newHistory 
+      };
     }
     return u;
   });

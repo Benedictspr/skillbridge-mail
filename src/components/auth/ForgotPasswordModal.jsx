@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, X, CheckCircle2, ShieldAlert, KeyRound, ArrowRight, ShieldCheck, Settings, ChevronDown, ChevronUp } from 'lucide-react';
-import { getRegisteredUsers, updateUserPassword } from '../../utils/userStore';
+import { getRegisteredUsers, updateUserPassword, validatePasswordReuse } from '../../utils/userStore';
 
 export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = '' }) {
   const [email, setEmail] = useState(initialEmail);
@@ -85,6 +85,13 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
 
     if (!newPassword || newPassword.length < 8) {
       setErrorMsg('New password must be at least 8 characters long.');
+      return;
+    }
+
+    // Enforce 3-month password reuse policy
+    const reuseCheck = validatePasswordReuse(email, newPassword);
+    if (!reuseCheck.valid) {
+      setErrorMsg(reuseCheck.message);
       return;
     }
 
