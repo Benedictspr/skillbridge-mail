@@ -9,22 +9,8 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
   
   // SMTP Config for Live Delivery
   const [showSmtpSettings, setShowSmtpSettings] = useState(false);
-  const [smtpUser, setSmtpUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('skillbridge_smtpConfig');
-      return saved ? JSON.parse(saved).user || '' : '';
-    } catch (e) {
-      return '';
-    }
-  });
-  const [smtpPass, setSmtpPass] = useState(() => {
-    try {
-      const saved = localStorage.getItem('skillbridge_smtpConfig');
-      return saved ? JSON.parse(saved).pass || '' : '';
-    } catch (e) {
-      return '';
-    }
-  });
+  const [smtpUser, setSmtpUser] = useState('');
+  const [smtpPass, setSmtpPass] = useState('');
 
   const [generatedOtp, setGeneratedOtp] = useState('');
   const [userOtpInput, setUserOtpInput] = useState('');
@@ -47,7 +33,6 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
       return;
     }
 
-    // Verify email is registered in userStore
     const users = getRegisteredUsers();
     const registered = users.find(u => u.email.toLowerCase() === cleanEmail);
 
@@ -64,34 +49,22 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
     setGeneratedOtp(otpCode);
 
     try {
-      // Save SMTP settings if entered
-      if (smtpUser && smtpPass) {
-        localStorage.setItem('skillbridge_smtpConfig', JSON.stringify({ mode: 'gmail', user: smtpUser, pass: smtpPass }));
-      }
-
-      // Send real email via backend server
-      const resp = await fetch('http://localhost:3001/api/send-reset-otp', {
+      const resp = await fetch('http://localhost:3001/api/send-signup-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           email: cleanEmail, 
-          otpCode,
+          name: registered.name, 
+          otpCode: otpCode,
           smtpUser: smtpUser || undefined,
-          smtpPass: smtpPass || undefined 
+          smtpPass: smtpPass || undefined
         })
       });
-
       const data = await resp.json();
       setIsLoading(false);
-
-      if (data.mode === 'sandbox' || data.fallback || !resp.ok) {
-        setDeliveryMode('sandbox');
-        setInfoMsg(`Security sandbox code generated for ${cleanEmail}: ${data.otpCode || otpCode}`);
-      } else {
-        setDeliveryMode('gmail');
-        setInfoMsg(`A 6-digit verification code was sent to ${cleanEmail}. Please check your email inbox.`);
-      }
-
+      
+      setDeliveryMode(data.mode || 'live');
+      setInfoMsg(`A 6-digit verification code was sent to ${cleanEmail}. Please check your email inbox.`);
       setErrorMsg('');
       setStep(2);
     } catch (err) {
@@ -115,7 +88,6 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
       return;
     }
 
-    // Cryptographically verify Google Authenticator 2FA token if 2FA enabled
     if (matchedUser?.twoFactorEnabled) {
       if (!twoFactorCodeInput || twoFactorCodeInput.trim().length < 6) {
         setErrorMsg('Google Authenticator 2FA is enabled for this account. Please enter your 6-digit Authenticator code.');
@@ -170,12 +142,12 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in font-sans">
-      <div className="relative w-full max-w-md bg-white rounded-[28px] shadow-[0_1px_3px_0_rgba(60,64,67,0.1),0_4px_12px_4px_rgba(60,64,67,0.08)] border border-[#DADCE0] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in font-sans text-white select-none">
+      <div className="relative w-full max-w-md bg-[#121212] rounded-[28px] shadow-2xl border border-zinc-800 overflow-hidden">
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 p-2 text-[#747775] hover:text-[#1F1F1F] rounded-full hover:bg-[#F8F9FA] transition-colors"
+          className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white rounded-full hover:bg-zinc-800 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -184,46 +156,44 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
           {/* STEP 1: Enter Registered Email */}
           {step === 1 && (
             <>
-              <div className="w-12 h-12 rounded-2xl bg-[#E8F0FE] text-[#0B57D0] flex items-center justify-center mb-5">
+              <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 text-white flex items-center justify-center mb-5">
                 <Mail className="w-6 h-6" />
               </div>
 
-              <h2 className="text-2xl font-normal text-[#1F1F1F] tracking-tight">
+              <h2 className="text-2xl font-normal text-white tracking-tight">
                 Reset your password
               </h2>
-              <p className="text-[#444746] text-sm mt-1.5 leading-relaxed font-normal">
+              <p className="text-zinc-400 text-sm mt-1.5 leading-relaxed font-normal">
                 Enter your registered work email address. We will send a 6-digit verification code to reset your password.
               </p>
 
               {errorMsg && (
-                <div className="mt-4 p-3 bg-[#FCE8E6] border border-[#FAD2CF] text-[#C5221F] text-xs rounded-xl font-medium flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 shrink-0" />
+                <div className="mt-4 p-3 bg-rose-950/40 border border-rose-800/40 text-rose-400 text-xs rounded-xl font-medium flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 shrink-0 text-rose-400" />
                   <span>{errorMsg}</span>
                 </div>
               )}
 
               <form onSubmit={handleSendOtp} className="mt-5 space-y-4 font-sans">
                 <div>
-                  <label className="block text-xs font-medium text-[#444746] mb-1.5">
+                  <label className="block text-xs font-medium text-zinc-400 mb-1.5">
                     Registered work email
                   </label>
                   <input
                     type="email"
                     required
-                    placeholder="benedict@sendaat.io"
+                    placeholder="maverick@sendaat.io"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border border-[#747775] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 rounded-xl text-[#1F1F1F] text-sm outline-none transition-all"
+                    className="w-full px-4 py-3 bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-sm outline-none transition-all font-sans font-normal placeholder-zinc-600"
                   />
                 </div>
-
-
 
                 <div className="pt-2 flex items-center justify-end gap-3">
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="px-5 py-2.5 rounded-full text-[#444746] hover:bg-[#F8F9FA] text-xs font-medium transition-colors"
+                    className="px-5 py-2.5 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 text-xs font-medium transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -231,10 +201,10 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
                   <button
                     type="submit"
                     disabled={isLoading || !email}
-                    className="px-6 py-2.5 bg-[#0B57D0] hover:bg-[#0842A0] text-white text-xs font-medium rounded-full shadow-xs transition-colors flex items-center gap-2"
+                    className="px-6 py-2.5 bg-white hover:bg-zinc-200 text-black text-xs font-medium rounded-full shadow-xs transition-colors flex items-center gap-2 cursor-pointer"
                   >
                     {isLoading ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                     ) : (
                       <>
                         <span>Send reset code</span>
@@ -250,27 +220,27 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
           {/* STEP 2: Enter Verification Codes & Set New Password */}
           {step === 2 && (
             <>
-              <div className="w-12 h-12 rounded-2xl bg-[#E8F0FE] text-[#0B57D0] flex items-center justify-center mb-5">
+              <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 text-white flex items-center justify-center mb-5">
                 <KeyRound className="w-6 h-6" />
               </div>
 
-              <h2 className="text-2xl font-normal text-[#1F1F1F] tracking-tight">
+              <h2 className="text-2xl font-normal text-white tracking-tight">
                 Enter verification code
               </h2>
-              <p className="text-[#444746] text-sm mt-1 leading-relaxed">
+              <p className="text-zinc-400 text-sm mt-1 leading-relaxed font-normal">
                 {infoMsg || `A 6-digit verification code was sent to ${email}`}
               </p>
 
               {errorMsg && (
-                <div className="mt-3 p-3 bg-[#FCE8E6] border border-[#FAD2CF] text-[#C5221F] text-xs rounded-xl font-medium flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 shrink-0" />
+                <div className="mt-3 p-3 bg-rose-950/40 border border-rose-800/40 text-rose-400 text-xs rounded-xl font-medium flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 shrink-0 text-rose-400" />
                   <span>{errorMsg}</span>
                 </div>
               )}
 
               <form onSubmit={handleResetPassword} className="mt-5 space-y-4 font-sans">
                 <div>
-                  <label className="block text-xs font-medium text-[#444746] mb-1.5">
+                  <label className="block text-xs font-medium text-zinc-400 mb-1.5">
                     6-Digit Email Verification Code *
                   </label>
                   <input
@@ -280,18 +250,17 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
                     placeholder="123456"
                     value={userOtpInput}
                     onChange={(e) => setUserOtpInput(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border border-[#747775] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 rounded-xl text-[#1F1F1F] text-center font-mono text-lg tracking-[6px] outline-none transition-all"
+                    className="w-full px-4 py-3 bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-center font-mono text-lg tracking-[6px] outline-none transition-all"
                   />
                 </div>
 
-                {/* Google Authenticator Prompt if enabled on account */}
                 {matchedUser?.twoFactorEnabled && (
-                  <div className="p-3 bg-[#F0F4F9] border border-[#D3E3FD] rounded-xl space-y-2">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[#0B57D0]">
+                  <div className="p-3 bg-black border border-zinc-800 rounded-xl space-y-2">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-white">
                       <ShieldCheck className="w-4 h-4 shrink-0" />
                       <span>Google Authenticator Required (2FA Protected)</span>
                     </div>
-                    <label className="block text-xs font-medium text-[#444746]">
+                    <label className="block text-xs font-medium text-zinc-400">
                       6-Digit Authenticator App Code *
                     </label>
                     <input
@@ -301,13 +270,13 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
                       placeholder="000 000"
                       value={twoFactorCodeInput}
                       onChange={(e) => setTwoFactorCodeInput(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-[#747775] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 rounded-xl text-[#1F1F1F] text-center font-mono text-base tracking-[6px] outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-center font-mono text-base tracking-[6px] outline-none transition-all"
                     />
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-xs font-medium text-[#444746] mb-1.5">
+                  <label className="block text-xs font-medium text-zinc-400 mb-1.5">
                     New Password *
                   </label>
                   <input
@@ -316,7 +285,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
                     placeholder="Minimum 8 characters"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border border-[#747775] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 rounded-xl text-[#1F1F1F] text-sm outline-none transition-all"
+                    className="w-full px-4 py-3 bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-sm outline-none transition-all"
                   />
                 </div>
 
@@ -324,7 +293,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="text-xs text-[#0B57D0] font-medium hover:underline"
+                    className="text-xs text-zinc-400 font-medium hover:text-white cursor-pointer"
                   >
                     Resend code
                   </button>
@@ -332,10 +301,10 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
                   <button
                     type="submit"
                     disabled={isLoading || !userOtpInput || !newPassword || (matchedUser?.twoFactorEnabled && !twoFactorCodeInput)}
-                    className="px-6 py-2.5 bg-[#0B57D0] hover:bg-[#0842A0] text-white text-xs font-medium rounded-full shadow-xs transition-colors flex items-center gap-2"
+                    className="px-6 py-2.5 bg-white hover:bg-zinc-200 text-black text-xs font-medium rounded-full shadow-xs transition-colors cursor-pointer"
                   >
                     {isLoading ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                     ) : (
                       <span>Save New Password</span>
                     )}
@@ -348,16 +317,16 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
           {/* STEP 3: Password Reset Success */}
           {step === 3 && (
             <div className="text-center py-4 font-sans">
-              <div className="w-12 h-12 bg-[#E6F4EA] text-[#137333] rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-7 h-7" />
               </div>
-              <h2 className="text-xl font-normal text-[#1F1F1F]">Password Reset Complete</h2>
-              <p className="text-[#444746] text-sm mt-2 leading-relaxed">
-                Your password for <span className="font-semibold text-[#1F1F1F]">{email}</span> has been updated successfully. You can now sign in.
+              <h2 className="text-xl font-normal text-white">Password Reset Complete</h2>
+              <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
+                Your password for <span className="font-semibold text-white">{email}</span> has been updated successfully. You can now sign in.
               </p>
               <button
                 onClick={handleClose}
-                className="mt-6 px-7 py-2.5 bg-[#0B57D0] hover:bg-[#0842A0] text-white font-medium text-xs rounded-full shadow-xs transition-colors"
+                className="mt-6 px-7 py-2.5 bg-white hover:bg-zinc-200 text-black font-medium text-xs rounded-full shadow-xs transition-colors cursor-pointer"
               >
                 Sign in to Sendaat
               </button>

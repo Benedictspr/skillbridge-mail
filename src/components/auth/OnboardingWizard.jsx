@@ -11,7 +11,7 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
 
   const [workspaceName, setWorkspaceName] = useState(currentUser?.company || 'My Workspace');
   const [domainName, setDomainName] = useState('sendaat.io');
-  const [teamSize, setTeamSize] = useState('1-10');
+  const [teamSize, setTeamSize] = useState('1-5');
   const [useCase, setUseCase] = useState('talent');
   const [senderMode, setSenderMode] = useState('gmail');
   const [senderEmail, setSenderEmail] = useState(currentUser?.email || 'outreach@company.com');
@@ -51,49 +51,52 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#F0F4F9] text-[#1F1F1F] flex flex-col justify-between p-4 sm:p-8 font-sans selection:bg-[#D3E3FD]">
-      {/* Top Header */}
+    <div className="min-h-screen w-full bg-[#050505] text-white flex flex-col justify-between p-4 sm:p-8 font-sans select-none">
+      
+      {/* Top Header Bar - Original Google Sans Normal Typography */}
       <div className="w-full max-w-3xl mx-auto flex items-center justify-between py-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#0B57D0] flex items-center justify-center text-white shadow-xs">
-            <Send className="w-4 h-4" />
+          <div className="w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center shadow-xs">
+            <Send className="w-4 h-4 text-black" />
           </div>
-          <span className="font-normal text-xl text-[#1F1F1F] tracking-tight">
+          <span className="font-normal text-xl text-white tracking-tight font-sans">
             Sendaat Setup
           </span>
         </div>
 
-        <div className="text-xs font-medium text-[#444746] bg-white px-3 py-1.5 rounded-full border border-[#DADCE0]">
+        <div className="text-xs font-medium text-zinc-300 bg-[#121212] px-3.5 py-1.5 rounded-full border border-zinc-800">
           Step {step} of {totalSteps}
         </div>
       </div>
 
-      {/* Main Wizard Card */}
-      <div className="w-full max-w-3xl mx-auto my-auto bg-white rounded-[28px] border border-[#DADCE0] shadow-[0_1px_3px_0_rgba(60,64,67,0.08),0_4px_12px_4px_rgba(60,64,67,0.04)] overflow-hidden font-sans">
+      {/* Main Wizard Card - Vantablack Monochromatic Surface */}
+      <div className="w-full max-w-3xl mx-auto my-auto bg-[#121212] rounded-[28px] border border-zinc-800 shadow-2xl overflow-hidden font-sans">
+        
         {/* Progress Bar */}
-        <div className="h-1 w-full bg-[#E1E3E1]">
+        <div className="h-1 w-full bg-black">
           <div 
-            className="h-full bg-[#0B57D0] transition-all duration-300"
+            className="h-full bg-white transition-all duration-300"
             style={{ width: `${(step / totalSteps) * 100}%` }}
           />
         </div>
 
         <div className="p-8 sm:p-12">
+          
           {/* STEP 1: Workspace */}
           {step === 1 && (
             <div className="space-y-6">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-normal text-[#1F1F1F] tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-normal text-white tracking-tight">
                   Set up your workspace
                 </h1>
-                <p className="text-[#444746] text-sm mt-1.5">
-                  Configure your organization profile for deliverability optimization.
+                <p className="text-zinc-400 text-sm mt-1.5 font-normal leading-relaxed">
+                  Configure your organization profile for deliverability optimization and domain authentication.
                 </p>
               </div>
 
               <div className="space-y-4 pt-2">
                 <div>
-                  <label className="block text-xs font-medium text-[#444746] mb-1.5">
+                  <label className="block text-xs font-medium text-zinc-400 mb-1.5">
                     Workspace name
                   </label>
                   <input
@@ -101,16 +104,16 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
                     value={workspaceName}
                     onChange={(e) => setWorkspaceName(e.target.value)}
                     placeholder="e.g. Apex Global Talent"
-                    className="w-full px-4 py-3 bg-white border border-[#747775] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 rounded-xl text-[#1F1F1F] text-sm outline-none font-sans"
+                    className="w-full px-4 py-3 bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-sm outline-none font-sans font-normal"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#444746] mb-1.5">
+                  <label className="block text-xs font-medium text-zinc-400 mb-1.5">
                     Sending domain
                   </label>
                   <div className="flex items-center">
-                    <span className="px-3.5 py-3 bg-[#F8F9FA] border border-r-0 border-[#747775] rounded-l-xl text-[#5F6368] text-sm font-mono">
+                    <span className="px-3.5 py-3 bg-zinc-900 border border-r-0 border-zinc-800 rounded-l-xl text-zinc-400 text-sm font-mono font-normal">
                       https://
                     </span>
                     <input
@@ -118,13 +121,13 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
                       value={domainName}
                       onChange={(e) => setDomainName(e.target.value)}
                       placeholder="company.com"
-                      className="w-full px-4 py-3 bg-white border border-[#747775] focus:border-[#0B57D0] rounded-r-xl text-[#1F1F1F] text-sm outline-none font-sans"
+                      className="w-full px-4 py-3 bg-black border border-zinc-800 focus:border-zinc-500 rounded-r-xl text-white text-sm outline-none font-sans font-normal"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#444746] mb-1.5">
+                  <label className="block text-xs font-medium text-zinc-400 mb-1.5">
                     Team size
                   </label>
                   <div className="grid grid-cols-4 gap-3">
@@ -133,10 +136,10 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
                         key={size}
                         type="button"
                         onClick={() => setTeamSize(size)}
-                        className={`py-2.5 px-3 rounded-xl border text-xs font-medium transition-all ${
+                        className={`py-2.5 px-3 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
                           teamSize === size 
-                            ? 'bg-[#E8F0FE] text-[#0B57D0] border-[#0B57D0]' 
-                            : 'bg-white text-[#444746] border-[#DADCE0] hover:bg-[#F8F9FA]'
+                            ? 'bg-white text-black border-white shadow-xs font-medium' 
+                            : 'bg-black text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 font-normal'
                         }`}
                       >
                         {size}
@@ -152,10 +155,10 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
           {step === 2 && (
             <div className="space-y-6">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-normal text-[#1F1F1F] tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-normal text-white tracking-tight">
                   Select your primary objective
                 </h1>
-                <p className="text-[#444746] text-sm mt-1.5">
+                <p className="text-zinc-400 text-sm mt-1.5 font-normal leading-relaxed">
                   We'll optimize your campaign throttle limits and spam shields based on your choice.
                 </p>
               </div>
@@ -195,15 +198,15 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
                       onClick={() => setUseCase(item.id)}
                       className={`p-5 rounded-2xl border cursor-pointer transition-all ${
                         isSelected 
-                          ? 'border-[#0B57D0] bg-[#F0F4F9]' 
-                          : 'border-[#DADCE0] bg-white hover:bg-[#F8F9FA]'
+                          ? 'border-white bg-zinc-900 text-white shadow-md' 
+                          : 'border-zinc-800 bg-black text-zinc-400 hover:bg-zinc-900/50 hover:text-white'
                       }`}
                     >
-                      <div className="w-8 h-8 rounded-full bg-[#E8F0FE] text-[#0B57D0] flex items-center justify-center mb-3">
+                      <div className="w-8 h-8 rounded-full bg-zinc-800 text-white flex items-center justify-center mb-3">
                         <IconComp className="w-4 h-4" />
                       </div>
-                      <h4 className="font-semibold text-[#1F1F1F] text-sm">{item.title}</h4>
-                      <p className="text-xs text-[#5F6368] mt-1 leading-relaxed">{item.desc}</p>
+                      <h4 className="font-medium text-white text-sm font-sans">{item.title}</h4>
+                      <p className="text-xs text-zinc-400 mt-1 font-normal leading-relaxed">{item.desc}</p>
                     </div>
                   );
                 })}
@@ -215,10 +218,10 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
           {step === 3 && (
             <div className="space-y-6">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-normal text-[#1F1F1F] tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-normal text-white tracking-tight">
                   Connect sending mailbox
                 </h1>
-                <p className="text-[#444746] text-sm mt-1.5">
+                <p className="text-zinc-400 text-sm mt-1.5 font-normal leading-relaxed">
                   Select your dispatch option. Sendaat manages DKIM keys and rate limits automatically.
                 </p>
               </div>
@@ -234,29 +237,29 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
                     onClick={() => setSenderMode(opt.id)}
                     className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
                       senderMode === opt.id 
-                        ? 'border-[#0B57D0] bg-[#F0F4F9]' 
-                        : 'border-[#DADCE0] bg-white hover:bg-[#F8F9FA]'
+                        ? 'border-white bg-zinc-900 text-white shadow-md' 
+                        : 'border-zinc-800 bg-black text-zinc-400 hover:bg-zinc-900/50 hover:text-white'
                     }`}
                   >
                     <div>
-                      <div className="font-semibold text-[#1F1F1F] text-sm">{opt.title}</div>
-                      <p className="text-xs text-[#5F6368] mt-0.5">{opt.desc}</p>
+                      <div className="font-medium text-white text-sm font-sans">{opt.title}</div>
+                      <p className="text-xs text-zinc-400 mt-0.5 font-normal">{opt.desc}</p>
                     </div>
-                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${senderMode === opt.id ? 'border-[#0B57D0] bg-[#0B57D0] text-white' : 'border-[#747775]'}`}>
-                      {senderMode === opt.id && <Check className="w-3 h-3 stroke-[3]" />}
+                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${senderMode === opt.id ? 'border-white bg-white text-black' : 'border-zinc-700'}`}>
+                      {senderMode === opt.id && <Check className="w-3 h-3 stroke-[2.5]" />}
                     </div>
                   </div>
                 ))}
 
                 <div className="pt-3">
-                  <label className="block text-xs font-medium text-[#444746] mb-1.5">
+                  <label className="block text-xs font-medium text-zinc-400 mb-1.5">
                     Primary sender email
                   </label>
                   <input
                     type="email"
                     value={senderEmail}
                     onChange={(e) => setSenderEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border border-[#747775] focus:border-[#0B57D0] rounded-xl text-[#1F1F1F] text-sm outline-none font-sans"
+                    className="w-full px-4 py-3 bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-sm outline-none font-sans font-normal"
                   />
                 </div>
               </div>
@@ -267,10 +270,10 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
           {step === 4 && (
             <div className="space-y-6">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-normal text-[#1F1F1F] tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-normal text-white tracking-tight">
                   Import initial contacts
                 </h1>
-                <p className="text-[#444746] text-sm mt-1.5">
+                <p className="text-zinc-400 text-sm mt-1.5 font-normal leading-relaxed">
                   Populate your initial roster to test dispatching.
                 </p>
               </div>
@@ -286,16 +289,16 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
                     onClick={() => setImportOption(opt.id)}
                     className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
                       importOption === opt.id 
-                        ? 'border-[#0B57D0] bg-[#F0F4F9]' 
-                        : 'border-[#DADCE0] bg-white hover:bg-[#F8F9FA]'
+                        ? 'border-white bg-zinc-900 text-white shadow-md' 
+                        : 'border-zinc-800 bg-black text-zinc-400 hover:bg-zinc-900/50 hover:text-white'
                     }`}
                   >
                     <div>
-                      <div className="font-semibold text-[#1F1F1F] text-sm">{opt.title}</div>
-                      <p className="text-xs text-[#5F6368] mt-0.5">{opt.desc}</p>
+                      <div className="font-medium text-white text-sm font-sans">{opt.title}</div>
+                      <p className="text-xs text-zinc-400 mt-0.5 font-normal">{opt.desc}</p>
                     </div>
-                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${importOption === opt.id ? 'border-[#0B57D0] bg-[#0B57D0] text-white' : 'border-[#747775]'}`}>
-                      {importOption === opt.id && <Check className="w-3 h-3 stroke-[3]" />}
+                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${importOption === opt.id ? 'border-white bg-white text-black' : 'border-zinc-700'}`}>
+                      {importOption === opt.id && <Check className="w-3 h-3 stroke-[2.5]" />}
                     </div>
                   </div>
                 ))}
@@ -304,13 +307,13 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
           )}
 
           {/* Nav Footer */}
-          <div className="mt-10 pt-6 border-t border-[#E1E3E1] flex items-center justify-between">
+          <div className="mt-10 pt-6 border-t border-zinc-800 flex items-center justify-between">
             {step > 1 ? (
               <button
                 type="button"
                 onClick={handleBack}
                 disabled={isFinishing}
-                className="px-5 py-2.5 rounded-full border border-[#747775] text-[#1F1F1F] hover:bg-[#F8F9FA] text-xs font-medium transition-colors"
+                className="px-5 py-2.5 rounded-full border border-zinc-700 text-white hover:bg-zinc-800 text-xs font-medium transition-colors cursor-pointer"
               >
                 Back
               </button>
@@ -320,10 +323,10 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
               type="button"
               onClick={handleNext}
               disabled={isFinishing}
-              className="px-7 py-2.5 bg-[#0B57D0] hover:bg-[#0842A0] text-white text-xs font-medium rounded-full shadow-xs transition-colors flex items-center gap-2"
+              className="px-7 py-2.5 bg-white hover:bg-zinc-200 text-black text-xs font-medium rounded-full shadow-xs transition-all flex items-center gap-2 cursor-pointer"
             >
               {isFinishing ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
               ) : (
                 <span>{step === totalSteps ? 'Complete & Launch' : 'Continue'}</span>
               )}
@@ -332,7 +335,7 @@ export default function OnboardingWizard({ currentUser, onCompleteOnboarding }) 
         </div>
       </div>
 
-      <div className="text-center text-xs text-[#747775] py-2">
+      <div className="text-center text-xs font-normal text-zinc-500 py-2">
         Sendaat Workspace Setup Protocol
       </div>
     </div>

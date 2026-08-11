@@ -34,7 +34,6 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
 
     setTimeout(() => {
       setIsLoading(false);
-      // Validate credentials against registered user store
       const result = validateCredentials(cleanEmail, password);
 
       if (!result.success) {
@@ -42,7 +41,6 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
         return;
       }
 
-      // Check if 2FA Google Authenticator is enabled for this account
       if (result.user.twoFactorEnabled) {
         setPendingUser(result.user);
         setStep('2fa');
@@ -107,51 +105,51 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
   };
 
   return (
-    <div className="w-full max-w-[380px] mx-auto font-sans">
+    <div className="w-full max-w-[380px] mx-auto font-sans text-white">
       {step === 'login' ? (
         <>
-          {/* Header */}
+          {/* Header - Google Sans Normal */}
           <div className="mb-5">
-            <h1 className="text-2xl font-normal text-[#1F1F1F] tracking-tight">
+            <h1 className="text-2xl font-normal text-white tracking-tight">
               Sign in
             </h1>
-            <p className="text-[#444746] text-xs mt-1 font-normal">
+            <p className="text-zinc-400 text-xs mt-1 font-normal">
               to continue to Sendaat Workspace
             </p>
           </div>
 
           {errorMsg && (
-            <div className="mb-4 px-3.5 py-2.5 bg-[#FCE8E6] border border-[#FAD2CF] text-[#C5221F] text-xs rounded-xl font-medium flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-[#C5221F] shrink-0" />
+            <div className="mb-4 px-3.5 py-2.5 bg-rose-950/40 border border-rose-800/40 text-rose-400 text-xs rounded-xl font-medium flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          {/* Main Production Form */}
+          {/* Form */}
           <form onSubmit={handleFormSubmit} className="space-y-3.5">
             <div>
-              <label className="block text-xs font-medium text-[#444746] mb-1">
+              <label className="block text-xs font-medium text-zinc-400 mb-1">
                 Work email address
               </label>
               <input
                 type="email"
                 required
-                placeholder="benedict@sendaat.io"
+                placeholder="maverick@sendaat.io"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-white border border-[#747775] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 rounded-xl text-[#1F1F1F] text-xs outline-none transition-all font-sans"
+                className="w-full px-3.5 py-2.5 bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-xs outline-none transition-all font-sans font-normal placeholder-zinc-600"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-medium text-[#444746]">
+                <label className="block text-xs font-medium text-zinc-400">
                   Password
                 </label>
                 <button
                   type="button"
                   onClick={() => onOpenForgotPassword(email)}
-                  className="text-xs text-[#0B57D0] hover:underline font-medium transition-colors"
+                  className="text-xs text-zinc-400 hover:text-white font-medium transition-colors cursor-pointer"
                 >
                   Forgot password?
                 </button>
@@ -163,12 +161,12 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 pr-10 bg-white border border-[#747775] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 rounded-xl text-[#1F1F1F] text-xs outline-none transition-all font-sans"
+                  className="w-full px-3.5 py-2.5 pr-10 bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-xs outline-none transition-all font-sans font-normal placeholder-zinc-600"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-[#747775] hover:text-[#1F1F1F] transition-colors"
+                  className="absolute right-3 top-3 text-zinc-500 hover:text-white transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -180,7 +178,7 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
               <button
                 type="button"
                 onClick={onSwitchToSignup}
-                className="text-xs font-medium text-[#0B57D0] hover:underline transition-colors"
+                className="text-xs font-medium text-zinc-400 hover:text-white transition-colors cursor-pointer"
               >
                 Create account
               </button>
@@ -188,10 +186,10 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-6 py-2 bg-[#0B57D0] hover:bg-[#0842A0] text-white font-medium text-xs rounded-full shadow-xs transition-colors flex items-center gap-1.5"
+                className="px-6 py-2 bg-white hover:bg-zinc-200 text-black font-medium text-xs rounded-full shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 {isLoading ? (
-                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                 ) : (
                   <>
                     <span>Sign in</span>
@@ -205,27 +203,27 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
       ) : (
         /* STEP 2: Google Authenticator 2-Factor Authentication (2FA) */
         <div className="animate-fade-in font-sans">
-          <div className="w-10 h-10 rounded-2xl bg-[#E8F0FE] text-[#0B57D0] flex items-center justify-center mb-4">
+          <div className="w-10 h-10 rounded-2xl bg-zinc-900 text-white flex items-center justify-center mb-4 border border-zinc-800">
             <ShieldCheck className="w-5 h-5" />
           </div>
 
-          <h2 className="text-2xl font-normal text-[#1F1F1F] tracking-tight">
+          <h2 className="text-2xl font-normal text-white tracking-tight">
             2-Step Verification
           </h2>
-          <p className="text-[#444746] text-xs mt-1 leading-relaxed font-normal">
-            Enter the 6-digit code generated by your <strong>Google Authenticator</strong> app for <span className="font-semibold text-[#1F1F1F]">{pendingUser?.email}</span>.
+          <p className="text-zinc-400 text-xs mt-1 leading-relaxed font-normal">
+            Enter the 6-digit code generated by your <strong>Google Authenticator</strong> app for <span className="font-semibold text-white">{pendingUser?.email}</span>.
           </p>
 
           {errorMsg && (
-            <div className="mt-3 px-3 py-2 bg-[#FCE8E6] border border-[#FAD2CF] text-[#C5221F] text-xs rounded-xl font-medium flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-[#C5221F] shrink-0" />
+            <div className="mt-3 px-3.5 py-2.5 bg-rose-950/40 border border-rose-800/40 text-rose-400 text-xs rounded-xl font-medium flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           <form onSubmit={handleVerify2FA} className="mt-4 space-y-4">
             <div>
-              <label className="block text-xs font-medium text-[#444746] mb-1">
+              <label className="block text-xs font-medium text-zinc-400 mb-1">
                 Google Authenticator Code
               </label>
               <input
@@ -235,29 +233,29 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
                 placeholder="000 000"
                 value={twoFactorCode}
                 onChange={(e) => setTwoFactorCode(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-[#747775] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 rounded-xl text-[#1F1F1F] text-center font-mono text-xl tracking-[8px] outline-none transition-all"
+                className="w-full px-4 py-3 bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-center font-mono text-xl tracking-[8px] outline-none transition-all"
               />
             </div>
 
             <button
               type="button"
               onClick={toggleQrView}
-              className="text-xs text-[#0B57D0] hover:underline flex items-center gap-1 font-medium"
+              className="text-xs text-zinc-400 hover:text-white flex items-center gap-1 font-medium cursor-pointer"
             >
               <QrCode className="w-3.5 h-3.5" />
               <span>{showQrModal ? 'Hide Secret Key & QR Code' : 'View Authenticator QR Code & Secret'}</span>
             </button>
 
             {showQrModal && (
-              <div className="p-3 bg-[#F8F9FA] border border-[#DADCE0] rounded-xl text-center animate-fade-in">
+              <div className="p-3 bg-black border border-zinc-800 rounded-xl text-center animate-fade-in">
                 {qrCodeUrl ? (
-                  <img src={qrCodeUrl} alt="Google Authenticator QR Code" className="w-28 h-28 mx-auto mb-2 rounded-lg bg-white p-1 border border-[#DADCE0]" />
+                  <img src={qrCodeUrl} alt="Google Authenticator QR Code" className="w-28 h-28 mx-auto mb-2 rounded-lg bg-white p-1" />
                 ) : (
-                  <div className="w-28 h-28 mx-auto flex items-center justify-center text-xs text-[#5F6368]">
+                  <div className="w-28 h-28 mx-auto flex items-center justify-center text-xs text-zinc-500 font-mono">
                     Loading QR code...
                   </div>
                 )}
-                <span className="font-mono text-xs text-[#0B57D0] font-bold tracking-wider select-all">
+                <span className="font-mono text-xs text-emerald-400 font-bold tracking-wider select-all">
                   {pendingUser?.twoFactorSecret || 'SENDAAT-2FA-784920'}
                 </span>
               </div>
@@ -267,7 +265,7 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
               <button
                 type="button"
                 onClick={() => setStep('login')}
-                className="text-xs text-[#0B57D0] hover:underline font-medium"
+                className="text-xs text-zinc-400 hover:text-white font-medium cursor-pointer"
               >
                 Back to Sign in
               </button>
@@ -275,10 +273,10 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
               <button
                 type="submit"
                 disabled={isLoading || twoFactorCode.length < 6}
-                className="px-6 py-2 bg-[#0B57D0] hover:bg-[#0842A0] text-white font-medium text-xs rounded-full shadow-xs transition-colors"
+                className="px-6 py-2 bg-white hover:bg-zinc-200 text-black font-medium text-xs rounded-full shadow-xs transition-colors cursor-pointer"
               >
                 {isLoading ? (
-                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                 ) : (
                   <span>Verify Code</span>
                 )}
