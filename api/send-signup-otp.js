@@ -5,17 +5,44 @@ const SYSTEM_SMTP = {
   pass: process.env.SMTP_PASS || 'smjpsmbbqhjvovcp'
 };
 
+function parseRequestBody(req) {
+  if (!req.body) return {};
+  if (typeof req.body === 'string') {
+    try {
+      return JSON.parse(req.body);
+    } catch (e) {
+      console.error('[SIGNUP OTP] Failed to parse string body:', e.message);
+      return {};
+    }
+  }
+  if (Buffer.isBuffer(req.body)) {
+    try {
+      return JSON.parse(req.body.toString('utf8'));
+    } catch (e) {
+      return {};
+    }
+  }
+  return req.body;
+}
+
 async function sendMailWithFallback({ to, subject, html, user, pass, fromName }) {
   const primaryUser = user || SYSTEM_SMTP.user;
   const primaryPass = pass || SYSTEM_SMTP.pass;
 
   try {
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: primaryUser, pass: primaryPass }
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: { user: primaryUser, pass: primaryPass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
+      tls: { rejectUnauthorized: false }
     });
+
     const info = await transporter.sendMail({
-      from: `${fromName} <${primaryUser}>`,
+      from: `"${fromName}" <${primaryUser}>`,
       to,
       subject,
       html
@@ -26,11 +53,17 @@ async function sendMailWithFallback({ to, subject, html, user, pass, fromName })
     if (primaryUser !== SYSTEM_SMTP.user || primaryPass !== SYSTEM_SMTP.pass) {
       try {
         const fallbackTransporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: { user: SYSTEM_SMTP.user, pass: SYSTEM_SMTP.pass }
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: { user: SYSTEM_SMTP.user, pass: SYSTEM_SMTP.pass },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 10000,
+          tls: { rejectUnauthorized: false }
         });
         const info = await fallbackTransporter.sendMail({
-          from: `${fromName} <${SYSTEM_SMTP.user}>`,
+          from: `"${fromName}" <${SYSTEM_SMTP.user}>`,
           to,
           subject,
           html
@@ -45,19 +78,21 @@ async function sendMailWithFallback({ to, subject, html, user, pass, fromName })
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
   );
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    const { email, name, otpCode, smtpUser, smtpPass } = req.body || {};
+    const body = parseRequestBody(req);
+    const { email, name, otpCode, smtpUser, smtpPass } = body;
+    
     if (!email || !otpCode) {
       return res.status(400).json({ error: 'Missing email or OTP code.' });
     }

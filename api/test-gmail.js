@@ -5,20 +5,40 @@ const SYSTEM_SMTP = {
   pass: process.env.SMTP_PASS || 'smjpsmbbqhjvovcp'
 };
 
+function parseRequestBody(req) {
+  if (!req.body) return {};
+  if (typeof req.body === 'string') {
+    try {
+      return JSON.parse(req.body);
+    } catch (e) {
+      return {};
+    }
+  }
+  if (Buffer.isBuffer(req.body)) {
+    try {
+      return JSON.parse(req.body.toString('utf8'));
+    } catch (e) {
+      return {};
+    }
+  }
+  return req.body;
+}
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
   );
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    const { smtpUser, smtpPass } = req.body || {};
+    const body = parseRequestBody(req);
+    const { smtpUser, smtpPass } = body;
     const user = smtpUser || SYSTEM_SMTP.user;
     const pass = smtpPass || SYSTEM_SMTP.pass;
 
@@ -31,6 +51,9 @@ export default async function handler(req, res) {
       port: 465,
       secure: true,
       auth: { user, pass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
       tls: { rejectUnauthorized: false }
     });
 

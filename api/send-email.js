@@ -5,26 +5,41 @@ const SYSTEM_SMTP = {
   pass: process.env.SMTP_PASS || 'smjpsmbbqhjvovcp'
 };
 
+function parseRequestBody(req) {
+  if (!req.body) return {};
+  if (typeof req.body === 'string') {
+    try {
+      return JSON.parse(req.body);
+    } catch (e) {
+      console.error('[SEND EMAIL] Failed to parse string body:', e.message);
+      return {};
+    }
+  }
+  if (Buffer.isBuffer(req.body)) {
+    try {
+      return JSON.parse(req.body.toString('utf8'));
+    } catch (e) {
+      return {};
+    }
+  }
+  return req.body;
+}
+
 export default async function handler(req, res) {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
   );
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    const { to, recipientEmail, subject, html, bodyText, smtpUser, smtpPass, fromName = 'Sendaat Outreach' } = req.body || {};
+    const body = parseRequestBody(req);
+    const { to, recipientEmail, subject, html, bodyText, smtpUser, smtpPass, fromName = 'Sendaat Outreach' } = body;
     const targetEmail = recipientEmail || to;
 
     if (!targetEmail) {
@@ -34,26 +49,21 @@ export default async function handler(req, res) {
     const primaryUser = smtpUser || SYSTEM_SMTP.user;
     const primaryPass = smtpPass || SYSTEM_SMTP.pass;
 
-    // Dispatch real email via Nodemailer Gmail / Custom SMTP
-    let transporter;
-    if (primaryUser.includes('@gmail.com')) {
-      transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: { user: primaryUser, pass: primaryPass }
-      });
-    } else {
-      transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: { user: primaryUser, pass: primaryPass }
-      });
-    }
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: { user: primaryUser, pass: primaryPass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
+      tls: { rejectUnauthorized: false }
+    });
 
     const contentHtml = html || `<p>${(bodyText || 'Outreach email message').replace(/\n/g, '<br/>')}</p>`;
 
     const mailOptions = {
-      from: `${fromName} <${primaryUser}>`,
+      from: `"${fromName}" <${primaryUser}>`,
       to: targetEmail,
       subject: subject || 'SkillBridge Outreach Message',
       html: contentHtml
@@ -72,18 +82,24 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('[VERCEL API EMAIL ERROR]', error);
 
-    // Fall back to system credentials if user credentials failed
-    if (req.body?.smtpUser && req.body.smtpUser !== SYSTEM_SMTP.user) {
+    const body = parseRequestBody(req);
+    if (body.smtpUser && body.smtpUser !== SYSTEM_SMTP.user) {
       try {
         const fallbackTransporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: { user: SYSTEM_SMTP.user, pass: SYSTEM_SMTP.pass }
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: { user: SYSTEM_SMTP.user, pass: SYSTEM_SMTP.pass },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 10000,
+          tls: { rejectUnauthorized: false }
         });
         const info = await fallbackTransporter.sendMail({
-          from: `Sendaat Network <${SYSTEM_SMTP.user}>`,
-          to: req.body.recipientEmail || req.body.to,
-          subject: req.body.subject || 'SkillBridge Outreach Message',
-          html: req.body.html || `<p>${req.body.bodyText || ''}</p>`
+          from: `"Sendaat Network" <${SYSTEM_SMTP.user}>`,
+          to: body.recipientEmail || body.to,
+          subject: body.subject || 'SkillBridge Outreach Message',
+          html: body.html || `<p>${body.bodyText || ''}</p>`
         });
         return res.status(200).json({
           success: true,
