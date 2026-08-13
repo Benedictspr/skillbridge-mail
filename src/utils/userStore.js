@@ -89,7 +89,24 @@ export async function registerUser(newUser) {
   const updatedUsers = [...users, userRecord];
   localStorage.setItem('sendaat_registeredUsers', JSON.stringify(updatedUsers));
 
-  // Sync with Supabase Cloud DB for Cross-Device Access
+  // Sync to Central Backend Serverless API
+  try {
+    await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: cleanEmail,
+        password: newUser.password,
+        name: userRecord.name,
+        company: userRecord.company,
+        role: userRecord.role
+      })
+    });
+  } catch (err) {
+    console.warn('Central auth register sync warning:', err);
+  }
+
+  // Sync with Supabase Cloud DB
   try {
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
@@ -138,14 +155,30 @@ export function validateCredentials(email, password) {
   return { success: true, user };
 }
 
-// ASYNC VALIDATE CREDENTIALS WITH SUPABASE CLOUD BACKEND
+// ASYNC VALIDATE CREDENTIALS WITH CENTRAL SERVER & SUPABASE CLOUD BACKEND
 export async function validateCredentialsAsync(email, password) {
   const cleanEmail = (email || '').trim().toLowerCase();
 
-  // 1. Try local storage check first
-  const localRes = validateCredentials(cleanEmail, password);
-  if (localRes.success) {
-    return localRes;
+  // 1. Try Central Vercel Backend Auth first (for Cross-Device / Cross-Browser Logins)
+  try {
+    const resp = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: cleanEmail, password: password })
+    });
+    
+    const data = await resp.json();
+    if (resp.ok && data.success && data.user) {
+      // Sync and overwrite local storage cache on this device with verified server account
+      const users = getRegisteredUsers();
+      const updatedUsers = users.filter(u => u.email.toLowerCase() !== cleanEmail);
+      updatedUsers.push(data.user);
+      localStorage.setItem('sendaat_registeredUsers', JSON.stringify(updatedUsers));
+
+      return { success: true, user: data.user };
+    }
+  } catch (backendErr) {
+    console.warn('Central Vercel auth check warning:', backendErr);
   }
 
   // 2. Query Supabase Cloud Authentication for cross-device logins
@@ -172,9 +205,9 @@ export async function validateCredentialsAsync(email, password) {
 
       // Cache locally on this device
       const users = getRegisteredUsers();
-      if (!users.some(u => u.email.toLowerCase() === cleanEmail)) {
-        localStorage.setItem('sendaat_registeredUsers', JSON.stringify([...users, cloudUser]));
-      }
+      const updatedUsers = users.filter(u => u.email.toLowerCase() !== cleanEmail);
+      updatedUsers.push(cloudUser);
+      localStorage.setItem('sendaat_registeredUsers', JSON.stringify(updatedUsers));
 
       return { success: true, user: cloudUser };
     }
@@ -182,7 +215,8 @@ export async function validateCredentialsAsync(email, password) {
     console.warn('Supabase cloud authentication check warning:', err);
   }
 
-  return localRes;
+  // 3. Fallback to LocalStorage Check
+  return validateCredentials(cleanEmail, password);
 }
 
 // 90 Days in milliseconds (3 months)
@@ -253,11 +287,32 @@ export function updateUserPassword(email, newPassword) {
   });
 
   if (!found) {
-    throw new Error('No registered account found with this email address.');
+    // If not found locally, create record
+    updatedUsers.push({
+      id: 'usr_' + Date.now(),
+      email: cleanEmail,
+      password: newPassword,
+      name: cleanEmail.split('@')[0],
+      company: `${cleanEmail.split('@')[0]}'s Workspace`,
+      role: 'Workspace Owner',
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
+      onboardingCompleted: false,
+      isEmailVerified: true,
+      twoFactorEnabled: false
+    });
   }
 
   localStorage.setItem('sendaat_registeredUsers', JSON.stringify(updatedUsers));
   
+  // Sync password update to Central Backend Serverless API
+  try {
+    fetch('/api/auth/update-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: cleanEmail, newPassword })
+    }).catch(() => {});
+  } catch (e) {}
+
   // Sync password update to Supabase
   try {
     supabase.auth.updateUser({ password: newPassword }).catch(() => {});
