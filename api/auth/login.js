@@ -1,4 +1,4 @@
-import { parseRequestBody, findUserByEmail, saveUserToStore, supabase } from './store.js';
+import { parseRequestBody, findUserByEmail, saveUserToStore, supabase } from '../../lib/authStore.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
