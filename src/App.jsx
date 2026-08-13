@@ -314,23 +314,38 @@ export default function App() {
   };
 
   // Dispatch single test email
-  const handleSendSingleTest = async (recipientEmail, testSubject = null, customHtml = null) => {
-    addLog(`Sending single test email to ${recipientEmail}...`, 'sending');
+  const handleSendSingleTest = async (recipientEmail, subjectOrHtml = null, customHtml = null) => {
+    const targetEmail = (typeof recipientEmail === 'string' && recipientEmail.includes('@')) 
+      ? recipientEmail.trim() 
+      : (currentUser?.email || 'm4verickjack@gmail.com');
+
+    let finalSubject = campaignConfig.subject || 'Test Outreach Email';
+    let finalHtml = customHtml || campaignConfig.bodyText || '<p>Test Outreach Email</p>';
+
+    if (typeof subjectOrHtml === 'string' && subjectOrHtml.trim().length > 0) {
+      if (subjectOrHtml.includes('<html') || subjectOrHtml.includes('<div') || subjectOrHtml.includes('<table') || subjectOrHtml.includes('<p') || subjectOrHtml.includes('<!DOCTYPE')) {
+        finalHtml = subjectOrHtml;
+      } else {
+        finalSubject = subjectOrHtml;
+      }
+    }
+
+    addLog(`Sending single test email to ${targetEmail}...`, 'sending');
     try {
       let response;
       const payload = JSON.stringify({
-        recipientEmail,
-        to: recipientEmail,
+        recipientEmail: targetEmail,
+        to: targetEmail,
         recipientName: 'Test Recipient',
-        subject: testSubject || campaignConfig.subject || 'Test Outreach Email',
+        subject: finalSubject,
         bodyText: campaignConfig.bodyText || 'Test Body',
-        html: customHtml || campaignConfig.bodyText || '<p>Test Outreach Email</p>',
+        html: finalHtml,
         headerLogoText: campaignConfig.headerLogoText,
         buttonText: campaignConfig.buttonText,
         buttonUrl: campaignConfig.buttonUrl,
         signatureText: campaignConfig.signatureText,
         smtpUser: smtpConfig.user,
-        smtpPass: smtpConfig.pass,
+        smtpPass: smtpPass || smtpConfig.pass,
         organization_id: currentOrg.id
       });
 

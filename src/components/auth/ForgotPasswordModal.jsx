@@ -49,23 +49,6 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     setGeneratedOtp(otpCode);
 
-    // 1. Try Supabase Auth password reset email first
-    try {
-      const { error: sbError } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-        redirectTo: window.location.origin
-      });
-      if (!sbError) {
-        setIsLoading(false);
-        setDeliveryMode('live');
-        setInfoMsg(`A 6-digit verification code / password reset link has been dispatched to ${cleanEmail}. Please check your email inbox.`);
-        setErrorMsg('');
-        setStep(2);
-        return;
-      }
-    } catch (sbErr) {
-      console.warn('Supabase reset warning:', sbErr);
-    }
-
     // 2. Try Node.js backend if active
     try {
       const resp = await fetch('/api/send-reset-otp', {
