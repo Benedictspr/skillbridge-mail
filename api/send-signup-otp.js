@@ -97,7 +97,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing email or OTP code.' });
     }
 
-    const signupSubject = `Security Verification Code | Sendaat Workspace`;
+    const signupSubject = `Security Verification Code | Sendaat`;
     const recipientName = name || email.split('@')[0];
 
     const signupHtml = `
@@ -116,18 +116,24 @@ export default async function handler(req, res) {
         </div>
 
         <div style="max-width: 560px; margin: 20px auto; padding: 0; background-color: #050505; border-radius: 24px; overflow: hidden; border: 1px solid #27272A;">
+          
+          <!-- Top Header -->
           <div style="background-color: #09090B; padding: 36px 32px; text-align: center; border-bottom: 1px solid #27272A;">
             <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; color: #FFFFFF;">Sendaat</div>
-            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px; color: #A1A1AA; font-weight: 600;">Enterprise Security Protocol</div>
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px; color: #A1A1AA; font-weight: 600;">Enterprise Infrastructure</div>
           </div>
 
+          <!-- Main Content -->
           <div style="padding: 36px 32px; background-color: #121212; color: #FFFFFF;">
-            <h2 style="color: #FFFFFF; font-size: 22px; font-weight: 500; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.3px;">Confirm your email address</h2>
+            <h2 style="color: #FFFFFF; font-size: 22px; font-weight: 500; margin-top: 0; margin-bottom: 12px; letter-spacing: -0.3px;">
+              Confirm your email address
+            </h2>
             <p style="color: #A1A1AA; font-size: 14px; line-height: 1.6; margin-top: 0; margin-bottom: 24px;">
-              Welcome, <strong style="color: #FFFFFF;">${recipientName}</strong>! Open this message to view your 6-digit verification code below to confirm <strong style="color: #FFFFFF;">${email}</strong> and activate your workspace.
+              Welcome, <strong style="color: #FFFFFF;">${recipientName}</strong>! Use the 6-digit verification code below to confirm <strong style="color: #FFFFFF;">${email}</strong> and activate your workspace.
             </p>
 
-            <div style="background-color: #000000; border: 1px solid #27272A; border-radius: 20px; padding: 24px; text-align: center; margin: 28px 0;">
+            <!-- Verification Code Box -->
+            <div style="background-color: #000000; border: 1px solid #27272A; border-radius: 20px; padding: 24px; text-align: center; margin: 24px 0;">
               <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #A1A1AA; font-weight: 700; margin-bottom: 8px;">Verification Code</div>
               <div style="font-size: 38px; font-weight: 800; letter-spacing: 12px; color: #FFFFFF; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace;">${otpCode}</div>
               <div style="font-size: 11px; color: #A1A1AA; margin-top: 10px;">Expires in 15 minutes • Do not share this code</div>
@@ -138,11 +144,32 @@ export default async function handler(req, res) {
             </p>
           </div>
 
-          <div style="padding: 20px 32px; background-color: #050505; border-top: 1px solid #27272A; text-align: center;">
-            <p style="color: #71717A; font-size: 11px; margin: 0; line-height: 1.5;">
+          <!-- Social Media & Protocol Footer -->
+          <div style="padding: 24px 32px; background-color: #050505; border-top: 1px solid #27272A; text-align: center;">
+            <div style="margin-bottom: 16px;">
+              <a href="https://x.com" target="_blank" style="display: inline-block; margin: 0 8px; text-decoration: none;">
+                <img src="https://img.icons8.com/ios-filled/48/ffffff/twitterx.png" alt="X" width="18" height="18" style="vertical-align: middle; opacity: 0.85;" />
+              </a>
+              <a href="https://facebook.com" target="_blank" style="display: inline-block; margin: 0 8px; text-decoration: none;">
+                <img src="https://img.icons8.com/ios-filled/48/ffffff/facebook-new.png" alt="Facebook" width="18" height="18" style="vertical-align: middle; opacity: 0.85;" />
+              </a>
+              <a href="https://instagram.com" target="_blank" style="display: inline-block; margin: 0 8px; text-decoration: none;">
+                <img src="https://img.icons8.com/ios-filled/48/ffffff/instagram-new.png" alt="Instagram" width="18" height="18" style="vertical-align: middle; opacity: 0.85;" />
+              </a>
+              <a href="https://linkedin.com" target="_blank" style="display: inline-block; margin: 0 8px; text-decoration: none;">
+                <img src="https://img.icons8.com/ios-filled/48/ffffff/linkedin.png" alt="LinkedIn" width="18" height="18" style="vertical-align: middle; opacity: 0.85;" />
+              </a>
+              <a href="https://snapchat.com" target="_blank" style="display: inline-block; margin: 0 8px; text-decoration: none;">
+                <img src="https://img.icons8.com/ios-filled/48/ffffff/snapchat.png" alt="Snapchat" width="18" height="18" style="vertical-align: middle; opacity: 0.85;" />
+              </a>
+            </div>
+
+            <p style="color: #71717A; font-size: 11px; margin: 0; line-height: 1.6;">
+              Account Email: <strong style="color: #A1A1AA;">${email}</strong><br/>
               Sendaat Enterprise Infrastructure Protocol
             </p>
           </div>
+
         </div>
       </body>
       </html>
