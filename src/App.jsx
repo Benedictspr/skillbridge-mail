@@ -334,30 +334,11 @@ export default function App() {
         organization_id: currentOrg.id
       });
 
-      try {
-        response = await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: payload
-        });
-        if (!response.ok && response.status === 404) {
-          throw new Error('Serverless route 404, fallback to localhost');
-        }
-      } catch (e1) {
-        try {
-          response = await fetch('http://localhost:3001/api/send-email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: payload
-          });
-        } catch (e2) {
-          response = await fetch('http://localhost:5000/api/send-email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: payload
-          });
-        }
-      }
+      response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload
+      });
 
       const resData = await response.json();
       if (response.ok && (resData.success || resData.simulated)) {
@@ -401,31 +382,11 @@ export default function App() {
         organization_id: currentOrg.id
       });
 
-      let response;
-      try {
-        response = await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: payload
-        });
-        if (!response.ok && response.status === 404) {
-          throw new Error('Serverless route 404, fallback to localhost');
-        }
-      } catch (e1) {
-        try {
-          response = await fetch('http://localhost:3001/api/send-email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: payload
-          });
-        } catch (e2) {
-          response = await fetch('http://localhost:5000/api/send-email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: payload
-          });
-        }
-      }
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload
+      });
 
       const resData = await response.json();
       if (response.ok && (resData.success || resData.simulated)) {
@@ -443,12 +404,7 @@ export default function App() {
 
   const fetchSentHistoryFromBackend = async () => {
     try {
-      let response;
-      try {
-        response = await fetch('http://localhost:3001/api/sent-history');
-      } catch (e) {
-        response = await fetch('http://localhost:5000/api/sent-history');
-      }
+      const response = await fetch('/api/sent-history');
       if (response && response.ok) {
         const data = await response.json();
         if (data.sentHistory) {
@@ -462,12 +418,7 @@ export default function App() {
 
   const fetchRepliesFromBackend = async () => {
     try {
-      let response;
-      try {
-        response = await fetch('http://localhost:3001/api/replies');
-      } catch (e) {
-        response = await fetch('http://localhost:5000/api/replies');
-      }
+      const response = await fetch('/api/replies');
       if (response && response.ok) {
         const data = await response.json();
         if (data.replies && Array.isArray(data.replies)) {

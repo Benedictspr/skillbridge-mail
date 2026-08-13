@@ -32,7 +32,7 @@ export default function VenitaHeader({
     }
 
     try {
-      const res = await fetch('http://localhost:3001/api/test-gmail', {
+      const res = await fetch('/api/test-gmail', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ smtpUser: smtpConfig.user, smtpPass: smtpConfig.pass })
@@ -47,7 +47,7 @@ export default function VenitaHeader({
       }
     } catch (err) {
       setIsTesting(false);
-      setTestResult({ success: false, msg: 'Backend offline at http://localhost:3001' });
+      setTestResult({ success: false, msg: 'API Connection Error' });
     }
   };
 

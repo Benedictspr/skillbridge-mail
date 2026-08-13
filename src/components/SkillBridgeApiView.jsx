@@ -187,40 +187,21 @@ echo "Status: " . $response->status;`;
     const startTime = performance.now();
 
     try {
-      let resp;
-      try {
-        resp = await fetch('http://localhost:3001/api/send-email', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            recipientId: `test-api-${Date.now()}`,
-            to: testRecipient,
-            subject: testSubject,
-            html: testBody,
-            mode: 'sandbox',
-            organization_id: currentOrg?.id || 'org_sendaat_1001'
-          })
-        });
-      } catch (e) {
-        resp = await fetch('http://localhost:5000/api/send-email', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            recipientId: `test-api-${Date.now()}`,
-            to: testRecipient,
-            subject: testSubject,
-            html: testBody,
-            mode: 'sandbox',
-            organization_id: currentOrg?.id || 'org_sendaat_1001'
-          })
-        });
-      }
+      resp = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          recipientId: `test-api-${Date.now()}`,
+          to: testRecipient,
+          subject: testSubject,
+          html: testBody,
+          mode: 'sandbox',
+          organization_id: currentOrg?.id || 'org_sendaat_1001'
+        })
+      });
 
       const endTime = performance.now();
       const latencyMs = Math.round(endTime - startTime);

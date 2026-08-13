@@ -61,7 +61,7 @@ export default function SignupForm({ onSignupSuccess, onSwitchToLogin }) {
         localStorage.setItem('skillbridge_smtpConfig', JSON.stringify({ mode: 'gmail', user: smtpUser, pass: smtpPass }));
       }
 
-      const resp = await fetch('http://localhost:3001/api/send-signup-otp', {
+      const resp = await fetch('/api/send-signup-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -90,7 +90,7 @@ export default function SignupForm({ onSignupSuccess, onSwitchToLogin }) {
   // Generate live TOTP Secret & QR Code
   const fetchLive2FASecret = async (cleanEmail) => {
     try {
-      const resp = await fetch('http://localhost:3001/api/2fa/generate', {
+      const resp = await fetch('/api/2fa/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: cleanEmail })
@@ -185,7 +185,7 @@ export default function SignupForm({ onSignupSuccess, onSwitchToLogin }) {
     setIsLoading(true);
 
     try {
-      const resp = await fetch('http://localhost:3001/api/2fa/verify', {
+      const resp = await fetch('/api/2fa/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: totpInput.trim(), secret: twoFactorSecret })
@@ -219,7 +219,7 @@ export default function SignupForm({ onSignupSuccess, onSwitchToLogin }) {
         twoFactorSecret: activeSecret
       });
 
-      fetch('http://localhost:3001/api/send-welcome-email', {
+      fetch('/api/send-welcome-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

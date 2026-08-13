@@ -68,7 +68,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
 
     // 2. Try Node.js backend if active
     try {
-      const resp = await fetch('http://localhost:3001/api/send-signup-otp', {
+      const resp = await fetch('/api/send-reset-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -123,7 +123,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
 
       setIsLoading(true);
       try {
-        const resp2fa = await fetch('http://localhost:3001/api/2fa/verify', {
+        const resp2fa = await fetch('/api/2fa/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token: twoFactorCodeInput.trim(), secret: matchedUser.twoFactorSecret })

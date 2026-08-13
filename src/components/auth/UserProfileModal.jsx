@@ -45,7 +45,7 @@ export default function UserProfileModal({
   const loadLive2FA = async (userEmail) => {
     try {
       setIsLoading(true);
-      const resp = await fetch('http://localhost:3001/api/2fa/generate', {
+      const resp = await fetch('/api/2fa/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userEmail })
@@ -84,7 +84,7 @@ export default function UserProfileModal({
     setIsLoading(true);
 
     try {
-      const resp = await fetch('http://localhost:3001/api/2fa/verify', {
+      const resp = await fetch('/api/2fa/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: verifyTotpInput.trim(), secret: twoFactorSecret })

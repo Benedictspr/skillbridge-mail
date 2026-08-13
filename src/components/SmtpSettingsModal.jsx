@@ -26,23 +26,11 @@ export default function SmtpSettingsModal({ isOpen, onClose, smtpConfig, setSmtp
     }
 
     try {
-      let response;
-      try {
-        response = await fetch('/api/test-gmail', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ smtpUser: smtpConfig.user, smtpPass: smtpConfig.pass })
-        });
-        if (!response.ok && response.status === 404) {
-          throw new Error('Fallback to localhost');
-        }
-      } catch (e1) {
-        response = await fetch('http://localhost:3001/api/test-gmail', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ smtpUser: smtpConfig.user, smtpPass: smtpConfig.pass })
-        });
-      }
+      response = await fetch('/api/test-gmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ smtpUser: smtpConfig.user, smtpPass: smtpConfig.pass })
+      });
 
       const data = await response.json();
 

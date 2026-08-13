@@ -55,7 +55,7 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
 
   const loadLiveQrCode = async (userEmail) => {
     try {
-      const resp = await fetch('http://localhost:3001/api/2fa/generate', {
+      const resp = await fetch('/api/2fa/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userEmail })
@@ -88,7 +88,7 @@ export default function LoginForm({ onLoginSuccess, onOpenForgotPassword, onSwit
     setIsLoading(true);
 
     try {
-      const resp = await fetch('http://localhost:3001/api/2fa/verify', {
+      const resp = await fetch('/api/2fa/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: twoFactorCode.trim(), secret: pendingUser?.twoFactorSecret })

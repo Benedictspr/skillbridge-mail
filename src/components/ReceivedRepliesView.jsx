@@ -29,7 +29,7 @@ export default function ReceivedRepliesView({
     setSyncStatus('Connecting to imap.gmail.com:993...');
 
     try {
-      const res = await fetch('http://localhost:3001/api/fetch-live-replies', {
+      const res = await fetch('/api/fetch-live-replies', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -72,7 +72,7 @@ export default function ReceivedRepliesView({
     const bodyText = `Hi Maverick,\n\nI am replying to your email regarding the ${role} opportunity. I have prior experience and am available for 10-15 hours a week. Please let me know how to proceed.\n\nThanks,\n${name}`;
 
     try {
-      const res = await fetch('http://localhost:3001/api/replies', {
+      const res = await fetch('/api/replies', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
