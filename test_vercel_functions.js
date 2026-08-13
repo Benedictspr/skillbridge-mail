@@ -1,9 +1,9 @@
 import sendWelcomeEmailHandler from './api/send-welcome-email.js';
 import sendSignupOtpHandler from './api/send-signup-otp.js';
 import sendResetOtpHandler from './api/send-reset-otp.js';
-import loginAuthHandler from './api/auth/login.js';
-import registerAuthHandler from './api/auth/register.js';
-import updatePasswordAuthHandler from './api/auth/update-password.js';
+import loginAuthHandler from './api/auth-login.js';
+import registerAuthHandler from './api/auth-register.js';
+import updatePasswordAuthHandler from './api/auth-update-password.js';
 
 function createMockRes() {
   const res = {
@@ -51,7 +51,7 @@ async function runTests() {
   console.log('Result 3 status:', res3.statusCode, res3.data);
 
   // Test 4: Auth Register Handler
-  console.log('\nTest 4: api/auth/register...');
+  console.log('\nTest 4: api/auth-register...');
   const req4 = {
     method: 'POST',
     body: JSON.stringify({ email: 'testuser@example.com', password: 'NewSecurePassword123!', name: 'Test User' })
@@ -61,7 +61,7 @@ async function runTests() {
   console.log('Result 4 status:', res4.statusCode, res4.data);
 
   // Test 5: Auth Login Handler
-  console.log('\nTest 5: api/auth/login...');
+  console.log('\nTest 5: api/auth-login...');
   const req5 = {
     method: 'POST',
     body: JSON.stringify({ email: 'testuser@example.com', password: 'NewSecurePassword123!' })
@@ -71,7 +71,7 @@ async function runTests() {
   console.log('Result 5 status:', res5.statusCode, res5.data);
 
   // Test 6: Auth Password Update Handler
-  console.log('\nTest 6: api/auth/update-password...');
+  console.log('\nTest 6: api/auth-update-password...');
   const req6 = {
     method: 'POST',
     body: JSON.stringify({ email: 'testuser@example.com', newPassword: 'UpdatedPassword789!' })
