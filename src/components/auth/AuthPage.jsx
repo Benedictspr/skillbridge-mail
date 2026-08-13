@@ -22,9 +22,9 @@ export default function AuthPage({ onLoginSuccess }) {
   };
 
   return (
-    <div className="h-screen max-h-screen w-full bg-[#050505] text-white flex flex-col justify-between items-center px-6 py-4 font-sans overflow-hidden select-none">
+    <div className="min-h-screen w-full bg-[#050505] text-white flex flex-col justify-between items-center px-4 sm:px-6 py-4 font-sans overflow-y-auto select-none">
       {/* Centered Main Wrapper: Brand Header & Auth Card */}
-      <div className="w-full max-w-5xl mx-auto my-auto flex flex-col gap-3 shrink">
+      <div className="w-full max-w-5xl mx-auto my-auto py-2 flex flex-col gap-3 shrink-0">
         {/* Top Brand Bar */}
         <header className="w-full flex items-center justify-between py-0.5 shrink-0">
           <div className="flex items-center gap-2">
@@ -41,7 +41,7 @@ export default function AuthPage({ onLoginSuccess }) {
         <div className="w-full bg-[#121212] rounded-[28px] border border-zinc-800 shadow-2xl overflow-hidden font-sans">
           <div className="grid md:grid-cols-12 items-stretch">
             {/* Left Column: Product Intro */}
-            <div className="md:col-span-5 p-6 sm:p-8 md:p-8 bg-black border-r border-zinc-800 flex flex-col justify-between space-y-6">
+            <div className="md:col-span-5 p-5 sm:p-7 md:p-8 bg-black border-r border-zinc-800 flex flex-col justify-between space-y-4">
               <div className="space-y-3">
                 <h2 className="text-2xl sm:text-3xl font-normal text-white tracking-tight leading-snug">
                   High-deliverability email infrastructure.
@@ -52,7 +52,7 @@ export default function AuthPage({ onLoginSuccess }) {
               </div>
 
               {/* Clean Feature Highlights */}
-              <div className="space-y-3 pt-4 border-t border-zinc-800">
+              <div className="space-y-2.5 pt-4 border-t border-zinc-800">
                 <div className="text-xs leading-normal">
                   <div className="font-semibold text-white">99.8% Inbox Placement</div>
                   <div className="text-zinc-400 text-[11px] font-normal">Automated IP warmup, DKIM signing, and SPF authentication.</div>
@@ -71,7 +71,7 @@ export default function AuthPage({ onLoginSuccess }) {
             </div>
 
             {/* Right Column: Dynamic Login / Signup Form Container */}
-            <div className="md:col-span-7 p-6 sm:p-8 md:p-8 flex flex-col justify-center bg-[#121212]">
+            <div className="md:col-span-7 p-5 sm:p-7 md:p-8 flex flex-col justify-center bg-[#121212] overflow-y-auto">
               {authMode === 'login' ? (
                 <LoginForm 
                   onLoginSuccess={onLoginSuccess}
