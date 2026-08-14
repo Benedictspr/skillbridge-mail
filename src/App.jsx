@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, startTransition } from 'react';
 import confetti from 'canvas-confetti';
 import AppHeader from './components/AppHeader';
 import AppSidebar from './components/AppSidebar';
@@ -572,7 +572,11 @@ export default function App() {
           activeTab={activeTab}
           setActiveTab={(tab) => {
             if (tab === 'settings') setIsSmtpModalOpen(true);
-            else setActiveTab(tab);
+            else {
+              startTransition(() => {
+                setActiveTab(tab);
+              });
+            }
           }}
           recipients={recipients}
           repliesCount={(replies || []).filter(r => r?.isUnread).length}

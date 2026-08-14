@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { startTransition } from 'react';
 import { 
   Plus, Contact2, SendHorizontal, PenTool, ShieldCheck, X, 
   MessageSquare, Home, Code2, BarChart3
@@ -20,6 +20,12 @@ export default function AppSidebar({
   const safeRecipients = Array.isArray(recipients) ? recipients : [];
   const readyCount = safeRecipients.filter(r => r?.status === 'Ready' || r?.status === 'Queued').length;
   const sentCount = safeRecipients.filter(r => r?.status === 'Sent').length;
+
+  const handleNavClick = (tab) => {
+    startTransition(() => {
+      setActiveTab(tab);
+    });
+  };
 
   return (
     <>
@@ -53,7 +59,7 @@ export default function AppSidebar({
             <div className="space-y-1">
               {/* Dashboard */}
               <div
-                onClick={() => setActiveTab('dashboard')}
+                onClick={() => handleNavClick('dashboard')}
                 className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
                   activeTab === 'dashboard' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
@@ -67,7 +73,7 @@ export default function AppSidebar({
 
               {/* STEP 1: CREATE */}
               <div
-                onClick={() => setActiveTab('builder')}
+                onClick={() => handleNavClick('builder')}
                 className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
                   activeTab === 'builder' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
@@ -81,7 +87,7 @@ export default function AppSidebar({
 
               {/* STEP 2: AUDIENCE */}
               <div
-                onClick={() => setActiveTab('recipients')}
+                onClick={() => handleNavClick('recipients')}
                 className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
                   activeTab === 'recipients' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
@@ -100,7 +106,7 @@ export default function AppSidebar({
 
               {/* STEP 3: SEND */}
               <div
-                onClick={() => setActiveTab('queue')}
+                onClick={() => handleNavClick('queue')}
                 className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
                   activeTab === 'queue' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
@@ -123,7 +129,7 @@ export default function AppSidebar({
 
               {/* STEP 4: ANALYSE */}
               <div
-                onClick={() => setActiveTab('sent')}
+                onClick={() => handleNavClick('sent')}
                 className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
                   activeTab === 'sent' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
@@ -142,7 +148,7 @@ export default function AppSidebar({
 
               {/* Deliverability */}
               <div
-                onClick={() => setActiveTab('deliverability')}
+                onClick={() => handleNavClick('deliverability')}
                 className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
                   activeTab === 'deliverability' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
@@ -156,7 +162,7 @@ export default function AppSidebar({
 
               {/* Replies */}
               <div
-                onClick={() => setActiveTab('replies')}
+                onClick={() => handleNavClick('replies')}
                 className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
                   activeTab === 'replies' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
@@ -175,7 +181,7 @@ export default function AppSidebar({
 
               {/* Documentation */}
               <div
-                onClick={() => setActiveTab('api')}
+                onClick={() => handleNavClick('api')}
                 className={`flex items-center p-2 rounded-lg cursor-pointer transition-all duration-150 ${
                   activeTab === 'api' ? 'text-white font-extrabold' : 'text-zinc-400 hover:text-white font-medium'
                 } ${isCollapsed ? 'justify-center' : 'justify-between'}`}

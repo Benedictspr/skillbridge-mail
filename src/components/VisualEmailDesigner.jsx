@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, startTransition } from 'react';
 import DesignerTopToolbar from './designer/DesignerTopToolbar';
 import DesignerLeftSidebar from './designer/DesignerLeftSidebar';
 import DesignerCanvas from './designer/DesignerCanvas';
@@ -104,10 +104,12 @@ export default function VisualEmailDesigner({
       try {
         localStorage.setItem('sendaat_email_designer_data', JSON.stringify(emailData));
         if (setCampaignConfig) {
-          setCampaignConfig(prev => ({
-            ...prev,
-            htmlContent: exportToHtml(emailData)
-          }));
+          startTransition(() => {
+            setCampaignConfig(prev => ({
+              ...prev,
+              htmlContent: exportToHtml(emailData)
+            }));
+          });
         }
         setSaveStatus('Saved');
       } catch (err) {

@@ -27,9 +27,12 @@ export default function EmailBuilderView({
   const [editorMode, setEditorMode] = useState('visual'); // 'visual' | 'design' | 'text'
   const [selectedFont, setSelectedFont] = useState(FONT_CATALOG[0].family);
 
-  // Load Google Fonts into document DOM
+  // Load Google Fonts into document DOM asynchronously after initial paint
   useEffect(() => {
-    loadGoogleFontsInDOM();
+    const timer = setTimeout(() => {
+      loadGoogleFontsInDOM();
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // Synchronize sender email with Gmail SMTP address if set
