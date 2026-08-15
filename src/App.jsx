@@ -781,6 +781,8 @@ export default function App() {
         onUpdateUser={(updated) => setCurrentUser(updated)}
         onSignOut={handleSignOut}
         onRestartOnboarding={() => setIsOnboardingWizardOpen(true)}
+        smtpConfig={smtpConfig}
+        setSmtpConfig={setSmtpConfig}
       />
     </div>
   );
