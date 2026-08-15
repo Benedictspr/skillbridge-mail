@@ -551,10 +551,16 @@ export default function App() {
           setIsSidebarCollapsed(!isSidebarCollapsed);
           setIsMobileSidebarOpen(!isMobileSidebarOpen);
         }}
-        onOpenSettings={() => setIsSmtpModalOpen(true)}
+        onOpenSettings={() => {
+          startTransition(() => {
+            setIsSmtpModalOpen(true);
+          });
+        }}
         onNavigateHome={() => {
-          setActiveTab('dashboard');
-          setActiveInboxTab('primary');
+          startTransition(() => {
+            setActiveTab('dashboard');
+            setActiveInboxTab('primary');
+          });
         }}
         currentOrg={currentOrg}
         setCurrentOrg={setCurrentOrg}
@@ -562,7 +568,11 @@ export default function App() {
         setActiveSuite={setActiveSuite}
         setActiveTab={setActiveTab}
         currentUser={currentUser}
-        onOpenProfile={() => setIsProfileModalOpen(true)}
+        onOpenProfile={() => {
+          startTransition(() => {
+            setIsProfileModalOpen(true);
+          });
+        }}
         onSignOut={handleSignOut}
         recipients={recipients}
       />
@@ -571,8 +581,11 @@ export default function App() {
         <AppSidebar
           activeTab={activeTab}
           setActiveTab={(tab) => {
-            if (tab === 'settings') setIsSmtpModalOpen(true);
-            else {
+            if (tab === 'settings') {
+              startTransition(() => {
+                setIsSmtpModalOpen(true);
+              });
+            } else {
               startTransition(() => {
                 setActiveTab(tab);
               });
@@ -586,7 +599,11 @@ export default function App() {
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
           onLoadSkillBridgeData={handleLoadSendaatData}
           onLoadSendaatData={handleLoadSendaatData}
-          onOpenCompose={() => setIsComposeOpen(true)}
+          onOpenCompose={() => {
+            startTransition(() => {
+              setIsComposeOpen(true);
+            });
+          }}
           campaignStatus={campaignStatus}
           currentOrg={currentOrg}
         />
@@ -600,7 +617,11 @@ export default function App() {
               onPauseQueue={handlePauseQueue}
               recipientTracker={recipientTracker}
               setActiveTab={setActiveTab}
-              onOpenCompose={() => setIsComposeOpen(true)}
+              onOpenCompose={() => {
+                startTransition(() => {
+                  setIsComposeOpen(true);
+                });
+              }}
               currentOrg={currentOrg}
               theme={theme}
             />

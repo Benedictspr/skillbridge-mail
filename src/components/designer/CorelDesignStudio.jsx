@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, startTransition } from 'react';
 import { 
   MousePointer2, Move, Crop, ZoomIn, ZoomOut, PenTool, Square, Circle, 
   Star, Grid, Type, Image as ImageIcon, Pipette, Paintbrush, Minus, 
@@ -472,13 +472,22 @@ export default function CorelDesignStudio({
     setContextMenu({ x: e.clientX, y: e.clientY });
   };
 
+  const [showScratchConfirm, setShowScratchConfirm] = useState(false);
+
   // Start from Scratch (Blank Canvas)
   const handleStartFromScratch = () => {
-    if (window.confirm('Clear all objects and start from a blank canvas?')) {
+    if (!showScratchConfirm) {
+      setShowScratchConfirm(true);
+      showToast('Click again to confirm clearing canvas');
+      setTimeout(() => setShowScratchConfirm(false), 4000);
+      return;
+    }
+    setShowScratchConfirm(false);
+    startTransition(() => {
       pushHistory([]);
       setSelectedIds([]);
       showToast('Cleared canvas for blank design!');
-    }
+    });
   };
 
   // Export HTML Handler

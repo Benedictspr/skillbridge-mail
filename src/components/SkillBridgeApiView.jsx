@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, startTransition } from 'react';
 import { 
   Key, Code, ShieldCheck, Copy, Check, Terminal, Zap, Globe, Layers, 
   Play, RefreshCw, Send, Server, FileText, CheckCircle2, AlertCircle, Cpu, Code2, Plus, Trash2, Shield, Eye, EyeOff
@@ -81,19 +81,26 @@ export default function SkillBridgeApiView({ currentOrg }) {
     setNewKeyName('');
   };
 
+  const [showRevokeConfirmId, setShowRevokeConfirmId] = useState(null);
+
   // Revoke API Key
   const handleRevokeKey = (keyId) => {
     if (apiKeys.length <= 1) {
-      alert("At least one active API key is required for workspace operation.");
       return;
     }
-    if (confirm("Are you sure you want to revoke this secret API key? Any applications using this key will immediately lose access.")) {
+    if (showRevokeConfirmId !== keyId) {
+      setShowRevokeConfirmId(keyId);
+      setTimeout(() => setShowRevokeConfirmId(null), 4000);
+      return;
+    }
+    setShowRevokeConfirmId(null);
+    startTransition(() => {
       const updated = apiKeys.filter(k => k.id !== keyId);
       setApiKeys(updated);
       if (selectedKeyId === keyId) {
         setSelectedKeyId(updated[0].id);
       }
-    }
+    });
   };
 
   const copyToClipboard = (text, keyId) => {

@@ -106,12 +106,19 @@ export default function RecipientImportView({
     setPasteText('');
   };
 
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+
   const clearAllRecipients = () => {
-    if (confirm('Are you sure you want to remove all contacts from your Audience list?')) {
-      startTransition(() => {
-        setRecipients([]);
-      });
+    if (!showClearConfirm) {
+      setShowClearConfirm(true);
+      setTimeout(() => setShowClearConfirm(false), 4000);
+      return;
     }
+    setShowClearConfirm(false);
+    startTransition(() => {
+      setRecipients([]);
+      setParseSuccessMsg('Audience roster cleared.');
+    });
   };
 
   const handleDrag = (e) => {
@@ -197,10 +204,14 @@ export default function RecipientImportView({
             {safeRecipients.length > 0 && (
               <button
                 onClick={clearAllRecipients}
-                className="bg-rose-950/40 hover:bg-rose-950/70 text-rose-400 border border-rose-800/40 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
+                className={`font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer ${
+                  showClearConfirm 
+                    ? 'bg-rose-600 hover:bg-rose-700 text-white font-extrabold shadow-md animate-pulse' 
+                    : 'bg-rose-950/40 hover:bg-rose-950/70 text-rose-400 border border-rose-800/40'
+                }`}
               >
-                <Trash2 className="w-4 h-4 text-rose-400" />
-                <span>Clear All ({safeRecipients.length})</span>
+                <Trash2 className="w-4 h-4" />
+                <span>{showClearConfirm ? 'Click to Confirm Clear All' : `Clear All (${safeRecipients.length})`}</span>
               </button>
             )}
           </div>
