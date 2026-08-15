@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import nodemailer from 'nodemailer';
+import { createDynamicTransporter } from './lib/smtpHelper.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -92,31 +93,26 @@ let registeredUsers = [
   }
 ];
 
-async function sendMailWithFallback({ to, subject, html, user, pass, fromName = 'Sendaat Security' }) {
+async function sendMailWithFallback({ to, subject, html, user, pass, provider, host, port, fromName = 'Sendaat Security' }) {
   let primaryUser = user || storedSmtpConfig.user || SYSTEM_SMTP.user;
   let primaryPass = pass || storedSmtpConfig.pass || SYSTEM_SMTP.pass;
+  let provKey = provider || storedSmtpConfig.provider || 'gmail';
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: primaryUser, pass: primaryPass }
-    });
+    const transporter = createDynamicTransporter({ provider: provKey, user: primaryUser, pass: primaryPass, host, port });
     const info = await transporter.sendMail({
       from: `${fromName} <${primaryUser}>`,
       to,
       subject,
       html
     });
-    console.log(`[EMAIL DISPATCH SUCCESS] Dispatched to: ${to} via ${primaryUser}`);
-    return { success: true, messageId: info.messageId, sender: primaryUser, mode: 'gmail' };
+    console.log(`[EMAIL DISPATCH SUCCESS] Dispatched to: ${to} via ${primaryUser} (${provKey})`);
+    return { success: true, messageId: info.messageId, sender: primaryUser, mode: provKey };
   } catch (err) {
     console.warn(`[SMTP PRIMARY ERROR] ${err.message}. Retrying with system credentials...`);
     if (primaryUser !== SYSTEM_SMTP.user || primaryPass !== SYSTEM_SMTP.pass) {
       try {
-        const fallbackTransporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: { user: SYSTEM_SMTP.user, pass: SYSTEM_SMTP.pass }
-        });
+        const fallbackTransporter = createDynamicTransporter({ provider: 'gmail', user: SYSTEM_SMTP.user, pass: SYSTEM_SMTP.pass });
         const info = await fallbackTransporter.sendMail({
           from: `${fromName} <${SYSTEM_SMTP.user}>`,
           to,

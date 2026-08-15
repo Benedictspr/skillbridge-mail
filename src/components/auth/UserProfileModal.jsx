@@ -6,6 +6,52 @@ import {
 } from 'lucide-react';
 import { updateUserProfile } from '../../utils/userStore';
 
+// Official SVG Brand Logos
+const GmailLogo = () => (
+  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6Z" fill="#EA4335" />
+    <path d="M22 6L12 13L2 6V18H4V8L12 13.5L20 8V18H22V6Z" fill="#34A853" />
+    <path d="M2 6L12 13L22 6H2Z" fill="#4285F4" />
+    <path d="M20 4H16L12 7L8 4H4C2.9 4 2 4.9 2 6V8L12 14.5L22 8V6C22 4.9 21.1 4 20 4Z" fill="#FBBC04" />
+  </svg>
+);
+
+const OutlookLogo = () => (
+  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M1 17L10 20V4L1 7V17Z" fill="#0078D4" />
+    <path d="M14.5 13.5L23 8V16C23 17.1 22.1 18 21 18H10V11.5L14.5 13.5Z" fill="#28A8EA" />
+    <path d="M23 8L14.5 13.5L10 11.5V6H21C22.1 6 23 6.9 23 8Z" fill="#0078D4" />
+    <path d="M10 6L14.5 13.5L23 8H10Z" fill="#50E6FF" />
+    <circle cx="5.5" cy="12" r="2.5" fill="white" />
+  </svg>
+);
+
+const YahooLogo = () => (
+  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="24" height="24" rx="6" fill="#6001D2" />
+    <path d="M6 7L10.5 13.5V17H13.5V13.5L18 7H15L12 11.5L9 7H6Z" fill="white" />
+    <circle cx="17.5" cy="16.5" r="1.2" fill="white" />
+  </svg>
+);
+
+const ZohoLogo = () => (
+  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="24" height="24" rx="6" fill="#009688" />
+    <path d="M6 7.5H18C18.8 7.5 19.5 8.2 19.5 9V15C19.5 15.8 18.8 16.5 18 16.5H6C5.2 16.5 4.5 15.8 4.5 15V9C4.5 8.2 5.2 7.5 6 7.5Z" fill="white" fillOpacity="0.2" />
+    <path d="M5 8L12 13L19 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <rect x="5" y="7.5" width="14" height="9" rx="1.5" stroke="white" strokeWidth="1.8" />
+  </svg>
+);
+
+const CustomSmtpLogo = () => (
+  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="4" width="20" height="6" rx="2" stroke="#A1A1AA" strokeWidth="2" />
+    <rect x="2" y="14" width="20" height="6" rx="2" stroke="#A1A1AA" strokeWidth="2" />
+    <circle cx="6" cy="7" r="1" fill="#A1A1AA" />
+    <circle cx="6" cy="17" r="1" fill="#A1A1AA" />
+  </svg>
+);
+
 export default function UserProfileModal({ 
   isOpen, 
   onClose, 
@@ -134,7 +180,7 @@ export default function UserProfileModal({
     }
   };
 
-  // Test Email Provider Connection
+  // Test Email Provider Connection (Supports Gmail, Outlook, Yahoo, Zoho, Custom)
   const handleTestSmtpConnection = async () => {
     setIsTestingSmtp(true);
     setSmtpTestResult(null);
@@ -149,7 +195,13 @@ export default function UserProfileModal({
       const response = await fetch('/api/test-gmail', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ smtpUser: smtpUser.trim(), smtpPass: smtpPass.trim() })
+        body: JSON.stringify({ 
+          smtpUser: smtpUser.trim(), 
+          smtpPass: smtpPass.trim(),
+          provider,
+          host: provider === 'custom' ? customHost : getProviderHost(provider),
+          port: provider === 'custom' ? customPort : 465
+        })
       });
 
       const data = await response.json();
@@ -380,8 +432,9 @@ export default function UserProfileModal({
                   Select Your Email Dispatch Provider
                 </label>
                 
-                {/* Provider Selector Cards Grid */}
+                {/* Official Brand Logos Selector Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {/* GMAIL */}
                   <button
                     type="button"
                     onClick={() => { setProvider('gmail'); setSelectedGuideProvider('gmail'); }}
@@ -392,15 +445,16 @@ export default function UserProfileModal({
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                      <GmailLogo />
                       {provider === 'gmail' && <Check className="w-3.5 h-3.5 text-white" />}
                     </div>
-                    <div className="mt-2">
+                    <div className="mt-2.5">
                       <span className="font-extrabold text-xs block text-white">Gmail / Google</span>
                       <span className="text-[10px] text-zinc-400 block">smtp.gmail.com</span>
                     </div>
                   </button>
 
+                  {/* OUTLOOK */}
                   <button
                     type="button"
                     onClick={() => { setProvider('outlook'); setSelectedGuideProvider('outlook'); }}
@@ -411,15 +465,16 @@ export default function UserProfileModal({
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                      <OutlookLogo />
                       {provider === 'outlook' && <Check className="w-3.5 h-3.5 text-white" />}
                     </div>
-                    <div className="mt-2">
+                    <div className="mt-2.5">
                       <span className="font-extrabold text-xs block text-white">Outlook / 365</span>
                       <span className="text-[10px] text-zinc-400 block">smtp.office365.com</span>
                     </div>
                   </button>
 
+                  {/* YAHOO */}
                   <button
                     type="button"
                     onClick={() => { setProvider('yahoo'); setSelectedGuideProvider('yahoo'); }}
@@ -430,15 +485,16 @@ export default function UserProfileModal({
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+                      <YahooLogo />
                       {provider === 'yahoo' && <Check className="w-3.5 h-3.5 text-white" />}
                     </div>
-                    <div className="mt-2">
+                    <div className="mt-2.5">
                       <span className="font-extrabold text-xs block text-white">Yahoo Mail</span>
                       <span className="text-[10px] text-zinc-400 block">smtp.mail.yahoo.com</span>
                     </div>
                   </button>
 
+                  {/* ZOHO */}
                   <button
                     type="button"
                     onClick={() => { setProvider('zoho'); setSelectedGuideProvider('zoho'); }}
@@ -449,15 +505,16 @@ export default function UserProfileModal({
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                      <ZohoLogo />
                       {provider === 'zoho' && <Check className="w-3.5 h-3.5 text-white" />}
                     </div>
-                    <div className="mt-2">
+                    <div className="mt-2.5">
                       <span className="font-extrabold text-xs block text-white">Zoho Mail</span>
                       <span className="text-[10px] text-zinc-400 block">smtp.zoho.com</span>
                     </div>
                   </button>
 
+                  {/* CUSTOM */}
                   <button
                     type="button"
                     onClick={() => { setProvider('custom'); setSelectedGuideProvider('custom'); }}
@@ -468,10 +525,10 @@ export default function UserProfileModal({
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <Server className="w-4 h-4 text-zinc-300" />
+                      <CustomSmtpLogo />
                       {provider === 'custom' && <Check className="w-3.5 h-3.5 text-white" />}
                     </div>
-                    <div className="mt-2">
+                    <div className="mt-2.5">
                       <span className="font-extrabold text-xs block text-white">Custom SMTP / SendGrid / AWS SES</span>
                       <span className="text-[10px] text-zinc-400 block">Custom host & port configuration</span>
                     </div>
@@ -490,7 +547,7 @@ export default function UserProfileModal({
                       <Mail className="w-4 h-4 text-zinc-500 absolute left-3 top-2.5" />
                       <input
                         type="email"
-                        placeholder="you@gmail.com"
+                        placeholder="you@domain.com"
                         value={smtpUser}
                         onChange={(e) => setSmtpUser(e.target.value)}
                         className="w-full pl-9 pr-3.5 py-2 bg-zinc-900 border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-xs outline-none font-mono"
@@ -584,7 +641,7 @@ export default function UserProfileModal({
                     className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-extrabold text-xs rounded-xl border border-zinc-700 flex items-center gap-2 transition-all cursor-pointer"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${isTestingSmtp ? 'animate-spin' : ''}`} />
-                    <span>{isTestingSmtp ? 'Testing Connection...' : 'Test Connection'}</span>
+                    <span>{isTestingSmtp ? 'Testing Connection...' : `Test ${provider.toUpperCase()} Connection`}</span>
                   </button>
                 </div>
 
@@ -648,27 +705,27 @@ export default function UserProfileModal({
             <div className="flex items-center gap-2 bg-[#09090B] p-1.5 rounded-xl border border-zinc-800 text-xs font-bold">
               <button
                 onClick={() => setSelectedGuideProvider('gmail')}
-                className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer ${selectedGuideProvider === 'gmail' ? 'bg-white text-black font-extrabold' : 'text-zinc-400'}`}
+                className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${selectedGuideProvider === 'gmail' ? 'bg-white text-black font-extrabold' : 'text-zinc-400'}`}
               >
-                Gmail
+                <GmailLogo /> Gmail
               </button>
               <button
                 onClick={() => setSelectedGuideProvider('outlook')}
-                className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer ${selectedGuideProvider === 'outlook' ? 'bg-white text-black font-extrabold' : 'text-zinc-400'}`}
+                className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${selectedGuideProvider === 'outlook' ? 'bg-white text-black font-extrabold' : 'text-zinc-400'}`}
               >
-                Outlook
+                <OutlookLogo /> Outlook
               </button>
               <button
                 onClick={() => setSelectedGuideProvider('yahoo')}
-                className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer ${selectedGuideProvider === 'yahoo' ? 'bg-white text-black font-extrabold' : 'text-zinc-400'}`}
+                className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${selectedGuideProvider === 'yahoo' ? 'bg-white text-black font-extrabold' : 'text-zinc-400'}`}
               >
-                Yahoo
+                <YahooLogo /> Yahoo
               </button>
               <button
                 onClick={() => setSelectedGuideProvider('zoho')}
-                className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer ${selectedGuideProvider === 'zoho' ? 'bg-white text-black font-extrabold' : 'text-zinc-400'}`}
+                className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${selectedGuideProvider === 'zoho' ? 'bg-white text-black font-extrabold' : 'text-zinc-400'}`}
               >
-                Zoho
+                <ZohoLogo /> Zoho
               </button>
             </div>
 

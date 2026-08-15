@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { createDynamicTransporter } from '../lib/smtpHelper.js';
 import { supabase } from '../lib/authStore.js';
 
 const SYSTEM_SMTP = {
@@ -17,7 +17,7 @@ function parseRequestBody(req) {
   return req.body;
 }
 
-// Serverless Background Dispatch Batch Engine
+// Serverless Background Dispatch Batch Engine (Supports Gmail, Outlook, Yahoo, Zoho, Custom SMTP)
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -37,23 +37,21 @@ export default async function handler(req, res) {
     if (action === 'start' || req.method === 'POST') {
       const targetUser = smtpConfig.user || process.env.SMTP_USER || SYSTEM_SMTP.user;
       const targetPass = smtpConfig.pass || process.env.SMTP_PASS || SYSTEM_SMTP.pass;
+      const provider = smtpConfig.provider || 'gmail';
 
       const pendingRecipients = recipients.filter(r => r.status === 'Ready' || r.status === 'Queued');
       if (pendingRecipients.length === 0) {
         return res.status(200).json({ success: true, message: 'All recipients are already dispatched.', remaining: 0 });
       }
 
-      console.log(`[SERVERLESS BACKGROUND QUEUE] Dispatching batch of ${pendingRecipients.length} recipients via ${targetUser}...`);
+      console.log(`[SERVERLESS BACKGROUND QUEUE] Dispatching batch of ${pendingRecipients.length} recipients via ${targetUser} (${provider})...`);
 
-      const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: { user: targetUser, pass: targetPass },
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 10000,
-        tls: { rejectUnauthorized: false }
+      const transporter = createDynamicTransporter({ 
+        provider, 
+        user: targetUser, 
+        pass: targetPass, 
+        host: smtpConfig.host, 
+        port: smtpConfig.port 
       });
 
       // Dispatch up to 5 emails in this serverless execution frame
@@ -81,7 +79,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         success: true,
-        message: `Processed background batch of ${batchToProcess.length} emails. Campaign is persistent on server!`,
+        message: `Processed background batch of ${batchToProcess.length} emails via ${provider.toUpperCase()}. Persistent queue active!`,
         results,
         processed: batchToProcess.length,
         remaining: remainingCount,

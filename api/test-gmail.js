@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { createDynamicTransporter } from '../lib/smtpHelper.js';
 
 const SYSTEM_SMTP = {
   user: process.env.SMTP_USER || 'shaptsevjkonikevich@gmail.com',
@@ -8,18 +8,10 @@ const SYSTEM_SMTP = {
 function parseRequestBody(req) {
   if (!req.body) return {};
   if (typeof req.body === 'string') {
-    try {
-      return JSON.parse(req.body);
-    } catch (e) {
-      return {};
-    }
+    try { return JSON.parse(req.body); } catch (e) { return {}; }
   }
   if (Buffer.isBuffer(req.body)) {
-    try {
-      return JSON.parse(req.body.toString('utf8'));
-    } catch (e) {
-      return {};
-    }
+    try { return JSON.parse(req.body.toString('utf8')); } catch (e) { return {}; }
   }
   return req.body;
 }
@@ -38,7 +30,7 @@ export default async function handler(req, res) {
 
   try {
     const body = parseRequestBody(req);
-    const { smtpUser, smtpPass } = body;
+    const { smtpUser, smtpPass, provider, host, port } = body;
     const user = smtpUser || SYSTEM_SMTP.user;
     const pass = smtpPass || SYSTEM_SMTP.pass;
 
@@ -46,24 +38,15 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Missing SMTP email or password' });
     }
 
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: { user, pass },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000,
-      tls: { rejectUnauthorized: false }
-    });
+    const transporter = createDynamicTransporter({ provider, user, pass, host, port });
 
     await transporter.verify();
-    return res.status(200).json({ success: true, message: `SMTP connection to ${user} verified!` });
+    return res.status(200).json({ success: true, message: `SMTP connection for ${user} verified successfully!` });
   } catch (err) {
-    console.error('[VERCEL TEST GMAIL ERROR]', err);
+    console.error('[UNIVERSAL SMTP TEST ERROR]', err);
     return res.status(400).json({
       success: false,
-      error: `Gmail SMTP Error: ${err.message}. Ensure 2-Step Verification is enabled and a 16-character App Password is used.`
+      error: `SMTP Error: ${err.message}. Please verify your username, App Password, and provider settings.`
     });
   }
 }
