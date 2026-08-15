@@ -1012,6 +1012,94 @@ app.post('/api/2fa/verify', async (req, res) => {
   }
 });
 
+// 14. Background Persistent Campaign Queue Engine (Laptop-Offline Execution)
+let persistentQueueState = {
+  status: 'IDLE',
+  recipients: [],
+  campaignConfig: {},
+  smtpConfig: {},
+  processedCount: 0,
+  timer: null
+};
+
+app.post('/api/start-persistent-queue', (req, res) => {
+  const { recipients, campaignConfig, smtpConfig } = req.body;
+  if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+    return res.status(400).json({ error: 'No recipients provided for campaign queue.' });
+  }
+
+  if (persistentQueueState.timer) clearInterval(persistentQueueState.timer);
+
+  persistentQueueState = {
+    status: 'SENDING',
+    recipients: recipients.map(r => ({ ...r, status: r.status || 'Ready' })),
+    campaignConfig: campaignConfig || {},
+    smtpConfig: smtpConfig || {},
+    processedCount: recipients.filter(r => r.status === 'Sent').length,
+    timer: null
+  };
+
+  console.log(`[SERVER PERSISTENT QUEUE START] Starting background queue for ${recipients.length} recipients...`);
+
+  // Start background interval tick on server
+  persistentQueueState.timer = setInterval(async () => {
+    if (persistentQueueState.status !== 'SENDING') {
+      clearInterval(persistentQueueState.timer);
+      persistentQueueState.timer = null;
+      return;
+    }
+
+    const pending = persistentQueueState.recipients.filter(r => r.status === 'Ready' || r.status === 'Queued');
+    if (pending.length === 0) {
+      persistentQueueState.status = 'COMPLETED';
+      clearInterval(persistentQueueState.timer);
+      persistentQueueState.timer = null;
+      console.log('[SERVER PERSISTENT QUEUE] All emails in background queue successfully sent!');
+      return;
+    }
+
+    const nextRecipient = pending[0];
+    nextRecipient.status = 'Sending';
+
+    try {
+      const user = persistentQueueState.smtpConfig.user || storedSmtpConfig.user;
+      const pass = persistentQueueState.smtpConfig.pass || storedSmtpConfig.pass;
+
+      await sendMailWithFallback({
+        to: nextRecipient.email,
+        subject: persistentQueueState.campaignConfig.subject || 'Outreach Opportunity',
+        html: persistentQueueState.campaignConfig.htmlContent || `<p>${(persistentQueueState.campaignConfig.bodyText || '').replace(/\n/g, '<br/>')}</p>`,
+        user,
+        pass,
+        fromName: persistentQueueState.campaignConfig.senderName || 'Sendaat Outreach'
+      });
+
+      nextRecipient.status = 'Sent';
+      persistentQueueState.processedCount++;
+      console.log(`[SERVER BACKGROUND DISPATCH] (${persistentQueueState.processedCount}/${persistentQueueState.recipients.length}) Sent to: ${nextRecipient.email}`);
+    } catch (err) {
+      nextRecipient.status = 'Failed';
+      console.error(`[SERVER BACKGROUND DISPATCH FAILED] To: ${nextRecipient.email}`, err.message);
+    }
+  }, (persistentQueueState.campaignConfig.intervalSeconds || 5) * 1000);
+
+  return res.json({
+    success: true,
+    message: 'Persistent server queue started. Campaign will continue sending on the server even if your laptop is closed or shut down!',
+    status: 'SENDING',
+    totalRecipients: recipients.length
+  });
+});
+
+app.get('/api/get-persistent-queue-status', (req, res) => {
+  return res.json({
+    status: persistentQueueState.status,
+    totalRecipients: persistentQueueState.recipients.length,
+    processedCount: persistentQueueState.processedCount,
+    recipients: persistentQueueState.recipients
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`[Sendaat Infrastructure Server] Running on http://localhost:${PORT}`);
 });
