@@ -227,32 +227,32 @@ export default function AppSidebar({
               </div>
 
               <div className="space-y-1 text-xs font-bold">
-                <div onClick={() => { setActiveTab('dashboard'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center gap-3 text-zinc-200">
+                <div onClick={() => { handleNavClick('dashboard'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center gap-3 text-zinc-200">
                   <Home className="w-4 h-4 text-white" /> Dashboard
                 </div>
-                <div onClick={() => { setActiveTab('builder'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center gap-3 text-zinc-200">
+                <div onClick={() => { handleNavClick('builder'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center gap-3 text-zinc-200">
                   <PenTool className="w-4 h-4 text-white" /> Create
                 </div>
-                <div onClick={() => { setActiveTab('recipients'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center justify-between text-zinc-200">
+                <div onClick={() => { handleNavClick('recipients'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center justify-between text-zinc-200">
                   <div className="flex items-center gap-3"><Contact2 className="w-4 h-4 text-white" /> Audience</div>
                   <span className="text-xs font-mono font-semibold text-zinc-400 w-6 text-right">{safeRecipients.length}</span>
                 </div>
-                <div onClick={() => { setActiveTab('queue'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center justify-between text-zinc-200">
+                <div onClick={() => { handleNavClick('queue'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center justify-between text-zinc-200">
                   <div className="flex items-center gap-3"><SendHorizontal className="w-4 h-4 text-white" /> Send</div>
                   <span className="text-xs font-mono font-semibold text-zinc-400 w-6 text-right">{readyCount}</span>
                 </div>
-                <div onClick={() => { setActiveTab('sent'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center justify-between text-zinc-200">
+                <div onClick={() => { handleNavClick('sent'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center justify-between text-zinc-200">
                   <div className="flex items-center gap-3"><BarChart3 className="w-4 h-4 text-white" /> Analyse</div>
                   <span className="text-xs font-mono font-semibold text-zinc-400 w-6 text-right">{sentCount}</span>
                 </div>
-                <div onClick={() => { setActiveTab('deliverability'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center gap-3 text-zinc-200">
+                <div onClick={() => { handleNavClick('deliverability'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center gap-3 text-zinc-200">
                   <ShieldCheck className="w-4 h-4 text-white" /> Deliverability
                 </div>
-                <div onClick={() => { setActiveTab('replies'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center justify-between text-zinc-200">
+                <div onClick={() => { handleNavClick('replies'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center justify-between text-zinc-200">
                   <div className="flex items-center gap-3"><MessageSquare className="w-4 h-4 text-white" /> Replies</div>
                   <span className="text-xs font-mono font-semibold text-zinc-400 w-6 text-right">{repliesCount}</span>
                 </div>
-                <div onClick={() => { setActiveTab('api'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center gap-3 text-zinc-200">
+                <div onClick={() => { handleNavClick('api'); onCloseMobile(); }} className="p-2 rounded-lg hover:bg-zinc-800 cursor-pointer flex items-center gap-3 text-zinc-200">
                   <Code2 className="w-4 h-4 text-white" /> Documentation
                 </div>
               </div>

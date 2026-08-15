@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { startTransition } from 'react';
 import { 
   PenTool, Contact2, SendHorizontal, BarChart3, 
   ShieldCheck, Layers, Plus
@@ -21,6 +21,12 @@ export default function DashboardView({
   const sentCount = safeRecipients.filter(r => r?.status === 'Sent').length;
   const totalCount = safeRecipients.length;
 
+  const handleNavClick = (tab) => {
+    startTransition(() => {
+      setActiveTab(tab);
+    });
+  };
+
   return (
     <div className="bg-[#050505] text-white p-4 sm:p-6 lg:p-8 space-y-6 font-sans animate-fade-in min-h-screen lg:min-h-0 lg:h-full flex flex-col justify-between select-none">
       
@@ -36,7 +42,7 @@ export default function DashboardView({
         </div>
       </div>
 
-      {/* 2. Main 4 Action Boxes Grid (Monochromatic Vantablack Style, NO Top-Right Icons, Fits 1 Page) */}
+      {/* 2. Main 4 Action Boxes Grid */}
       <div className="flex-1 flex flex-col justify-between space-y-3 min-h-0">
         <div className="flex items-center justify-between px-1 shrink-0">
           <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
@@ -50,7 +56,7 @@ export default function DashboardView({
           
           {/* BOX 1: CREATE EMAIL */}
           <div 
-            onClick={() => setActiveTab('builder')}
+            onClick={() => handleNavClick('builder')}
             className="group bg-[#121212] hover:bg-[#18181B] rounded-[24px] p-5 border border-zinc-800 hover:border-zinc-600 transition-all duration-200 flex flex-col justify-between cursor-pointer relative overflow-hidden h-full shadow-xs"
           >
             <div className="space-y-3">
@@ -74,7 +80,7 @@ export default function DashboardView({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActiveTab('builder');
+                  handleNavClick('builder');
                 }}
                 className="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-black font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
               >
@@ -86,7 +92,7 @@ export default function DashboardView({
 
           {/* BOX 2: AUDIENCE */}
           <div 
-            onClick={() => setActiveTab('recipients')}
+            onClick={() => handleNavClick('recipients')}
             className="group bg-[#121212] hover:bg-[#18181B] rounded-[24px] p-5 border border-zinc-800 hover:border-zinc-600 transition-all duration-200 flex flex-col justify-between cursor-pointer relative overflow-hidden h-full shadow-xs"
           >
             <div className="space-y-3">
@@ -114,7 +120,7 @@ export default function DashboardView({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActiveTab('recipients');
+                  handleNavClick('recipients');
                 }}
                 className="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-black font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
               >
@@ -126,7 +132,7 @@ export default function DashboardView({
 
           {/* BOX 3: SEND */}
           <div 
-            onClick={() => setActiveTab('queue')}
+            onClick={() => handleNavClick('queue')}
             className="group bg-[#121212] hover:bg-[#18181B] rounded-[24px] p-5 border border-zinc-800 hover:border-zinc-600 transition-all duration-200 flex flex-col justify-between cursor-pointer relative overflow-hidden h-full shadow-xs"
           >
             <div className="space-y-3">
@@ -154,7 +160,7 @@ export default function DashboardView({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActiveTab('queue');
+                  handleNavClick('queue');
                 }}
                 className="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-black font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
               >
@@ -166,7 +172,7 @@ export default function DashboardView({
 
           {/* BOX 4: ANALYSE */}
           <div 
-            onClick={() => setActiveTab('sent')}
+            onClick={() => handleNavClick('sent')}
             className="group bg-[#121212] hover:bg-[#18181B] rounded-[24px] p-5 border border-zinc-800 hover:border-zinc-600 transition-all duration-200 flex flex-col justify-between cursor-pointer relative overflow-hidden h-full shadow-xs"
           >
             <div className="space-y-3">
@@ -194,7 +200,7 @@ export default function DashboardView({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActiveTab('sent');
+                  handleNavClick('sent');
                 }}
                 className="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-black font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
               >

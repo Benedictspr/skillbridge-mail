@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, startTransition } from 'react';
 import { 
   Upload, FileText, Check, AlertCircle, Trash2, UserPlus, 
   HelpCircle, CheckCircle2, RefreshCw, X, Download, ShieldCheck, Mail
@@ -13,46 +13,61 @@ export default function RecipientImportView({
   const [pasteText, setPasteText] = useState('');
   const [parseSuccessMsg, setParseSuccessMsg] = useState('');
   const [dragActive, setDragActive] = useState(false);
-  const [importTab, setImportTab] = useState('paste'); // 'paste' | 'file' | 'list'
+  const [importTab, setImportTab] = useState('list'); // Default to Audience list 'list' | 'paste' | 'file'
+  const fileInputRef = useRef(null);
 
   const safeRecipients = Array.isArray(recipients) ? recipients : [];
 
-  // Smart Note Parser Function
-  const parseRawNotes = () => {
-    if (!pasteText.trim()) return;
+  // Helper to parse file text content (CSV or TXT) into structured contact objects
+  const processFileContent = (rawText, filename = 'Uploaded File') => {
+    if (!rawText || !rawText.trim()) return;
 
-    const lines = pasteText.split('\n');
+    const lines = rawText.split(/\r?\n/).filter(l => l.trim().length > 0);
     const newParsed = [];
     const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
 
-    lines.forEach((line, idx) => {
+    // Check if first line is CSV header
+    const firstLineLower = lines[0].toLowerCase();
+    const isCsvHeader = firstLineLower.includes('email') || firstLineLower.includes('name');
+    const startIdx = isCsvHeader ? 1 : 0;
+
+    for (let i = startIdx; i < lines.length; i++) {
+      const line = lines[i];
       const emailsFound = line.match(emailRegex);
+
       if (emailsFound && emailsFound.length > 0) {
         const email = emailsFound[0].trim().toLowerCase();
-        
-        let cleaned = line.replace(email, '').trim();
         let name = '';
         let role = 'Candidate';
         let company = currentOrg?.name || 'Sendaat Network';
 
-        if (cleaned.includes('-')) {
-          const parts = cleaned.split('-');
+        if (line.includes(',')) {
+          const cols = line.split(',').map(c => c.replace(/^["']|["']$/g, '').trim());
+          const emailColIdx = cols.findIndex(c => c.toLowerCase() === email);
+          
+          if (emailColIdx >= 0) {
+            const otherCols = cols.filter((_, idx) => idx !== emailColIdx);
+            if (otherCols.length >= 1) name = otherCols[0];
+            if (otherCols.length >= 2) role = otherCols[1];
+            if (otherCols.length >= 3) company = otherCols[2];
+          } else {
+            name = cols[0] !== email ? cols[0] : (cols[1] || '');
+          }
+        } else if (line.includes('-')) {
+          const parts = line.replace(email, '').split('-');
           name = parts[0].trim();
-          role = parts[1].trim();
-        } else if (cleaned.includes(',')) {
-          const parts = cleaned.split(',');
-          name = parts[0].trim();
-          role = parts[1].trim();
+          role = parts[1]?.trim() || 'Candidate';
         } else {
-          name = cleaned.trim() || email.split('@')[0];
+          name = line.replace(email, '').trim();
         }
 
+        if (!name) name = email.split('@')[0];
         const nameParts = name.split(' ');
         const firstName = nameParts[0] || 'Candidate';
         const lastName = nameParts.slice(1).join(' ') || '';
 
         newParsed.push({
-          id: `imp-${Date.now()}-${idx}-${Math.random().toString(36).substr(2, 4)}`,
+          id: `imp-${Date.now()}-${i}-${Math.random().toString(36).substr(2, 4)}`,
           email,
           firstName,
           lastName,
@@ -62,29 +77,40 @@ export default function RecipientImportView({
           organization_id: currentOrg?.id || 'org_sendaat_1001'
         });
       }
-    });
+    }
 
     if (newParsed.length > 0) {
       const existingEmails = new Set(safeRecipients.map(r => r.email.toLowerCase()));
       const uniqueNew = newParsed.filter(r => !existingEmails.has(r.email.toLowerCase()));
 
       if (uniqueNew.length > 0) {
-        setRecipients(prev => [...(Array.isArray(prev) ? prev : []), ...uniqueNew]);
-        setParseSuccessMsg(`Successfully extracted ${uniqueNew.length} new contact(s)!`);
-        setPasteText('');
+        startTransition(() => {
+          setRecipients(prev => [...(Array.isArray(prev) ? prev : []), ...uniqueNew]);
+          setParseSuccessMsg(`Successfully imported ${uniqueNew.length} new contact(s) from ${filename}!`);
+          setImportTab('list');
+        });
       } else {
-        setParseSuccessMsg('All extracted contacts are already in your Audience list.');
+        setParseSuccessMsg(`All ${newParsed.length} contacts from ${filename} are already in your Audience list.`);
       }
     } else {
-      setParseSuccessMsg('No valid email addresses found in the text.');
+      setParseSuccessMsg(`No valid email addresses found in ${filename}.`);
     }
 
-    setTimeout(() => setParseSuccessMsg(''), 4000);
+    setTimeout(() => setParseSuccessMsg(''), 5000);
+  };
+
+  // Smart Note Parser Function
+  const parseRawNotes = () => {
+    if (!pasteText.trim()) return;
+    processFileContent(pasteText, 'Pasted Roster');
+    setPasteText('');
   };
 
   const clearAllRecipients = () => {
     if (confirm('Are you sure you want to remove all contacts from your Audience list?')) {
-      setRecipients([]);
+      startTransition(() => {
+        setRecipients([]);
+      });
     }
   };
 
@@ -106,16 +132,41 @@ export default function RecipientImportView({
       const file = e.dataTransfer.files[0];
       const reader = new FileReader();
       reader.onload = (event) => {
-        setPasteText(event.target.result);
-        setImportTab('paste');
+        processFileContent(event.target.result, file.name);
       };
       reader.readAsText(file);
     }
   };
 
+  const handleFileSelect = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        processFileContent(event.target.result, file.name);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleTabChange = (tab) => {
+    startTransition(() => {
+      setImportTab(tab);
+    });
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12 font-sans text-white bg-[#050505] p-4 sm:p-6 lg:p-8 min-h-screen select-none">
       
+      {/* Hidden File Picker Input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept=".csv,.txt"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
       {/* 1. Header Banner */}
       <div className="bg-[#121212] p-6 sm:p-8 rounded-[24px] border border-zinc-800 shadow-md space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -127,14 +178,17 @@ export default function RecipientImportView({
               Recipient Import & Audience Roster
             </h2>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
-              Import applicant rosters from notes, CSV files, or manual entries for <strong className="text-white">{currentOrg?.name || 'Sendaat Enterprise'}</strong>.
+              Import applicant rosters from CSV/TXT files, text notes, or manual entries for <strong className="text-white">{currentOrg?.name || 'Sendaat Enterprise'}</strong>.
             </p>
           </div>
 
-          {/* Clean Load Sample Dataset (5) button - NO star logo, NO 50 */}
           <div className="flex items-center gap-3 shrink-0">
             <button
-              onClick={onLoadSkillBridgeData}
+              onClick={() => {
+                startTransition(() => {
+                  if (onLoadSkillBridgeData) onLoadSkillBridgeData();
+                });
+              }}
               className="bg-white hover:bg-zinc-200 text-black font-extrabold text-xs px-4.5 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
             >
               <span>Load Sample Dataset (5)</span>
@@ -155,27 +209,7 @@ export default function RecipientImportView({
         {/* Tab Selector */}
         <div className="pt-3 flex gap-2 border-t border-zinc-800">
           <button
-            onClick={() => setImportTab('paste')}
-            className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
-              importTab === 'paste' ? 'bg-white text-black font-extrabold shadow-xs' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
-            }`}
-          >
-            <FileText className="w-4 h-4" />
-            <span>Smart Note Parser</span>
-          </button>
-
-          <button
-            onClick={() => setImportTab('file')}
-            className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
-              importTab === 'file' ? 'bg-white text-black font-extrabold shadow-xs' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
-            }`}
-          >
-            <Upload className="w-4 h-4" />
-            <span>Upload CSV / Text File</span>
-          </button>
-
-          <button
-            onClick={() => setImportTab('list')}
+            onClick={() => handleTabChange('list')}
             className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
               importTab === 'list' ? 'bg-white text-black font-extrabold shadow-xs' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
             }`}
@@ -183,18 +217,85 @@ export default function RecipientImportView({
             <UserPlus className="w-4 h-4" />
             <span>Audience Roster ({safeRecipients.length})</span>
           </button>
+
+          <button
+            onClick={() => handleTabChange('file')}
+            className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
+              importTab === 'file' ? 'bg-white text-black font-extrabold shadow-xs' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
+            }`}
+          >
+            <Upload className="w-4 h-4" />
+            <span>Upload CSV / TXT File</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange('paste')}
+            className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
+              importTab === 'paste' ? 'bg-white text-black font-extrabold shadow-xs' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>Paste Text Notes</span>
+          </button>
         </div>
       </div>
 
-      {/* 2. Notification Box */}
+      {/* Parse Status Notification Banner */}
       {parseSuccessMsg && (
-        <div className="p-4 bg-zinc-900 border border-zinc-700 text-white text-xs rounded-xl font-bold flex items-center gap-2 animate-fade-in">
-          <Check className="w-4 h-4 text-emerald-400 stroke-[2.5]" />
-          <span>{parseSuccessMsg}</span>
+        <div className="p-4 bg-zinc-900 border border-zinc-700 rounded-2xl flex items-center justify-between gap-3 text-white text-xs font-semibold animate-fade-in shadow-md">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="w-5 h-5 text-white shrink-0" />
+            <span>{parseSuccessMsg}</span>
+          </div>
+          <button onClick={() => setParseSuccessMsg('')} className="p-1 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
-      {/* 3. TAB CONTENT */}
+      {/* 2. Upload File Dropzone Section */}
+      {importTab === 'file' && (
+        <div className="bg-[#121212] p-6 sm:p-8 rounded-[24px] border border-zinc-800 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-extrabold text-base text-white flex items-center gap-2">
+              <Upload className="w-4 h-4 text-white" />
+              <span>Upload CSV or TXT File</span>
+            </h3>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="px-3.5 py-1.5 bg-white text-black font-extrabold text-xs rounded-xl hover:bg-zinc-200 transition-all cursor-pointer"
+            >
+              Browse Files...
+            </button>
+          </div>
+
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all cursor-pointer group ${
+              dragActive 
+                ? 'border-white bg-zinc-900 scale-[1.01]' 
+                : 'border-zinc-800 hover:border-zinc-500 bg-black hover:bg-zinc-900/50'
+            }`}
+          >
+            <div className="w-14 h-14 bg-zinc-900 group-hover:bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-zinc-800 transition-colors">
+              <Upload className="w-7 h-7 text-white group-hover:scale-110 transition-transform" />
+            </div>
+            <h4 className="text-base font-extrabold text-white">Click or Drag & Drop your candidate roster file here</h4>
+            <p className="text-xs text-zinc-400 mt-1.5 max-w-sm mx-auto">
+              Click anywhere in this box to choose a <strong className="text-zinc-200">.csv</strong> or <strong className="text-zinc-200">.txt</strong> file from your computer.
+            </p>
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white text-black font-bold text-xs rounded-xl shadow-xs group-hover:bg-zinc-200 transition-all">
+              <span>Select File from Computer</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Text Notes Extractor Section */}
       {importTab === 'paste' && (
         <div className="bg-[#121212] p-6 sm:p-8 rounded-[24px] border border-zinc-800 shadow-xs space-y-4">
           <div className="space-y-1">
@@ -217,7 +318,7 @@ export default function RecipientImportView({
 
           <div className="flex items-center justify-between pt-2">
             <p className="text-xs text-zinc-400">
-              Paste a note above or click "Load Sample Dataset (5)".
+              Paste text above and click "Parse & Add to Audience".
             </p>
 
             <button
@@ -231,30 +332,7 @@ export default function RecipientImportView({
         </div>
       )}
 
-      {importTab === 'file' && (
-        <div className="bg-[#121212] p-6 sm:p-8 rounded-[24px] border border-zinc-800 shadow-xs space-y-4">
-          <h3 className="font-extrabold text-base text-white flex items-center gap-2">
-            <Upload className="w-4 h-4 text-white" />
-            <span>Upload CSV or TXT File</span>
-          </h3>
-
-          <div
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-2xl p-12 text-center transition-colors ${
-              dragActive ? 'border-white bg-zinc-900' : 'border-zinc-800 bg-black'
-            }`}
-          >
-            <Upload className="w-10 h-10 text-white mx-auto mb-3" />
-            <h4 className="text-sm font-bold text-white">Drag and drop your candidate roster file here</h4>
-            <p className="text-xs text-zinc-400 mt-1">Supports .csv, .txt, or exported contacts list</p>
-          </div>
-        </div>
-      )}
-
-      {/* 4. Audience Roster Table */}
+      {/* 4. Audience Roster Table Section */}
       {importTab === 'list' && (
         <div className="bg-[#121212] p-6 rounded-[24px] border border-zinc-800 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
@@ -263,7 +341,11 @@ export default function RecipientImportView({
               <span>Current Audience Roster ({safeRecipients.length})</span>
             </h3>
             <button
-              onClick={onLoadSkillBridgeData}
+              onClick={() => {
+                startTransition(() => {
+                  if (onLoadSkillBridgeData) onLoadSkillBridgeData();
+                });
+              }}
               className="px-3.5 py-1.5 bg-white text-black font-extrabold text-xs rounded-xl hover:bg-zinc-200 transition-all cursor-pointer"
             >
               Load Sample Dataset (5)
@@ -271,8 +353,26 @@ export default function RecipientImportView({
           </div>
 
           {safeRecipients.length === 0 ? (
-            <div className="p-8 text-center bg-black rounded-xl border border-zinc-800 text-zinc-400 text-xs font-mono">
-              No contacts loaded in Audience roster yet. Click "Load Sample Dataset (5)" above to populate instantly.
+            <div className="p-8 text-center bg-black rounded-xl border border-zinc-800 text-zinc-400 text-xs font-mono space-y-3">
+              <p>No contacts loaded in Audience roster yet.</p>
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  onClick={() => handleTabChange('file')}
+                  className="px-4 py-2 bg-white text-black font-extrabold text-xs rounded-xl hover:bg-zinc-200 transition-all cursor-pointer"
+                >
+                  Upload CSV File
+                </button>
+                <button
+                  onClick={() => {
+                    startTransition(() => {
+                      if (onLoadSkillBridgeData) onLoadSkillBridgeData();
+                    });
+                  }}
+                  className="px-4 py-2 bg-zinc-800 text-white font-bold text-xs rounded-xl hover:bg-zinc-700 transition-all cursor-pointer border border-zinc-700"
+                >
+                  Load Sample Dataset (5)
+                </button>
+              </div>
             </div>
           ) : (
             <div className="overflow-x-auto border border-zinc-800 rounded-xl">
@@ -301,9 +401,13 @@ export default function RecipientImportView({
                       </td>
                       <td className="p-3 text-right">
                         <button
-                          onClick={() => setRecipients(safeRecipients.filter(item => item.id !== r.id))}
-                          className="p-1 hover:bg-rose-950/60 text-rose-400 rounded-lg transition-colors"
-                          title="Delete Contact"
+                          onClick={() => {
+                            startTransition(() => {
+                              setRecipients(prev => prev.filter(rec => rec.id !== r.id));
+                            });
+                          }}
+                          className="p-1 text-zinc-500 hover:text-rose-400 hover:bg-zinc-800 rounded transition-colors"
+                          title="Delete recipient"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
