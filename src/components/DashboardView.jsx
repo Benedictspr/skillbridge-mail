@@ -113,9 +113,9 @@ export default function DashboardView({
             </div>
 
             <div className="pt-4 space-y-2">
-              <div className="text-[11px] font-mono text-zinc-400 flex items-center justify-between px-1">
+              <div className="text-[11px] font-mono text-zinc-400 flex items-center justify-between px-1 pointer-events-none">
                 <span>Total Roster:</span>
-                <strong className="text-white font-bold">{totalCount} Contacts</strong>
+                <strong className="text-white font-bold pointer-events-none">{totalCount} Contacts</strong>
               </div>
               <button
                 onClick={(e) => {

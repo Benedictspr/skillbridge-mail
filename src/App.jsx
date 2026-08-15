@@ -244,25 +244,40 @@ export default function App() {
   useEffect(() => { campaignConfigRef.current = campaignConfig; }, [campaignConfig]);
   useEffect(() => { campaignStatusRef.current = campaignStatus; }, [campaignStatus]);
 
-  // Synchronize state with localStorage
+  // Synchronize state with localStorage (Debounced to prevent blocking main thread / input delay)
   useEffect(() => {
-    localStorage.setItem('sendaat_currentOrg', JSON.stringify(currentOrg));
+    const timer = setTimeout(() => {
+      try { localStorage.setItem('sendaat_currentOrg', JSON.stringify(currentOrg)); } catch (e) {}
+    }, 300);
+    return () => clearTimeout(timer);
   }, [currentOrg]);
 
   useEffect(() => {
-    localStorage.setItem('sendaat_suppressionList', JSON.stringify(suppressionList));
+    const timer = setTimeout(() => {
+      try { localStorage.setItem('sendaat_suppressionList', JSON.stringify(suppressionList)); } catch (e) {}
+    }, 300);
+    return () => clearTimeout(timer);
   }, [suppressionList]);
 
   useEffect(() => {
-    localStorage.setItem('sendaat_smtpConfig', JSON.stringify(smtpConfig));
+    const timer = setTimeout(() => {
+      try { localStorage.setItem('sendaat_smtpConfig', JSON.stringify(smtpConfig)); } catch (e) {}
+    }, 300);
+    return () => clearTimeout(timer);
   }, [smtpConfig]);
 
   useEffect(() => {
-    localStorage.setItem('sendaat_recipients', JSON.stringify(recipients));
+    const timer = setTimeout(() => {
+      try { localStorage.setItem('sendaat_recipients', JSON.stringify(recipients)); } catch (e) {}
+    }, 300);
+    return () => clearTimeout(timer);
   }, [recipients]);
 
   useEffect(() => {
-    localStorage.setItem('sendaat_campaignConfig', JSON.stringify(campaignConfig));
+    const timer = setTimeout(() => {
+      try { localStorage.setItem('sendaat_campaignConfig', JSON.stringify(campaignConfig)); } catch (e) {}
+    }, 300);
+    return () => clearTimeout(timer);
   }, [campaignConfig]);
 
   const addLog = (message, type = 'info') => {
@@ -272,7 +287,9 @@ export default function App() {
 
   const handleLoadSendaatData = () => {
     const scopedStudents = SKILLBRIDGE_STUDENTS.map(s => ({ ...s, organization_id: currentOrg.id }));
-    setRecipients(scopedStudents);
+    startTransition(() => {
+      setRecipients(scopedStudents);
+    });
     addLog(`Loaded Sendaat Candidates dataset (${scopedStudents.length} contacts) bound to ${currentOrg.name}.`, 'info');
   };
   const handleLoadSkillBridgeData = handleLoadSendaatData;
@@ -281,35 +298,40 @@ export default function App() {
     let safeList = Array.isArray(recipients) ? recipients : [];
     if (safeList.length === 0) {
       const scopedStudents = SKILLBRIDGE_STUDENTS.map(s => ({ ...s, organization_id: currentOrg.id }));
-      setRecipients(scopedStudents);
+      startTransition(() => {
+        setRecipients(scopedStudents);
+      });
       safeList = scopedStudents;
       addLog(`Loaded Sendaat Candidates dataset (${scopedStudents.length} contacts).`, 'info');
     }
 
     const pending = safeList.filter(r => r?.status === 'Ready' || r?.status === 'Queued');
-    if (pending.length === 0) {
-      // Auto-reset all recipients to Ready if previous run completed
-      setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => ({ ...r, status: 'Ready' })));
-      addLog('Reset recipient roster statuses to Ready and starting dispatch queue...', 'info');
-    }
-
-    setActiveTab('recipients');
-    setCampaignStatus('SENDING');
+    startTransition(() => {
+      if (pending.length === 0) {
+        setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => ({ ...r, status: 'Ready' })));
+      }
+      setActiveTab('recipients');
+      setCampaignStatus('SENDING');
+    });
     addLog('Campaign queue initiated with continuous 1-by-1 email dispatches.', 'info');
   };
 
   const handlePauseQueue = () => {
-    setCampaignStatus('PAUSED');
+    startTransition(() => {
+      setCampaignStatus('PAUSED');
+    });
     isSendingRef.current = false;
     if (queueTimerRef.current) clearTimeout(queueTimerRef.current);
     addLog('Queue paused by user.', 'info');
   };
 
   const handleResetQueue = () => {
-    setCampaignStatus('IDLE');
     isSendingRef.current = false;
     if (queueTimerRef.current) clearTimeout(queueTimerRef.current);
-    setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => ({ ...r, status: 'Ready' })));
+    startTransition(() => {
+      setCampaignStatus('IDLE');
+      setRecipients(prev => (Array.isArray(prev) ? prev : []).map(r => ({ ...r, status: 'Ready' })));
+    });
     addLog('Reset dispatch queue to IDLE.', 'info');
   };
 
