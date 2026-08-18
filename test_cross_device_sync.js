@@ -1,8 +1,5 @@
-// Comprehensive Automated Cross-Device Memory & Synchronization Test Suite
-// Verifies 100% functionality for Server-Side Persistent User State, Multi-Device Continuity,
-// Optimistic Concurrency Control, Real-Time SSE Updates, Version History, and Data Isolation.
-
 import http from 'http';
+import { createAuthToken } from './lib/authStore.js';
 
 const BASE_URL = 'http://localhost:3001';
 
@@ -65,11 +62,13 @@ async function runAcceptanceTests() {
     // -------------------------------------------------------------------------
     console.log('TEST 1: User Login on Device A & Initial State Hydration');
     const userA = { id: 'usr_test_sync_101', email: 'alex.sync@sendaat.io', name: 'Alex Sync' };
+    const tokenA = createAuthToken(userA);
     const deviceA = 'dev_laptop_macbook_pro_01';
 
-    const res1 = await request(`/api/sync/hydrate?userId=${userA.id}`, {
-      headers: { 'X-User-Id': userA.id, 'X-Device-Id': deviceA }
+    const res1 = await request(`/api/sync/hydrate`, {
+      headers: { 'Authorization': `Bearer ${tokenA}`, 'X-Device-Id': deviceA }
     });
+
 
     assert(res1.status === 200 && res1.data.success, 'Device A hydrated state from cloud successfully');
     assert(res1.data.state && res1.data.state.version >= 1, 'Cloud state contains valid version number');
@@ -99,7 +98,7 @@ async function runAcceptanceTests() {
 
     const res2 = await request('/api/sync/push', {
       method: 'POST',
-      headers: { 'X-User-Id': userA.id, 'X-Device-Id': deviceA },
+      headers: { 'Authorization': `Bearer ${tokenA}`, 'X-Device-Id': deviceA },
       body: {
         userId: userA.id,
         deviceId: deviceA,
@@ -123,8 +122,8 @@ async function runAcceptanceTests() {
     console.log('\nTEST 3: Device B logs in as User A (Cross-Device Continuity Verification)');
     const deviceB = 'dev_mobile_iphone_15';
 
-    const res3 = await request(`/api/sync/hydrate?userId=${userA.id}`, {
-      headers: { 'X-User-Id': userA.id, 'X-Device-Id': deviceB }
+    const res3 = await request(`/api/sync/hydrate`, {
+      headers: { 'Authorization': `Bearer ${tokenA}`, 'X-Device-Id': deviceB }
     });
 
     assert(res3.status === 200 && res3.data.success, 'Device B successfully hydrated from authoritative cloud');
@@ -144,7 +143,7 @@ async function runAcceptanceTests() {
 
     const res4 = await request('/api/sync/push', {
       method: 'POST',
-      headers: { 'X-User-Id': userA.id, 'X-Device-Id': deviceB },
+      headers: { 'Authorization': `Bearer ${tokenA}`, 'X-Device-Id': deviceB },
       body: {
         userId: userA.id,
         deviceId: deviceB,
@@ -162,8 +161,8 @@ async function runAcceptanceTests() {
     // TEST 5: Return to Device A -> Receives updated state from Device B
     // -------------------------------------------------------------------------
     console.log('\nTEST 5: Device A re-hydrates & receives latest Device B changes');
-    const res5 = await request(`/api/sync/hydrate?userId=${userA.id}`, {
-      headers: { 'X-User-Id': userA.id, 'X-Device-Id': deviceA }
+    const res5 = await request(`/api/sync/hydrate`, {
+      headers: { 'Authorization': `Bearer ${tokenA}`, 'X-Device-Id': deviceA }
     });
 
     assert(res5.data.state.savedTemplates.length === 1, 'Device A received saved templates created on Device B');
@@ -173,14 +172,16 @@ async function runAcceptanceTests() {
     // TEST 6: Version History Snapshotting & Safe Rollback Recovery
     // -------------------------------------------------------------------------
     console.log('\nTEST 6: Version History Snapshots & 1-Click Rollback Recovery');
-    const res6 = await request(`/api/sync/versions?projectId=proj_default_campaign&userId=${userA.id}`);
+    const res6 = await request(`/api/sync/versions?projectId=proj_default_campaign`, {
+      headers: { 'Authorization': `Bearer ${tokenA}` }
+    });
     assert(res6.status === 200 && Array.isArray(res6.data.versions), 'Version history endpoint returned snapshot timeline');
     assert(res6.data.versions.length >= 1, `Recorded ${res6.data.versions.length} historical revision snapshots`);
 
     const snapshotToRestore = res6.data.versions[res6.data.versions.length - 1];
     const resRestore = await request('/api/sync/restore', {
       method: 'POST',
-      headers: { 'X-User-Id': userA.id, 'X-Device-Id': deviceA },
+      headers: { 'Authorization': `Bearer ${tokenA}`, 'X-Device-Id': deviceA },
       body: {
         userId: userA.id,
         projectId: 'proj_default_campaign',
@@ -197,13 +198,13 @@ async function runAcceptanceTests() {
     console.log('\nTEST 7: Offline Mutation Queue & Batch Reconnect Flush');
     const offlineMutations = [
       {
-        id: 'mut_1',
+        id: 'mut_101_test',
         delta: { activeTab: 'recipients' },
         deviceId: deviceA,
         clientVersion: 10
       },
       {
-        id: 'mut_2',
+        id: 'mut_102_test',
         delta: { suppressionList: [{ id: 'sup-off-1', email: 'bad@domain.com' }] },
         deviceId: deviceA,
         clientVersion: 11
@@ -212,7 +213,7 @@ async function runAcceptanceTests() {
 
     const resBatch = await request('/api/sync/batch', {
       method: 'POST',
-      headers: { 'X-User-Id': userA.id, 'X-Device-Id': deviceA },
+      headers: { 'Authorization': `Bearer ${tokenA}`, 'X-Device-Id': deviceA },
       body: {
         userId: userA.id,
         deviceId: deviceA,
@@ -229,8 +230,10 @@ async function runAcceptanceTests() {
     // -------------------------------------------------------------------------
     console.log('\nTEST 8: Security & Multi-Tenant User Isolation');
     const userB = { id: 'usr_isolated_user_202', email: 'stranger@otherdomain.com' };
-    const resUserB = await request(`/api/sync/hydrate?userId=${userB.id}`, {
-      headers: { 'X-User-Id': userB.id, 'X-Device-Id': 'dev_stranger' }
+    const tokenB = createAuthToken(userB);
+
+    const resUserB = await request(`/api/sync/hydrate`, {
+      headers: { 'Authorization': `Bearer ${tokenB}`, 'X-Device-Id': 'dev_stranger' }
     });
 
     assert(resUserB.status === 200 && resUserB.data.success, 'User B receives their own isolated workspace');
@@ -252,3 +255,4 @@ async function runAcceptanceTests() {
 }
 
 runAcceptanceTests();
+

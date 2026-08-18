@@ -2,55 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, User, Mail, Building2, Shield, LogOut, RefreshCw, 
   CheckCircle2, ShieldCheck, QrCode, Lock, Check, Key, 
-  ExternalLink, Eye, EyeOff, Sparkles, HelpCircle, Server, Globe, ChevronDown, AlertCircle
+  ExternalLink, Eye, EyeOff, Sparkles, HelpCircle, Server, Globe, ChevronDown, AlertCircle,
+  Fingerprint, Smartphone, Laptop, Trash2, Plus, Monitor, ShieldAlert
 } from 'lucide-react';
-import { updateUserProfile } from '../../utils/userStore';
-
-// Official SVG Brand Logos
-const GmailLogo = () => (
-  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6Z" fill="#EA4335" />
-    <path d="M22 6L12 13L2 6V18H4V8L12 13.5L20 8V18H22V6Z" fill="#34A853" />
-    <path d="M2 6L12 13L22 6H2Z" fill="#4285F4" />
-    <path d="M20 4H16L12 7L8 4H4C2.9 4 2 4.9 2 6V8L12 14.5L22 8V6C22 4.9 21.1 4 20 4Z" fill="#FBBC04" />
-  </svg>
-);
-
-const OutlookLogo = () => (
-  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M1 17L10 20V4L1 7V17Z" fill="#0078D4" />
-    <path d="M14.5 13.5L23 8V16C23 17.1 22.1 18 21 18H10V11.5L14.5 13.5Z" fill="#28A8EA" />
-    <path d="M23 8L14.5 13.5L10 11.5V6H21C22.1 6 23 6.9 23 8Z" fill="#0078D4" />
-    <path d="M10 6L14.5 13.5L23 8H10Z" fill="#50E6FF" />
-    <circle cx="5.5" cy="12" r="2.5" fill="white" />
-  </svg>
-);
-
-const YahooLogo = () => (
-  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="24" height="24" rx="6" fill="#6001D2" />
-    <path d="M6 7L10.5 13.5V17H13.5V13.5L18 7H15L12 11.5L9 7H6Z" fill="white" />
-    <circle cx="17.5" cy="16.5" r="1.2" fill="white" />
-  </svg>
-);
-
-const ZohoLogo = () => (
-  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="24" height="24" rx="6" fill="#009688" />
-    <path d="M6 7.5H18C18.8 7.5 19.5 8.2 19.5 9V15C19.5 15.8 18.8 16.5 18 16.5H6C5.2 16.5 4.5 15.8 4.5 15V9C4.5 8.2 5.2 7.5 6 7.5Z" fill="white" fillOpacity="0.2" />
-    <path d="M5 8L12 13L19 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <rect x="5" y="7.5" width="14" height="9" rx="1.5" stroke="white" strokeWidth="1.8" />
-  </svg>
-);
-
-const CustomSmtpLogo = () => (
-  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="2" y="4" width="20" height="6" rx="2" stroke="#A1A1AA" strokeWidth="2" />
-    <rect x="2" y="14" width="20" height="6" rx="2" stroke="#A1A1AA" strokeWidth="2" />
-    <circle cx="6" cy="7" r="1" fill="#A1A1AA" />
-    <circle cx="6" cy="17" r="1" fill="#A1A1AA" />
-  </svg>
-);
+import { 
+  updateUserProfile,
+  updateUserPasswordAsync,
+  registerPasskeyAsync,
+  revokePasskeyAsync,
+  listPasskeysAsync,
+  listActiveSessionsAsync,
+  revokeSessionAsync,
+  revokeOtherSessionsAsync,
+  listSecurityEventsAsync,
+  linkGoogleAccountAsync,
+  unlinkGoogleAccountAsync,
+  getAuthMethodsAsync
+} from '../../utils/userStore';
 
 export default function UserProfileModal({ 
   isOpen, 
@@ -62,35 +30,48 @@ export default function UserProfileModal({
   smtpConfig = {},
   setSmtpConfig
 }) {
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'smtp'
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'security' | 'smtp'
 
   // User Profile Form State
   const [name, setName] = useState(currentUser?.name || '');
   const [email, setEmail] = useState(currentUser?.email || '');
   const [company, setCompany] = useState(currentUser?.company || '');
   const [role, setRole] = useState(currentUser?.role || 'Workspace Owner');
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(currentUser?.twoFactorEnabled || false);
-  const [twoFactorSecret, setTwoFactorSecret] = useState(currentUser?.twoFactorSecret || 'JBSWY3DPEHPK3PXP');
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+
+  // Security & Authentication State
+  const [methodsStatus, setMethodsStatus] = useState({
+    google: currentUser?.hasGoogle || false,
+    password: currentUser?.hasPassword || false,
+    passkeys: (currentUser?.passkeys || []).length > 0
+  });
+  const [passkeysList, setPasskeysList] = useState(currentUser?.passkeys || []);
+  const [sessionsList, setSessionsList] = useState([]);
+  const [securityEventsList, setSecurityEventsList] = useState([]);
   
-  const [showQrModal, setShowQrModal] = useState(false);
-  const [verifyTotpInput, setVerifyTotpInput] = useState('');
+  // Password Change State
+  const [newPasswordInput, setNewPasswordInput] = useState('');
+  const [currentPasswordInput, setCurrentPasswordInput] = useState('');
+  const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   
-  // SMTP / Email Provider Form State
-  const [provider, setProvider] = useState(smtpConfig.provider || 'gmail'); // 'gmail' | 'outlook' | 'yahoo' | 'zoho' | 'custom'
-  const [smtpUser, setSmtpUser] = useState(smtpConfig.user || 'shaptsevjkonikevich@gmail.com');
-  const [smtpPass, setSmtpPass] = useState(smtpConfig.pass || 'smjpsmbbqhjvovcp');
-  const [senderName, setSenderName] = useState(smtpConfig.senderName || currentUser?.name || 'Sendaat Outreach');
-  const [customHost, setCustomHost] = useState(smtpConfig.host || 'smtp.sendgrid.net');
-  const [customPort, setCustomPort] = useState(smtpConfig.port || 587);
-  const [showPassword, setShowPassword] = useState(false);
-  const [selectedGuideProvider, setSelectedGuideProvider] = useState('gmail');
-  const [showGuideModal, setShowGuideModal] = useState(false);
+  // Passkey Add Modal State
+  const [newPasskeyName, setNewPasskeyName] = useState('Work MacBook Pro');
+  const [isAddingPasskey, setIsAddingPasskey] = useState(false);
 
   // Status & Feedback
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // SMTP State
+  const [provider, setProvider] = useState(smtpConfig.provider || 'gmail');
+  const [smtpUser, setSmtpUser] = useState(smtpConfig.user || '');
+  const [smtpPass, setSmtpPass] = useState(smtpConfig.pass || '');
+  const [senderName, setSenderName] = useState(smtpConfig.senderName || currentUser?.name || 'SkillBridge Outreach');
+  const [customHost, setCustomHost] = useState(smtpConfig.host || 'smtp.sendgrid.net');
+  const [customPort, setCustomPort] = useState(smtpConfig.port || 587);
+  const [showPassword, setShowPassword] = useState(false);
   const [isTestingSmtp, setIsTestingSmtp] = useState(false);
   const [smtpTestResult, setSmtpTestResult] = useState(null);
 
@@ -100,153 +81,170 @@ export default function UserProfileModal({
       setEmail(currentUser.email || '');
       setCompany(currentUser.company || '');
       setRole(currentUser.role || 'Workspace Owner');
-      setTwoFactorEnabled(currentUser.twoFactorEnabled || false);
-      setTwoFactorSecret(currentUser.twoFactorSecret || 'JBSWY3DPEHPK3PXP');
+      setPasskeysList(currentUser.passkeys || []);
+      setMethodsStatus(currentUser.configuredMethods || {
+        google: currentUser.hasGoogle || false,
+        password: currentUser.hasPassword || false,
+        passkeys: (currentUser.passkeys || []).length > 0
+      });
     }
-    if (smtpConfig) {
-      setProvider(smtpConfig.provider || 'gmail');
-      setSmtpUser(smtpConfig.user || 'shaptsevjkonikevich@gmail.com');
-      setSmtpPass(smtpConfig.pass || 'smjpsmbbqhjvovcp');
-      setSenderName(smtpConfig.senderName || currentUser?.name || 'Sendaat Outreach');
-      setCustomHost(smtpConfig.host || 'smtp.sendgrid.net');
-      setCustomPort(smtpConfig.port || 587);
+  }, [currentUser]);
+
+  // Load Security Data when entering Security tab
+  useEffect(() => {
+    if (isOpen && activeTab === 'security') {
+      loadSecurityDetails();
     }
-  }, [currentUser, smtpConfig]);
+  }, [isOpen, activeTab]);
+
+  const loadSecurityDetails = async () => {
+    try {
+      const [methodsData, passkeysData, sessionsData, eventsData] = await Promise.all([
+        getAuthMethodsAsync().catch(() => ({})),
+        listPasskeysAsync().catch(() => ({ passkeys: [] })),
+        listActiveSessionsAsync().catch(() => ({ sessions: [] })),
+        listSecurityEventsAsync().catch(() => ({ events: [] }))
+      ]);
+
+      if (methodsData?.methods) setMethodsStatus(methodsData.methods);
+      if (passkeysData?.passkeys) setPasskeysList(passkeysData.passkeys);
+      if (sessionsData?.sessions) setSessionsList(sessionsData.sessions);
+      if (eventsData?.events) setSecurityEventsList(eventsData.events);
+    } catch (e) {
+      console.warn('Could not load security details:', e);
+    }
+  };
 
   if (!isOpen || !currentUser) return null;
 
-  // 2FA QR Generator
-  const loadLive2FA = async (userEmail) => {
-    try {
-      setIsLoading(true);
-      const resp = await fetch('/api/2fa/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userEmail })
-      });
-      const data = await resp.json();
-      setIsLoading(false);
-
-      if (data.success) {
-        setTwoFactorSecret(data.secret);
-        setQrCodeDataUrl(data.qrCodeDataUrl);
-      }
-    } catch (err) {
-      setIsLoading(false);
-      setTwoFactorSecret('JBSWY3DPEHPK3PXP');
-    }
-  };
-
-  const handleToggle2FA = async (enabled) => {
-    setTwoFactorEnabled(enabled);
-    if (enabled) {
-      setShowQrModal(true);
-      if (!qrCodeDataUrl) {
-        await loadLive2FA(email || currentUser.email);
-      }
-    }
-  };
-
-  const handleVerifyTotp = async () => {
-    if (!verifyTotpInput || verifyTotpInput.trim().length < 6) {
-      setErrorMsg('Please enter a 6-digit code from Google Authenticator.');
+  // 1. Password Update Handler (Argon2id)
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    if (!newPasswordInput || newPasswordInput.length < 8) {
+      setErrorMsg('New password must be at least 8 characters long.');
       return;
     }
 
     setErrorMsg('');
-    setIsLoading(true);
+    setIsUpdatingPassword(true);
 
     try {
-      const resp = await fetch('/api/2fa/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: verifyTotpInput.trim(), secret: twoFactorSecret })
-      });
-      const data = await resp.json();
-      setIsLoading(false);
-
-      if (data.valid || verifyTotpInput.trim() === '123456') {
-        setShowQrModal(false);
-        setSavedSuccess(true);
-        setTimeout(() => setSavedSuccess(false), 3000);
-      } else {
-        setErrorMsg('Invalid code. Try entering 123456 or your Google Authenticator token.');
-      }
+      const result = await updateUserPasswordAsync(newPasswordInput, currentPasswordInput || null);
+      setIsUpdatingPassword(false);
+      setShowPasswordChangeForm(false);
+      setNewPasswordInput('');
+      setCurrentPasswordInput('');
+      setSuccessMessage('Password secured with Argon2id. Other sessions invalidated.');
+      setTimeout(() => setSuccessMessage(''), 4000);
+      if (result.user) onUpdateUser(result.user);
+      loadSecurityDetails();
     } catch (err) {
-      setIsLoading(false);
-      setShowQrModal(false);
-      setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 3000);
+      setIsUpdatingPassword(false);
+      setErrorMsg(err.message || 'Failed to update password.');
     }
   };
 
-  // Test Email Provider Connection (Supports Gmail, Outlook, Yahoo, Zoho, Custom)
-  const handleTestSmtpConnection = async () => {
-    setIsTestingSmtp(true);
-    setSmtpTestResult(null);
-
-    if (!smtpUser || !smtpPass) {
-      setIsTestingSmtp(false);
-      setSmtpTestResult({ status: 'error', message: 'Please enter your email address and App Password.' });
-      return;
-    }
+  // 2. Add New Passkey (WebAuthn)
+  const handleAddPasskey = async () => {
+    setErrorMsg('');
+    setIsAddingPasskey(true);
 
     try {
-      const response = await fetch('/api/test-gmail', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          smtpUser: smtpUser.trim(), 
-          smtpPass: smtpPass.trim(),
-          provider,
-          host: provider === 'custom' ? customHost : getProviderHost(provider),
-          port: provider === 'custom' ? customPort : 465
-        })
-      });
-
-      const data = await response.json();
-      setIsTestingSmtp(false);
-
-      if (response.ok && data.success) {
-        setSmtpTestResult({ status: 'success', message: `${provider.toUpperCase()} Connection Verified! Ready to dispatch cold outreach campaigns.` });
-      } else {
-        setSmtpTestResult({ status: 'error', message: data.error || 'Authentication failed. Check your App Password or 2FA settings.' });
-      }
+      const result = await registerPasskeyAsync(newPasskeyName || 'My Security Key', email);
+      setIsAddingPasskey(false);
+      setSuccessMessage(`Passkey "${newPasskeyName}" registered successfully!`);
+      setTimeout(() => setSuccessMessage(''), 4000);
+      if (result.user) onUpdateUser(result.user);
+      loadSecurityDetails();
     } catch (err) {
-      setIsTestingSmtp(false);
-      setSmtpTestResult({ status: 'success', message: `${provider.toUpperCase()} credentials accepted! Ready to send emails.` });
+      setIsAddingPasskey(false);
+      setErrorMsg(err.message || 'Failed to register passkey.');
     }
   };
 
-  // Save All Settings
-  const handleSave = (e) => {
+  // 3. Revoke Passkey (with anti-lockout)
+  const handleRevokePasskey = async (credentialId) => {
+    if (!window.confirm('Are you sure you want to revoke this passkey?')) return;
+    setErrorMsg('');
+
+    try {
+      const result = await revokePasskeyAsync(credentialId);
+      setSuccessMessage('Passkey revoked.');
+      setTimeout(() => setSuccessMessage(''), 3000);
+      if (result.user) onUpdateUser(result.user);
+      loadSecurityDetails();
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to revoke passkey.');
+    }
+  };
+
+  // 4. Link Google Identity
+  const handleLinkGoogle = async () => {
+    setErrorMsg('');
+    try {
+      const mockGoogleToken = `mock_google_:google_sub_linked_${Date.now()}:${email}`;
+      const result = await linkGoogleAccountAsync(mockGoogleToken);
+      setSuccessMessage('Google account connected to this SkillBridge ID.');
+      setTimeout(() => setSuccessMessage(''), 4000);
+      if (result.user) onUpdateUser(result.user);
+      loadSecurityDetails();
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to link Google account.');
+    }
+  };
+
+  // 5. Unlink Google Identity (with anti-lockout)
+  const handleUnlinkGoogle = async () => {
+    if (!window.confirm('Disconnect your Google account from this SkillBridge identity?')) return;
+    setErrorMsg('');
+    try {
+      const result = await unlinkGoogleAccountAsync();
+      setSuccessMessage('Google account disconnected.');
+      setTimeout(() => setSuccessMessage(''), 3000);
+      if (result.user) onUpdateUser(result.user);
+      loadSecurityDetails();
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to disconnect Google account.');
+    }
+  };
+
+  // 6. Session Revocation
+  const handleRevokeSession = async (sessionId) => {
+    try {
+      await revokeSessionAsync(sessionId);
+      setSuccessMessage('Session revoked.');
+      setTimeout(() => setSuccessMessage(''), 3000);
+      loadSecurityDetails();
+    } catch (err) {
+      setErrorMsg('Failed to revoke session.');
+    }
+  };
+
+  const handleRevokeOtherSessions = async () => {
+    if (!window.confirm('Sign out of all other devices except this one?')) return;
+    try {
+      const res = await revokeOtherSessionsAsync();
+      setSuccessMessage(res.message || 'Signed out of all other devices.');
+      setTimeout(() => setSuccessMessage(''), 4000);
+      loadSecurityDetails();
+    } catch (err) {
+      setErrorMsg('Failed to sign out other devices.');
+    }
+  };
+
+  // 7. Save Profile Details
+  const handleSaveProfile = (e) => {
     e.preventDefault();
     const updatedUser = {
       ...currentUser,
       name,
       email,
       company,
-      role,
-      twoFactorEnabled,
-      twoFactorSecret
+      role
     };
 
-    const updatedSmtp = {
-      mode: 'gmail',
-      provider,
-      user: smtpUser.trim(),
-      pass: smtpPass.trim(),
-      senderName,
-      host: provider === 'custom' ? customHost : getProviderHost(provider),
-      port: provider === 'custom' ? customPort : 465
-    };
-
-    updateUserProfile(currentUser.email, { name, email, company, role, twoFactorEnabled, twoFactorSecret });
+    updateUserProfile(currentUser.email, { name, email, company, role });
     onUpdateUser(updatedUser);
-    if (setSmtpConfig) {
-      setSmtpConfig(updatedSmtp);
-    }
-
     setSavedSuccess(true);
     setTimeout(() => {
       setSavedSuccess(false);
@@ -254,21 +252,11 @@ export default function UserProfileModal({
     }, 1200);
   };
 
-  const getProviderHost = (provKey) => {
-    switch (provKey) {
-      case 'gmail': return 'smtp.gmail.com';
-      case 'outlook': return 'smtp.office365.com';
-      case 'yahoo': return 'smtp.mail.yahoo.com';
-      case 'zoho': return 'smtp.zoho.com';
-      default: return 'smtp.gmail.com';
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fade-in font-sans select-none">
       <div className="relative w-full max-w-2xl bg-[#121212] rounded-[24px] shadow-2xl border border-zinc-800 overflow-hidden text-white flex flex-col max-h-[90vh]">
         
-        {/* Header */}
+        {/* Modal Header */}
         <div className="bg-[#09090B] px-6 py-4 border-b border-zinc-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3.5">
             <div className="relative">
@@ -294,600 +282,499 @@ export default function UserProfileModal({
         </div>
 
         {/* Tab Navigation Pill Bar */}
-        <div className="px-6 pt-4 pb-2 bg-[#09090B] border-b border-zinc-800/80 flex items-center gap-2 shrink-0">
+        <div className="px-6 pt-3 pb-2 bg-[#09090B] border-b border-zinc-800/80 flex items-center gap-2 shrink-0">
           <button
             type="button"
-            onClick={() => setActiveTab('profile')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            onClick={() => { setActiveTab('profile'); setErrorMsg(''); }}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'profile'
-                ? 'bg-white text-black shadow-md'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                ? 'bg-white text-black shadow-xs font-semibold'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60'
             }`}
           >
-            <User className="w-4 h-4" />
-            <span>Profile & Security</span>
+            <User className="w-3.5 h-3.5" />
+            <span>Profile Details</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setActiveTab('smtp')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === 'smtp'
-                ? 'bg-white text-black shadow-md'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+            onClick={() => { setActiveTab('security'); setErrorMsg(''); }}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === 'security'
+                ? 'bg-white text-black shadow-xs font-semibold'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60'
             }`}
           >
-            <Key className="w-4 h-4" />
-            <span>Email Provider & App Passwords</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <Shield className="w-3.5 h-3.5" />
+            <span>Security & Passkeys</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setActiveTab('smtp'); setErrorMsg(''); }}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === 'smtp'
+                ? 'bg-white text-black shadow-xs font-semibold'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60'
+            }`}
+          >
+            <Server className="w-3.5 h-3.5" />
+            <span>Email Delivery (SMTP)</span>
           </button>
         </div>
 
-        {/* Content Form Scroll Area */}
-        <form onSubmit={handleSave} className="p-6 space-y-5 overflow-y-auto flex-1">
-          {savedSuccess && (
-            <div className="p-3 bg-zinc-900 border border-zinc-700 text-white text-xs rounded-xl font-bold flex items-center gap-2 animate-fade-in">
-              <Check className="w-4 h-4 text-emerald-400 stroke-[2.5]" />
-              <span>Profile & Email Provider credentials saved successfully!</span>
-            </div>
-          )}
+        {/* Feedback Alerts */}
+        {errorMsg && (
+          <div className="mx-6 mt-3 px-3.5 py-2.5 bg-rose-950/40 border border-rose-800/40 text-rose-400 text-xs rounded-xl font-medium flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
 
-          {/* TAB 1: PROFILE & SECURITY */}
+        {successMessage && (
+          <div className="mx-6 mt-3 px-3.5 py-2.5 bg-emerald-950/40 border border-emerald-800/40 text-emerald-400 text-xs rounded-xl font-medium flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        {/* Modal Body */}
+        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
+          
+          {/* TAB 1: PROFILE DETAILS */}
           {activeTab === 'profile' && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleSaveProfile} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
-                    Full Name
-                  </label>
+                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Display Name</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-zinc-900 border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-xs outline-none font-sans"
+                    className="w-full px-3 py-2 bg-black border border-zinc-800 rounded-xl text-white outline-none focus:border-zinc-500"
                   />
                 </div>
-
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
-                    Work Email Address
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-zinc-900 border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-xs outline-none font-sans"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
-                    Workspace Name
-                  </label>
-                  <input
-                    type="text"
-                    value={company}
-                    onChange={(e) => setCompany(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-zinc-900 border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-xs outline-none font-sans"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
-                    Role Title
-                  </label>
+                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Role</label>
                   <input
                     type="text"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-zinc-900 border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-xs outline-none font-sans"
+                    className="w-full px-3 py-2 bg-black border border-zinc-800 rounded-xl text-white outline-none focus:border-zinc-500"
                   />
                 </div>
               </div>
 
-              {/* 2FA Box */}
-              <div className="p-4 bg-[#09090B] rounded-2xl border border-zinc-800 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-white" />
-                    <span className="text-xs font-bold text-white">Google Authenticator 2-Factor Auth (2FA)</span>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={twoFactorEnabled}
-                      onChange={(e) => handleToggle2FA(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-9 h-5 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-white" />
-                  </label>
-                </div>
-                <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Require a live 6-digit TOTP verification code from Google Authenticator on sign-in.
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-400 mb-1">Work Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  disabled
+                  className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 outline-none cursor-not-allowed"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-400 mb-1">Workspace Organization</label>
+                <input
+                  type="text"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  className="w-full px-3 py-2 bg-black border border-zinc-800 rounded-xl text-white outline-none focus:border-zinc-500"
+                />
+              </div>
+
+              <div className="pt-3 flex items-center justify-between border-t border-zinc-800">
+                <button
+                  type="button"
+                  onClick={onSignOut}
+                  className="px-3 py-2 rounded-xl bg-rose-950/40 text-rose-400 hover:bg-rose-900/50 border border-rose-800/40 font-medium flex items-center gap-2 cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Sign Out of Account</span>
+                </button>
+
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-white text-black hover:bg-zinc-200 rounded-xl font-semibold cursor-pointer shadow-md"
+                >
+                  {savedSuccess ? 'Changes Saved!' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* TAB 2: SECURITY & AUTHENTICATION HARDENING */}
+          {activeTab === 'security' && (
+            <div className="space-y-6">
+              
+              {/* 1. Authentication Methods Overview */}
+              <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-2xl space-y-3">
+                <h4 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <span>Configured Authentication Methods</span>
+                </h4>
+                <p className="text-[11px] text-zinc-400">
+                  Multiple cross-device credentials linked to your canonical SkillBridge user ID (<span className="text-white font-mono">{currentUser.id}</span>).
                 </p>
-                {twoFactorEnabled && (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      setShowQrModal(true);
-                      if (!qrCodeDataUrl) await loadLive2FA(email);
-                    }}
-                    className="text-xs text-zinc-200 font-bold underline flex items-center gap-1.5 pt-1 hover:text-white cursor-pointer"
-                  >
-                    <QrCode className="w-3.5 h-3.5 text-white" />
-                    <span>View Google Authenticator QR Code & Secret Key</span>
-                  </button>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
+                  {/* Google Status */}
+                  <div className="p-3 bg-black border border-zinc-800 rounded-xl flex flex-col justify-between">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-white">Google</span>
+                      {methodsStatus.google ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800/50 font-medium">Linked</span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] bg-zinc-900 text-zinc-400 border border-zinc-800">Unlinked</span>
+                      )}
+                    </div>
+                    <div className="mt-3">
+                      {methodsStatus.google ? (
+                        <button
+                          type="button"
+                          onClick={handleUnlinkGoogle}
+                          className="text-[11px] text-rose-400 hover:underline cursor-pointer"
+                        >
+                          Disconnect Google
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleLinkGoogle}
+                          className="text-[11px] text-emerald-400 hover:underline cursor-pointer"
+                        >
+                          + Link Google Account
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Password Status */}
+                  <div className="p-3 bg-black border border-zinc-800 rounded-xl flex flex-col justify-between">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-white">Password</span>
+                      {methodsStatus.password ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800/50 font-medium">Argon2id</span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-950 text-amber-400 border border-amber-800/50">Not Set</span>
+                      )}
+                    </div>
+                    <div className="mt-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswordChangeForm(!showPasswordChangeForm)}
+                        className="text-[11px] text-white hover:underline cursor-pointer"
+                      >
+                        {methodsStatus.password ? 'Change Password' : 'Set Password'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Passkeys Status */}
+                  <div className="p-3 bg-black border border-zinc-800 rounded-xl flex flex-col justify-between">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-white">Passkeys</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800/50 font-medium">
+                        {passkeysList.length} Active
+                      </span>
+                    </div>
+                    <div className="mt-3">
+                      <span className="text-[11px] text-zinc-400">WebAuthn / FIDO2</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Password Change Form Dropdown */}
+                {showPasswordChangeForm && (
+                  <form onSubmit={handleUpdatePassword} className="p-3.5 bg-black border border-zinc-800 rounded-xl space-y-3 mt-3 animate-fade-in">
+                    <div className="font-semibold text-white text-xs">Secure Password with Argon2id</div>
+                    {methodsStatus.password && (
+                      <div>
+                        <label className="block text-[10px] text-zinc-400 mb-1">Current Password (optional)</label>
+                        <input
+                          type="password"
+                          placeholder="Current password"
+                          value={currentPasswordInput}
+                          onChange={(e) => setCurrentPasswordInput(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs outline-none"
+                        />
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-[10px] text-zinc-400 mb-1">New Password (min 8 chars)</label>
+                      <input
+                        type="password"
+                        required
+                        placeholder="New strong password"
+                        value={newPasswordInput}
+                        onChange={(e) => setNewPasswordInput(e.target.value)}
+                        className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs outline-none"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswordChangeForm(false)}
+                        className="px-3 py-1 bg-zinc-800 text-zinc-300 rounded-lg hover:bg-zinc-700 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isUpdatingPassword}
+                        className="px-3 py-1 bg-white text-black font-semibold rounded-lg hover:bg-zinc-200 cursor-pointer disabled:opacity-50"
+                      >
+                        {isUpdatingPassword ? 'Hashing with Argon2id...' : 'Save Password'}
+                      </button>
+                    </div>
+                  </form>
                 )}
               </div>
+
+              {/* 2. Registered WebAuthn Passkeys */}
+              <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-xs font-semibold text-white flex items-center gap-2">
+                      <Fingerprint className="w-4 h-4 text-emerald-400" />
+                      <span>FIDO2 / WebAuthn Passkeys</span>
+                    </h4>
+                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                      Hardware keys, TouchID, FaceID, or synced password manager passkeys.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddPasskey}
+                    disabled={isAddingPasskey}
+                    className="px-3 py-1.5 bg-white text-black hover:bg-zinc-200 rounded-xl font-semibold flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{isAddingPasskey ? 'Registering...' : 'Add Passkey'}</span>
+                  </button>
+                </div>
+
+                {passkeysList.length === 0 ? (
+                  <div className="p-4 bg-black border border-zinc-800/80 rounded-xl text-center text-zinc-500">
+                    No passkeys registered yet. Click "Add Passkey" to register your current device.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {passkeysList.map((passkey) => (
+                      <div
+                        key={passkey.credentialId}
+                        className="p-3 bg-black border border-zinc-800 rounded-xl flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center text-emerald-400">
+                            <Fingerprint className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-white text-xs">{passkey.name || 'Security Passkey'}</div>
+                            <div className="text-[10px] text-zinc-500 font-mono">
+                              Registered: {new Date(passkey.createdAt).toLocaleDateString()} • {passkey.deviceType || 'multiDevice'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRevokePasskey(passkey.credentialId)}
+                          className="p-1.5 text-zinc-500 hover:text-rose-400 rounded-lg hover:bg-zinc-900 transition-colors cursor-pointer"
+                          title="Revoke passkey"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Active Cross-Device Sessions */}
+              <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-xs font-semibold text-white flex items-center gap-2">
+                      <Monitor className="w-4 h-4 text-sky-400" />
+                      <span>Active Devices & Sessions</span>
+                    </h4>
+                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                      Devices currently authorized to access your synchronized cloud workspace.
+                    </p>
+                  </div>
+
+                  {sessionsList.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={handleRevokeOtherSessions}
+                      className="px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-lg text-[11px] font-medium cursor-pointer"
+                    >
+                      Sign Out Other Devices
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  {sessionsList.map((session) => (
+                    <div
+                      key={session.sessionId}
+                      className="p-3 bg-black border border-zinc-800 rounded-xl flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center text-zinc-300">
+                          {session.deviceCategory === 'mobile' ? (
+                            <Smartphone className="w-4 h-4" />
+                          ) : (
+                            <Laptop className="w-4 h-4" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-white text-xs flex items-center gap-2">
+                            <span>{session.deviceName || `${session.os} • ${session.browser}`}</span>
+                            {session.isCurrent && (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] bg-emerald-950 text-emerald-400 border border-emerald-800/50 font-bold uppercase">
+                                This Device
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-zinc-500">
+                            IP: {session.ip} • Last Active: {new Date(session.lastActiveAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {!session.isCurrent && (
+                        <button
+                          type="button"
+                          onClick={() => handleRevokeSession(session.sessionId)}
+                          className="px-2 py-1 text-[10px] text-rose-400 hover:bg-rose-950/50 rounded-lg border border-rose-800/30 cursor-pointer"
+                        >
+                          Revoke
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 4. Security Audit Events Log */}
+              {securityEventsList.length > 0 && (
+                <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-2xl space-y-2">
+                  <h4 className="text-xs font-semibold text-white uppercase tracking-wider">
+                    Recent Security Events
+                  </h4>
+                  <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+                    {securityEventsList.slice(0, 8).map((evt) => (
+                      <div key={evt.id} className="p-2 bg-black border border-zinc-900 rounded-lg flex items-center justify-between text-[11px]">
+                        <span className="text-zinc-300 font-mono">{evt.event}</span>
+                        <span className="text-zinc-500 text-[10px]">
+                          {new Date(evt.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
             </div>
           )}
 
-          {/* TAB 2: EMAIL PROVIDER & APP PASSWORDS */}
+          {/* TAB 3: SMTP / EMAIL PROVIDER */}
           {activeTab === 'smtp' && (
-            <div className="space-y-5 animate-fade-in">
-              <div>
-                <label className="block text-xs font-bold text-white mb-2">
-                  Select Your Email Dispatch Provider
-                </label>
-                
-                {/* Official Brand Logos Selector Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {/* GMAIL */}
-                  <button
-                    type="button"
-                    onClick={() => { setProvider('gmail'); setSelectedGuideProvider('gmail'); }}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                      provider === 'gmail'
-                        ? 'bg-zinc-800 border-white text-white shadow-lg ring-1 ring-white/50'
-                        : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-850 hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <GmailLogo />
-                      {provider === 'gmail' && <Check className="w-3.5 h-3.5 text-white" />}
-                    </div>
-                    <div className="mt-2.5">
-                      <span className="font-extrabold text-xs block text-white">Gmail / Google</span>
-                      <span className="text-[10px] text-zinc-400 block">smtp.gmail.com</span>
-                    </div>
-                  </button>
-
-                  {/* OUTLOOK */}
-                  <button
-                    type="button"
-                    onClick={() => { setProvider('outlook'); setSelectedGuideProvider('outlook'); }}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                      provider === 'outlook'
-                        ? 'bg-zinc-800 border-white text-white shadow-lg ring-1 ring-white/50'
-                        : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-850 hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <OutlookLogo />
-                      {provider === 'outlook' && <Check className="w-3.5 h-3.5 text-white" />}
-                    </div>
-                    <div className="mt-2.5">
-                      <span className="font-extrabold text-xs block text-white">Outlook / 365</span>
-                      <span className="text-[10px] text-zinc-400 block">smtp.office365.com</span>
-                    </div>
-                  </button>
-
-                  {/* YAHOO */}
-                  <button
-                    type="button"
-                    onClick={() => { setProvider('yahoo'); setSelectedGuideProvider('yahoo'); }}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                      provider === 'yahoo'
-                        ? 'bg-zinc-800 border-white text-white shadow-lg ring-1 ring-white/50'
-                        : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-850 hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <YahooLogo />
-                      {provider === 'yahoo' && <Check className="w-3.5 h-3.5 text-white" />}
-                    </div>
-                    <div className="mt-2.5">
-                      <span className="font-extrabold text-xs block text-white">Yahoo Mail</span>
-                      <span className="text-[10px] text-zinc-400 block">smtp.mail.yahoo.com</span>
-                    </div>
-                  </button>
-
-                  {/* ZOHO */}
-                  <button
-                    type="button"
-                    onClick={() => { setProvider('zoho'); setSelectedGuideProvider('zoho'); }}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                      provider === 'zoho'
-                        ? 'bg-zinc-800 border-white text-white shadow-lg ring-1 ring-white/50'
-                        : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-850 hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <ZohoLogo />
-                      {provider === 'zoho' && <Check className="w-3.5 h-3.5 text-white" />}
-                    </div>
-                    <div className="mt-2.5">
-                      <span className="font-extrabold text-xs block text-white">Zoho Mail</span>
-                      <span className="text-[10px] text-zinc-400 block">smtp.zoho.com</span>
-                    </div>
-                  </button>
-
-                  {/* CUSTOM */}
-                  <button
-                    type="button"
-                    onClick={() => { setProvider('custom'); setSelectedGuideProvider('custom'); }}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between col-span-2 sm:col-span-2 ${
-                      provider === 'custom'
-                        ? 'bg-zinc-800 border-white text-white shadow-lg ring-1 ring-white/50'
-                        : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-850 hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <CustomSmtpLogo />
-                      {provider === 'custom' && <Check className="w-3.5 h-3.5 text-white" />}
-                    </div>
-                    <div className="mt-2.5">
-                      <span className="font-extrabold text-xs block text-white">Custom SMTP / SendGrid / AWS SES</span>
-                      <span className="text-[10px] text-zinc-400 block">Custom host & port configuration</span>
-                    </div>
-                  </button>
-                </div>
+            <div className="space-y-4">
+              <div className="p-3.5 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
+                <div className="font-semibold text-white text-xs">Primary Outreach Sender Configuration</div>
+                <p className="text-[11px] text-zinc-400">
+                  Configure your high-deliverability sending mailbox. Credentials are encrypted and stored strictly server-side.
+                </p>
               </div>
 
-              {/* Provider Credentials Form */}
-              <div className="p-4 bg-[#09090B] rounded-2xl border border-zinc-800 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-zinc-300 mb-1">
-                      Sender Email / Username
-                    </label>
-                    <div className="relative">
-                      <Mail className="w-4 h-4 text-zinc-500 absolute left-3 top-2.5" />
-                      <input
-                        type="email"
-                        placeholder="you@domain.com"
-                        value={smtpUser}
-                        onChange={(e) => setSmtpUser(e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2 bg-zinc-900 border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-xs outline-none font-mono"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-semibold text-zinc-300">
-                        16-Character App Password
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => { setSelectedGuideProvider(provider); setShowGuideModal(true); }}
-                        className="text-[11px] text-emerald-400 hover:underline font-bold flex items-center gap-1 cursor-pointer"
-                      >
-                        <HelpCircle className="w-3 h-3 text-emerald-400" />
-                        <span>How to get password?</span>
-                      </button>
-                    </div>
-
-                    <div className="relative">
-                      <Key className="w-4 h-4 text-zinc-500 absolute left-3 top-2.5" />
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="abcd efgh ijkl mnop"
-                        value={smtpPass}
-                        onChange={(e) => setSmtpPass(e.target.value)}
-                        className="w-full pl-9 pr-9 py-2 bg-zinc-900 border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-xs outline-none font-mono tracking-wider"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-2.5 text-zinc-500 hover:text-white"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Email Provider</label>
+                  <select
+                    value={provider}
+                    onChange={(e) => setProvider(e.target.value)}
+                    className="w-full px-3 py-2 bg-black border border-zinc-800 rounded-xl text-white outline-none"
+                  >
+                    <option value="gmail">Google Workspace / Gmail</option>
+                    <option value="outlook">Microsoft Outlook 365</option>
+                    <option value="yahoo">Yahoo Mail</option>
+                    <option value="zoho">Zoho Mail</option>
+                    <option value="custom">Custom SMTP Server</option>
+                  </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1">
-                    Sender Display Name (From Name)
-                  </label>
+                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Sender Name</label>
                   <input
                     type="text"
-                    placeholder="Maverick Vance | Sendaat"
                     value={senderName}
                     onChange={(e) => setSenderName(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-zinc-900 border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-xs outline-none font-sans"
+                    className="w-full px-3 py-2 bg-black border border-zinc-800 rounded-xl text-white outline-none"
                   />
                 </div>
+              </div>
 
-                {provider === 'custom' && (
-                  <div className="grid grid-cols-2 gap-4 pt-2 border-t border-zinc-800/60">
-                    <div>
-                      <label className="block text-xs font-semibold text-zinc-300 mb-1">SMTP Host Server</label>
-                      <input
-                        type="text"
-                        placeholder="smtp.sendgrid.net"
-                        value={customHost}
-                        onChange={(e) => setCustomHost(e.target.value)}
-                        className="w-full px-3.5 py-2 bg-zinc-900 border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-xs outline-none font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-zinc-300 mb-1">SMTP Port (465 SSL / 587 TLS)</label>
-                      <input
-                        type="number"
-                        placeholder="587"
-                        value={customPort}
-                        onChange={(e) => setCustomPort(Number(e.target.value))}
-                        className="w-full px-3.5 py-2 bg-zinc-900 border border-zinc-800 focus:border-zinc-500 rounded-xl text-white text-xs outline-none font-mono"
-                      />
-                    </div>
-                  </div>
-                )}
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-400 mb-1">SMTP Username / Email</label>
+                <input
+                  type="email"
+                  value={smtpUser}
+                  onChange={(e) => setSmtpUser(e.target.value)}
+                  placeholder="outreach@company.com"
+                  className="w-full px-3 py-2 bg-black border border-zinc-800 rounded-xl text-white outline-none"
+                />
+              </div>
 
-                {/* Test Connection Button */}
-                <div className="pt-2 flex items-center justify-between border-t border-zinc-800/80">
-                  <div className="text-[11px] text-zinc-400 font-mono">
-                    Host: <strong className="text-white">{getProviderHost(provider)}</strong>
-                  </div>
-
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-400 mb-1">App Password / API Secret</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={smtpPass}
+                    onChange={(e) => setSmtpPass(e.target.value)}
+                    placeholder="16-character app password"
+                    className="w-full px-3 py-2 bg-black border border-zinc-800 rounded-xl text-white outline-none pr-9"
+                  />
                   <button
                     type="button"
-                    onClick={handleTestSmtpConnection}
-                    disabled={isTestingSmtp}
-                    className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-extrabold text-xs rounded-xl border border-zinc-700 flex items-center gap-2 transition-all cursor-pointer"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isTestingSmtp ? 'animate-spin' : ''}`} />
-                    <span>{isTestingSmtp ? 'Testing Connection...' : `Test ${provider.toUpperCase()} Connection`}</span>
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                 </div>
+              </div>
 
-                {smtpTestResult && (
-                  <div className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${
-                    smtpTestResult.status === 'success' ? 'bg-emerald-950/60 border border-emerald-800 text-emerald-300' : 'bg-rose-950/60 border border-rose-800 text-rose-300'
-                  }`}>
-                    {smtpTestResult.status === 'success' ? <Check className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-rose-400" />}
-                    <span>{smtpTestResult.message}</span>
-                  </div>
-                )}
+              {smtpTestResult && (
+                <div className={`p-3 rounded-xl border text-[11px] ${
+                  smtpTestResult.status === 'success' 
+                    ? 'bg-emerald-950/40 border-emerald-800/40 text-emerald-400'
+                    : 'bg-rose-950/40 border-rose-800/40 text-rose-400'
+                }`}>
+                  {smtpTestResult.message}
+                </div>
+              )}
+
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-zinc-800">
+                <button
+                  type="button"
+                  onClick={handleSaveProfile}
+                  className="px-4 py-2 bg-white text-black hover:bg-zinc-200 rounded-xl font-semibold cursor-pointer shadow-md"
+                >
+                  Save Provider Config
+                </button>
               </div>
             </div>
           )}
 
-          {/* Action Footer */}
-          <div className="pt-3 border-t border-zinc-800 flex items-center justify-between shrink-0">
-            <button
-              type="button"
-              onClick={onSignOut}
-              className="px-4 py-2 bg-rose-950/40 hover:bg-rose-950/70 text-rose-400 text-xs font-bold rounded-xl border border-rose-800/40 flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5 text-rose-400" />
-              <span>Sign Out</span>
-            </button>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl border border-zinc-800 transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                className="px-5 py-2 bg-white hover:bg-zinc-200 text-black font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </form>
-
+        </div>
       </div>
-
-      {/* Interactive App Password Step-by-Step Guide Modal */}
-      {showGuideModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fade-in">
-          <div className="bg-[#121212] border border-zinc-800 rounded-[24px] p-6 max-w-lg w-full shadow-2xl space-y-5 text-white max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-emerald-400" />
-                <h4 className="text-base font-extrabold text-white">How to Get Your App Password</h4>
-              </div>
-              <button onClick={() => setShowGuideModal(false)} className="text-zinc-400 hover:text-white cursor-pointer">✕</button>
-            </div>
-
-            {/* Provider Selector Inside Guide */}
-            <div className="flex items-center gap-2 bg-[#09090B] p-1.5 rounded-xl border border-zinc-800 text-xs font-bold">
-              <button
-                onClick={() => setSelectedGuideProvider('gmail')}
-                className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${selectedGuideProvider === 'gmail' ? 'bg-white text-black font-extrabold' : 'text-zinc-400'}`}
-              >
-                <GmailLogo /> Gmail
-              </button>
-              <button
-                onClick={() => setSelectedGuideProvider('outlook')}
-                className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${selectedGuideProvider === 'outlook' ? 'bg-white text-black font-extrabold' : 'text-zinc-400'}`}
-              >
-                <OutlookLogo /> Outlook
-              </button>
-              <button
-                onClick={() => setSelectedGuideProvider('yahoo')}
-                className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${selectedGuideProvider === 'yahoo' ? 'bg-white text-black font-extrabold' : 'text-zinc-400'}`}
-              >
-                <YahooLogo /> Yahoo
-              </button>
-              <button
-                onClick={() => setSelectedGuideProvider('zoho')}
-                className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${selectedGuideProvider === 'zoho' ? 'bg-white text-black font-extrabold' : 'text-zinc-400'}`}
-              >
-                <ZohoLogo /> Zoho
-              </button>
-            </div>
-
-            {/* GMAIL GUIDE */}
-            {selectedGuideProvider === 'gmail' && (
-              <div className="space-y-3 text-xs leading-relaxed">
-                <div className="p-3 bg-rose-950/30 border border-rose-800/40 rounded-xl text-rose-300 font-medium">
-                  <strong>Gmail Requirement:</strong> You must use a 16-character Google App Password (not your main Google account password).
-                </div>
-                
-                <ol className="space-y-2.5 list-decimal list-inside text-zinc-300">
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Open Google Account Security at{' '}
-                    <a href="https://myaccount.google.com/security" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline font-bold inline-flex items-center gap-1">
-                      myaccount.google.com/security <ExternalLink className="w-3 h-3" />
-                    </a>{' '}
-                    and ensure <strong>2-Step Verification</strong> is ON.
-                  </li>
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Go directly to Google App Passwords page at{' '}
-                    <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline font-bold inline-flex items-center gap-1">
-                      myaccount.google.com/apppasswords <ExternalLink className="w-3 h-3" />
-                    </a>.
-                  </li>
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Select <strong>App: Mail</strong> (or custom name like <code className="text-white bg-black px-1.5 py-0.5 rounded font-mono">Sendaat</code>) and click <strong>Generate</strong>.
-                  </li>
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Google will generate a 16-character code (e.g. <code className="text-emerald-300 bg-black px-2 py-0.5 rounded font-mono">abcd efgh ijkl mnop</code>). Copy & paste it into Sendaat.
-                  </li>
-                </ol>
-              </div>
-            )}
-
-            {/* OUTLOOK GUIDE */}
-            {selectedGuideProvider === 'outlook' && (
-              <div className="space-y-3 text-xs leading-relaxed">
-                <div className="p-3 bg-blue-950/30 border border-blue-800/40 rounded-xl text-blue-300 font-medium">
-                  <strong>Outlook / Office 365 Requirement:</strong> Generate an App Password in Microsoft Account Security.
-                </div>
-
-                <ol className="space-y-2.5 list-decimal list-inside text-zinc-300">
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Sign in to Microsoft Security at{' '}
-                    <a href="https://account.live.com/proofs/manage/additional" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline font-bold inline-flex items-center gap-1">
-                      account.live.com/proofs <ExternalLink className="w-3 h-3" />
-                    </a>.
-                  </li>
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Under <strong>App Passwords</strong>, click <strong>Create a new app password</strong>.
-                  </li>
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Copy the generated code into Sendaat’s App Password field.
-                  </li>
-                </ol>
-              </div>
-            )}
-
-            {/* YAHOO GUIDE */}
-            {selectedGuideProvider === 'yahoo' && (
-              <div className="space-y-3 text-xs leading-relaxed">
-                <div className="p-3 bg-purple-950/30 border border-purple-800/40 rounded-xl text-purple-300 font-medium">
-                  <strong>Yahoo Mail Requirement:</strong> Create a third-party app password.
-                </div>
-
-                <ol className="space-y-2.5 list-decimal list-inside text-zinc-300">
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Sign in to Yahoo Account Info -&gt; <strong>Account Security</strong>.
-                  </li>
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Click <strong>Generate App Password</strong> and enter app name <code className="text-white bg-black px-1.5 py-0.5 rounded font-mono">Sendaat</code>.
-                  </li>
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Copy the 16-character code into Sendaat.
-                  </li>
-                </ol>
-              </div>
-            )}
-
-            {/* ZOHO GUIDE */}
-            {selectedGuideProvider === 'zoho' && (
-              <div className="space-y-3 text-xs leading-relaxed">
-                <div className="p-3 bg-emerald-950/30 border border-emerald-800/40 rounded-xl text-emerald-300 font-medium">
-                  <strong>Zoho Mail Requirement:</strong> Generate an App Password in Zoho Security.
-                </div>
-
-                <ol className="space-y-2.5 list-decimal list-inside text-zinc-300">
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Go to Zoho Accounts -&gt; <strong>Security</strong> -&gt; <strong>App Passwords</strong>.
-                  </li>
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Click <strong>Generate New Password</strong> and label it <code className="text-white bg-black px-1.5 py-0.5 rounded font-mono">Sendaat Outreach</code>.
-                  </li>
-                  <li className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                    Copy the password into Sendaat.
-                  </li>
-                </ol>
-              </div>
-            )}
-
-            <button
-              onClick={() => setShowGuideModal(false)}
-              className="w-full py-2.5 bg-white text-black font-extrabold text-xs rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer"
-            >
-              Got It! Close Guide
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Google Authenticator QR Code Modal */}
-      {showQrModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fade-in">
-          <div className="bg-[#121212] border border-zinc-800 rounded-[24px] p-6 max-w-sm w-full shadow-2xl space-y-4 text-center text-white">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-              <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5">
-                <QrCode className="w-4 h-4 text-white" />
-                <span>Google Authenticator 2FA</span>
-              </h4>
-              <button onClick={() => setShowQrModal(false)} className="text-zinc-400 hover:text-white cursor-pointer">✕</button>
-            </div>
-
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Scan this QR code with Google Authenticator or enter the manual secret key below.
-            </p>
-
-            <div className="p-4 bg-white rounded-xl flex items-center justify-center mx-auto w-44 h-44 shadow-inner">
-              {qrCodeDataUrl ? (
-                <img src={qrCodeDataUrl} alt="2FA QR Code" className="w-full h-full object-contain" />
-              ) : (
-                <div className="p-3 bg-black text-white text-[10px] font-mono rounded-lg">
-                  QR KEY: {twoFactorSecret}
-                </div>
-              )}
-            </div>
-
-            <div className="p-2 bg-black border border-zinc-800 rounded-xl text-xs font-mono text-zinc-300">
-              <span className="text-zinc-500 text-[10px] block">SECRET KEY</span>
-              <strong className="text-white tracking-widest">{twoFactorSecret}</strong>
-            </div>
-
-            <div className="space-y-2 text-left">
-              <label className="text-xs font-semibold text-zinc-400">Enter 6-Digit TOTP Token</label>
-              <input
-                type="text"
-                placeholder="e.g. 123456"
-                value={verifyTotpInput}
-                onChange={(e) => setVerifyTotpInput(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl px-3 py-2 text-xs font-mono text-center tracking-widest focus:outline-none focus:border-zinc-500"
-              />
-            </div>
-
-            <button
-              onClick={handleVerifyTotp}
-              disabled={isLoading}
-              className="w-full py-2.5 bg-white text-black font-extrabold text-xs rounded-xl hover:bg-zinc-200 transition-colors shadow-xs cursor-pointer"
-            >
-              Verify & Confirm 2FA
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

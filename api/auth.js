@@ -1,29 +1,71 @@
-import { parseRequestBody, findUserByEmail, saveUserToStore, supabase } from '../lib/authStore.js';
+import { 
+  parseRequestBody, 
+  findUserByEmail, 
+  findUserById,
+  findUserByGoogleSub,
+  findUserByPasskeyCredentialId,
+  saveUserToStore, 
+  supabase, 
+  createSession,
+  createAuthToken, 
+  sanitizeUser,
+  hashPassword,
+  verifyPassword,
+  checkRateLimit,
+  recordFailedAttempt,
+  clearFailedAttempts,
+  revokeSession,
+  revokeAllOtherSessions,
+  getUserSessions,
+  canRemoveAuthenticationMethod,
+  recordSecurityEvent
+} from '../lib/authStore.js';
+
+import {
+  createPasskeyRegistrationOptions,
+  verifyPasskeyRegistration,
+  createPasskeyAuthenticationOptions,
+  verifyPasskeyAuthentication
+} from '../lib/webauthnHelper.js';
+
+import { verifyGoogleToken } from '../lib/googleAuthHelper.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, X-Device-Id'
   );
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
     const action = req.query.action || (req.url ? req.url.split('?')[0].split('/').pop() : '');
     const body = parseRequestBody(req);
 
-    if (action === 'login' || req.url.includes('/login') || req.url.includes('auth-login')) {
+    if (action === 'login' || req.url.includes('/login')) {
       return await handleLogin(req, res, body);
-    } else if (action === 'register' || req.url.includes('/register') || req.url.includes('auth-register')) {
+    } else if (action === 'register' || req.url.includes('/register')) {
       return await handleRegister(req, res, body);
-    } else if (action === 'update-password' || req.url.includes('/update-password') || req.url.includes('auth-update-password')) {
+    } else if (action === 'update-password' || req.url.includes('/update-password')) {
       return await handleUpdatePassword(req, res, body);
+    } else if (action === 'google-verify' || req.url.includes('/google/verify')) {
+      return await handleGoogleVerify(req, res, body);
+    } else if (action === 'passkey-reg-opts' || req.url.includes('/passkey/register-options')) {
+      return await handlePasskeyRegOptions(req, res, body);
+    } else if (action === 'passkey-reg-verify' || req.url.includes('/passkey/register-verify')) {
+      return await handlePasskeyRegVerify(req, res, body);
+    } else if (action === 'passkey-auth-opts' || req.url.includes('/passkey/auth-options')) {
+      return await handlePasskeyAuthOptions(req, res, body);
+    } else if (action === 'passkey-auth-verify' || req.url.includes('/passkey/auth-verify')) {
+      return await handlePasskeyAuthVerify(req, res, body);
     }
 
+    if (body.credential || body.token && body.token.startsWith('ey')) {
+      return await handleGoogleVerify(req, res, body);
+    }
     if (body.newPassword) return await handleUpdatePassword(req, res, body);
     if (body.name || body.company) return await handleRegister(req, res, body);
     return await handleLogin(req, res, body);
@@ -43,52 +85,23 @@ async function handleLogin(req, res, body) {
   const cleanEmail = email.trim().toLowerCase();
   let user = findUserByEmail(cleanEmail);
 
-  if (user && user.password === password) {
-    console.log(`[VERCEL AUTH LOGIN SUCCESS] Authenticated via server store: ${cleanEmail}`);
-    return res.status(200).json({ success: true, user });
-  }
-
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: cleanEmail,
-      password: password
-    });
-
-    if (!error && data?.user) {
-      const meta = data.user.user_metadata || {};
-      const cloudUser = {
-        id: data.user.id || `usr_${Date.now()}`,
-        email: cleanEmail,
-        password: password,
-        name: meta.name || cleanEmail.split('@')[0],
-        company: meta.company || `${cleanEmail.split('@')[0]}'s Workspace`,
-        role: meta.role || 'Workspace Owner',
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
-        onboardingCompleted: false,
-        isEmailVerified: true,
-        twoFactorEnabled: false
-      };
-
-      saveUserToStore(cloudUser);
-      console.log(`[VERCEL AUTH LOGIN SUCCESS] Authenticated via Supabase Cloud: ${cleanEmail}`);
-      return res.status(200).json({ success: true, user: cloudUser });
+  if (user) {
+    const isValid = await verifyPassword(user.passwordCredential, password);
+    if (isValid) {
+      if (user.passwordCredential && !user.passwordCredential.hash.startsWith('$argon2')) {
+        user.passwordCredential.hash = await hashPassword(password);
+        user.passwordCredential.algorithm = 'argon2id';
+        saveUserToStore(user);
+      }
+      const { token } = createSession(user, req, { deviceId: req.headers['x-device-id'] });
+      return res.status(200).json({ success: true, user: sanitizeUser(user), token });
     }
-  } catch (sbErr) {
-    console.warn('[VERCEL AUTH LOGIN] Supabase query warning:', sbErr.message);
-  }
-
-  if (!user) {
-    return res.status(404).json({
-      success: false,
-      reason: 'EMAIL_NOT_FOUND',
-      message: 'No account found with this email address. Please create an account.'
-    });
   }
 
   return res.status(401).json({
     success: false,
-    reason: 'INVALID_PASSWORD',
-    message: 'Incorrect password. Please try again or reset your password.'
+    reason: 'INVALID_CREDENTIALS',
+    message: 'Incorrect email or password. Please try again.'
   });
 }
 
@@ -100,36 +113,38 @@ async function handleRegister(req, res, body) {
 
   const cleanEmail = email.trim().toLowerCase();
   const existing = findUserByEmail(cleanEmail);
+  if (existing) {
+    return res.status(400).json({ error: 'An account with this email address already exists. Please sign in.' });
+  }
+
+  const rawPass = password || 'Password123!';
+  const passwordHash = await hashPassword(rawPass);
 
   const newUser = {
-    id: existing?.id || `usr_${Date.now()}`,
+    id: `usr_${Date.now()}`,
     email: cleanEmail,
-    password: password || 'Password123!',
     name: name ? name.trim() : cleanEmail.split('@')[0],
     company: company ? company.trim() : `${cleanEmail.split('@')[0]}'s Workspace`,
     role: role || 'Workspace Owner',
     avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
     onboardingCompleted: false,
     isEmailVerified: true,
-    twoFactorEnabled: false
+    twoFactorEnabled: false,
+    passwordCredential: {
+      hash: passwordHash,
+      algorithm: 'argon2id',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    identities: [],
+    passkeys: [],
+    sessions: [],
+    securityEvents: []
   };
 
   saveUserToStore(newUser);
-
-  try {
-    await supabase.auth.signUp({
-      email: cleanEmail,
-      password: newUser.password,
-      options: {
-        data: { name: newUser.name, company: newUser.company, role: newUser.role }
-      }
-    });
-  } catch (e) {
-    console.warn('[VERCEL AUTH REGISTER] Supabase sync warning:', e.message);
-  }
-
-  console.log(`[VERCEL AUTH REGISTER SUCCESS] Registered: ${cleanEmail}`);
-  return res.status(200).json({ success: true, user: newUser });
+  const { token } = createSession(newUser, req, { deviceId: req.headers['x-device-id'] });
+  return res.status(200).json({ success: true, user: sanitizeUser(newUser), token });
 }
 
 async function handleUpdatePassword(req, res, body) {
@@ -142,30 +157,135 @@ async function handleUpdatePassword(req, res, body) {
   let user = findUserByEmail(cleanEmail);
 
   if (!user) {
+    return res.status(404).json({ error: 'User account not found.' });
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+  user.passwordCredential = {
+    hash: passwordHash,
+    algorithm: 'argon2id',
+    createdAt: user.passwordCredential?.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  saveUserToStore(user);
+  const { token } = createSession(user, req, { deviceId: req.headers['x-device-id'] });
+  return res.status(200).json({ success: true, message: 'Password updated successfully across all devices.', user: sanitizeUser(user), token });
+}
+
+async function handleGoogleVerify(req, res, body) {
+  const credentialToken = body.token || body.credential;
+  if (!credentialToken) {
+    return res.status(400).json({ error: 'Missing Google credential token.' });
+  }
+
+  const verified = await verifyGoogleToken(credentialToken);
+  const { googleSub, email, name, avatar, isEmailVerified } = verified;
+
+  let user = findUserByGoogleSub(googleSub) || (email ? findUserByEmail(email) : null);
+
+  if (!user) {
     user = {
       id: `usr_${Date.now()}`,
-      email: cleanEmail,
-      password: newPassword,
-      name: cleanEmail.split('@')[0],
-      company: `${cleanEmail.split('@')[0]}'s Workspace`,
+      email: email,
+      name: name || email.split('@')[0],
+      company: `${name || email.split('@')[0]}'s Workspace`,
       role: 'Workspace Owner',
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
+      avatar: avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(email)}`,
       onboardingCompleted: false,
-      isEmailVerified: true,
-      twoFactorEnabled: false
+      isEmailVerified: Boolean(isEmailVerified),
+      identities: [{ provider: 'google', sub: googleSub, email, linkedAt: new Date().toISOString() }],
+      passkeys: [],
+      sessions: [],
+      securityEvents: []
     };
   } else {
-    user.password = newPassword;
+    user.identities = user.identities || [];
+    if (!user.identities.some(i => i.provider === 'google' && i.sub === googleSub)) {
+      user.identities.push({ provider: 'google', sub: googleSub, email, linkedAt: new Date().toISOString() });
+    }
   }
 
   saveUserToStore(user);
+  const { token } = createSession(user, req, { deviceId: req.headers['x-device-id'] });
+  return res.status(200).json({ success: true, user: sanitizeUser(user), token });
+}
 
-  try {
-    await supabase.auth.updateUser({ password: newPassword });
-  } catch (e) {
-    console.warn('[VERCEL UPDATE PASSWORD] Supabase update warning:', e.message);
+async function handlePasskeyRegOptions(req, res, body) {
+  const { email } = body;
+  const user = email ? findUserByEmail(email) : null;
+  const { options, challengeId } = await createPasskeyRegistrationOptions(
+    user || { id: `usr_${Date.now()}`, email: email || 'user@skillbridge.io' },
+    user?.passkeys || [],
+    req
+  );
+  return res.json({ success: true, options, challengeId });
+}
+
+async function handlePasskeyRegVerify(req, res, body) {
+  const { response, challengeId, name, email } = body;
+  const { credential, userId } = await verifyPasskeyRegistration(response, challengeId, req);
+
+  let user = findUserById(userId) || (email ? findUserByEmail(email) : null);
+  if (!user) {
+    user = {
+      id: userId,
+      email: email || `user_${Date.now()}@skillbridge.io`,
+      name: (email || 'user').split('@')[0],
+      company: 'Workspace',
+      role: 'Workspace Owner',
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userId)}`,
+      onboardingCompleted: false,
+      isEmailVerified: true,
+      passkeys: [],
+      identities: [],
+      sessions: [],
+      securityEvents: []
+    };
   }
 
-  console.log(`[VERCEL UPDATE PASSWORD SUCCESS] Updated password for: ${cleanEmail}`);
-  return res.status(200).json({ success: true, message: 'Password updated successfully across all devices.', user });
+  const passkeyRecord = {
+    credentialId: credential.credentialId,
+    publicKey: credential.publicKey,
+    counter: credential.counter,
+    transports: credential.transports,
+    deviceType: credential.deviceType,
+    backedUp: credential.backedUp,
+    name: (name || 'Security Passkey').trim(),
+    createdAt: new Date().toISOString(),
+    lastUsedAt: new Date().toISOString(),
+    status: 'active'
+  };
+
+  user.passkeys = (user.passkeys || []).filter(p => p.credentialId !== passkeyRecord.credentialId);
+  user.passkeys.push(passkeyRecord);
+  saveUserToStore(user);
+
+  const { token } = createSession(user, req, { deviceId: req.headers['x-device-id'] });
+  return res.json({ success: true, user: sanitizeUser(user), credential: passkeyRecord, token });
+}
+
+async function handlePasskeyAuthOptions(req, res, body) {
+  const { email } = body;
+  const user = email ? findUserByEmail(email) : null;
+  const { options, challengeId } = await createPasskeyAuthenticationOptions(user, user?.passkeys || [], req);
+  return res.json({ success: true, options, challengeId });
+}
+
+async function handlePasskeyAuthVerify(req, res, body) {
+  const { response, challengeId } = body;
+  const credentialId = response.id;
+  const user = findUserByPasskeyCredentialId(credentialId);
+  if (!user) return res.status(401).json({ error: 'Unrecognized passkey credential.' });
+
+  const storedPasskey = (user.passkeys || []).find(p => p.credentialId === credentialId && p.status !== 'revoked');
+  if (!storedPasskey) return res.status(401).json({ error: 'Passkey is revoked.' });
+
+  const verificationResult = await verifyPasskeyAuthentication(response, storedPasskey, challengeId, req);
+  storedPasskey.counter = verificationResult.newCounter;
+  storedPasskey.lastUsedAt = new Date().toISOString();
+  saveUserToStore(user);
+
+  const { token } = createSession(user, req, { deviceId: req.headers['x-device-id'] });
+  return res.json({ success: true, user: sanitizeUser(user), token });
 }

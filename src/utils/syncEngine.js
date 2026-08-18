@@ -4,6 +4,7 @@
 class SyncEngine {
   constructor() {
     this.userId = null;
+    this.token = this.loadToken();
     this.deviceId = this.getOrCreateDeviceId();
     this.currentVersion = 1;
     this.syncStatus = 'synced'; // 'synced' | 'syncing' | 'saving' | 'offline' | 'changes_pending' | 'conflict'
@@ -23,6 +24,27 @@ class SyncEngine {
     this.initBroadcastChannel();
   }
 
+  loadToken() {
+    try {
+      return localStorage.getItem('sendaat_authToken') || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  setAuth(user, token = null) {
+    if (!user) return;
+    this.userId = String(user.id || user.userId).trim();
+    if (token) {
+      this.token = token;
+      try {
+        localStorage.setItem('sendaat_authToken', token);
+      } catch (e) {}
+    }
+    this.connectStream();
+    this.flushOfflineQueue();
+  }
+
   getOrCreateDeviceId() {
     try {
       let id = localStorage.getItem('sendaat_deviceId');
@@ -35,6 +57,17 @@ class SyncEngine {
     } catch (e) {
       return `dev_${Math.random().toString(36).substring(2, 9)}`;
     }
+  }
+
+  getAuthHeaders() {
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Device-Id': this.deviceId
+    };
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+    return headers;
   }
 
   initNetworkListeners() {
@@ -88,6 +121,7 @@ class SyncEngine {
 
     if (this.userId !== cleanUserId) {
       this.userId = cleanUserId;
+      this.token = this.token || this.loadToken();
       console.log(`[SYNC ENGINE] Initialized for User: ${cleanUserId} (Device: ${this.deviceId})`);
       this.connectStream();
       this.flushOfflineQueue();
@@ -103,7 +137,8 @@ class SyncEngine {
     }
 
     try {
-      const streamUrl = `/api/sync/stream?userId=${encodeURIComponent(this.userId)}&deviceId=${encodeURIComponent(this.deviceId)}`;
+      const tokenParam = this.token ? `&token=${encodeURIComponent(this.token)}` : '';
+      const streamUrl = `/api/sync/stream?userId=${encodeURIComponent(this.userId)}&deviceId=${encodeURIComponent(this.deviceId)}${tokenParam}`;
       this.eventSource = new EventSource(streamUrl);
 
       this.eventSource.onopen = () => {
@@ -159,15 +194,12 @@ class SyncEngine {
 
   // Hydrate full authoritative state from backend cloud memory
   async hydrate(userId = this.userId) {
-    const targetUserId = userId || this.userId || 'usr_maverick';
+    const targetUserId = userId || this.userId;
     this.setStatus('syncing');
 
     try {
-      const resp = await fetch(`/api/sync/hydrate?userId=${encodeURIComponent(targetUserId)}`, {
-        headers: {
-          'X-User-Id': targetUserId,
-          'X-Device-Id': this.deviceId
-        }
+      const resp = await fetch(`/api/sync/hydrate?userId=${encodeURIComponent(targetUserId || '')}`, {
+        headers: this.getAuthHeaders()
       });
 
       if (!resp.ok) {
@@ -241,11 +273,7 @@ class SyncEngine {
     try {
       const resp = await fetch('/api/sync/push', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-Id': this.userId,
-          'X-Device-Id': this.deviceId
-        },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify({
           userId: this.userId,
           deviceId: this.deviceId,
@@ -277,7 +305,7 @@ class SyncEngine {
 
   enqueueOfflineMutation(delta) {
     this.offlineQueue.push({
-      id: `mut_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      id: `mut_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       timestamp: new Date().toISOString(),
       clientVersion: this.currentVersion,
       deviceId: this.deviceId,
@@ -297,11 +325,7 @@ class SyncEngine {
     try {
       const resp = await fetch('/api/sync/batch', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-Id': this.userId,
-          'X-Device-Id': this.deviceId
-        },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify({
           userId: this.userId,
           deviceId: this.deviceId,
@@ -344,7 +368,9 @@ class SyncEngine {
   // Version History Helpers
   async getVersions(projectId = 'proj_default_campaign') {
     try {
-      const resp = await fetch(`/api/sync/versions?projectId=${encodeURIComponent(projectId)}&userId=${encodeURIComponent(this.userId || 'usr_maverick')}`);
+      const resp = await fetch(`/api/sync/versions?projectId=${encodeURIComponent(projectId)}&userId=${encodeURIComponent(this.userId || '')}`, {
+        headers: this.getAuthHeaders()
+      });
       if (resp.ok) {
         const data = await resp.json();
         return data.versions || [];
@@ -360,11 +386,7 @@ class SyncEngine {
     try {
       const resp = await fetch('/api/sync/restore', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-Id': this.userId || 'usr_maverick',
-          'X-Device-Id': this.deviceId
-        },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify({
           userId: this.userId,
           projectId: projectId,
@@ -391,11 +413,7 @@ class SyncEngine {
     try {
       const resp = await fetch('/api/sync/projects', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-Id': this.userId || 'usr_maverick',
-          'X-Device-Id': this.deviceId
-        },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify({
           ...project,
           userId: this.userId,
@@ -459,3 +477,4 @@ class SyncEngine {
 
 export const syncEngine = new SyncEngine();
 export default syncEngine;
+

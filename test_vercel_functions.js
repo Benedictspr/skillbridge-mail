@@ -80,17 +80,18 @@ async function runTests() {
   await authHandler(req5, res5);
   console.log('Result 5 status:', res5.statusCode, res5.data);
 
-  // Test 6: Sync Hydrate Handler via consolidated api/sync.js
+  // Test 6: Sync Hydrate Handler via consolidated api/sync.js (Authenticated)
   console.log('\nTest 6: api/sync?action=hydrate...');
+  const token = res5.data?.token;
   const req6 = {
     method: 'GET',
-    query: { action: 'hydrate', userId: 'usr_test_user' },
-    url: '/api/sync?action=hydrate&userId=usr_test_user',
-    headers: { 'x-user-id': 'usr_test_user' }
+    query: { action: 'hydrate' },
+    url: '/api/sync?action=hydrate',
+    headers: { 'Authorization': `Bearer ${token}` }
   };
   const res6 = createMockRes();
   await syncHandler(req6, res6);
-  console.log('Result 6 status:', res6.statusCode, 'version:', res6.data?.state?.version);
+  console.log('Result 6 status:', res6.statusCode, 'version:', res6.data?.state?.version, 'user:', res6.data?.userId);
 
   // Test 7: 2FA Generate Handler via consolidated api/2fa.js
   console.log('\nTest 7: api/2fa?action=generate...');

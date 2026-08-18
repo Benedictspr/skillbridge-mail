@@ -27,7 +27,7 @@ import {
   INITIAL_SUPPRESSION_LIST 
 } from './mockData';
 import { extractFirstNameFromEmail } from './utils/nameParser';
-import { getRegisteredUsers, registerUser } from './utils/userStore';
+import { getRegisteredUsers, registerUser, logoutUserAsync } from './utils/userStore';
 import syncEngine from './utils/syncEngine';
 
 export default function App() {
@@ -114,7 +114,10 @@ export default function App() {
     setActiveTab('dashboard');
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    try {
+      await logoutUserAsync();
+    } catch (e) {}
     setCurrentUser(null);
     setIsProfileModalOpen(false);
     setIsOnboardingWizardOpen(false);
@@ -166,9 +169,9 @@ export default function App() {
   const [smtpConfig, setSmtpConfig] = useState(() => {
     try {
       const saved = localStorage.getItem('sendaat_smtpConfig');
-      return saved ? JSON.parse(saved) : { mode: 'gmail', user: 'shaptsevjkonikevich@gmail.com', pass: 'smjpsmbbqhjvovcp' };
+      return saved ? JSON.parse(saved) : { mode: 'gmail', user: '', configured: false };
     } catch (e) {
-      return { mode: 'gmail', user: 'shaptsevjkonikevich@gmail.com', pass: 'smjpsmbbqhjvovcp' };
+      return { mode: 'gmail', user: '', configured: false };
     }
   });
 

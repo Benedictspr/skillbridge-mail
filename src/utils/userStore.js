@@ -1,336 +1,385 @@
-// Central User Registration & Authentication Storage helper with Supabase Cloud Sync
-import { supabase } from './supabaseClient';
+// Central User Registration & Authentication client utility for SkillBridge
+import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
 
-const DEFAULT_USERS = [
-  {
-    id: 'usr_default_admin',
-    email: 'maverick@sendaat.io',
-    password: 'Password123!',
-    name: 'Maverick Vance',
-    company: 'Sendaat Enterprise',
-    role: 'Infrastructure Lead',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
-    onboardingCompleted: true,
-    twoFactorEnabled: false,
-    twoFactorSecret: 'SENDAAT-2FA-784920'
-  },
-  {
-    id: 'usr_maverick',
-    email: 'm4verickjack@gmail.com',
-    password: 'Password123!',
-    name: 'Maverick Jack',
-    company: 'Sendaat Enterprise',
-    role: 'Workspace Owner',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
-    onboardingCompleted: true,
-    twoFactorEnabled: false,
-    twoFactorSecret: 'SENDAAT-2FA-991023'
-  },
-  {
-    id: 'usr_smtp_owner',
-    email: 'shaptsevjkonikevich@gmail.com',
-    password: 'Password123!',
-    name: 'Sendaat Admin',
-    company: 'Sendaat Network',
-    role: 'Platform Admin',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
-    onboardingCompleted: true,
-    twoFactorEnabled: false,
-    twoFactorSecret: 'SENDAAT-2FA-100293'
-  }
-];
-
-export function getRegisteredUsers() {
+export function getStoredAuthToken() {
   try {
-    const saved = localStorage.getItem('sendaat_registeredUsers');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const hasMaverick = parsed.some(u => u.email.toLowerCase() === 'm4verickjack@gmail.com');
-        if (!hasMaverick) {
-          const merged = [...parsed, DEFAULT_USERS[1]];
-          localStorage.setItem('sendaat_registeredUsers', JSON.stringify(merged));
-          return merged;
-        }
-        return parsed;
-      }
-    }
+    return localStorage.getItem('sendaat_authToken') || null;
   } catch (e) {
-    console.error('Error reading registered users:', e);
+    return null;
   }
-  
-  localStorage.setItem('sendaat_registeredUsers', JSON.stringify(DEFAULT_USERS));
-  return DEFAULT_USERS;
 }
 
-export async function registerUser(newUser) {
-  const users = getRegisteredUsers();
-  const cleanEmail = newUser.email.trim().toLowerCase();
-  const existing = users.find(u => u.email.toLowerCase() === cleanEmail);
-  
-  if (existing) {
-    throw new Error('An account with this email address already exists. Please sign in.');
-  }
-
-  const userRecord = {
-    id: 'usr_' + Date.now(),
-    email: cleanEmail,
-    password: newUser.password,
-    name: newUser.name ? newUser.name.trim() : cleanEmail.split('@')[0],
-    company: newUser.company ? newUser.company.trim() : `${cleanEmail.split('@')[0]}'s Workspace`,
-    role: newUser.role || 'Workspace Owner',
-    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
-    onboardingCompleted: false,
-    isEmailVerified: newUser.isEmailVerified ?? true,
-    twoFactorEnabled: newUser.twoFactorEnabled || false,
-    twoFactorSecret: newUser.twoFactorSecret || ('SENDAAT-2FA-' + Math.floor(100000 + Math.random() * 900000))
-  };
-
-  const updatedUsers = [...users, userRecord];
-  localStorage.setItem('sendaat_registeredUsers', JSON.stringify(updatedUsers));
-
-  // Sync to Central Backend Serverless API
+export function setStoredAuthToken(token) {
   try {
-    await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: cleanEmail,
-        password: newUser.password,
-        name: userRecord.name,
-        company: userRecord.company,
-        role: userRecord.role
-      })
-    });
-  } catch (err) {
-    console.warn('Central auth register sync warning:', err);
-  }
-
-  // Sync with Supabase Cloud DB
-  try {
-    const { data, error } = await supabase.auth.signUp({
-      email: cleanEmail,
-      password: newUser.password,
-      options: {
-        data: {
-          name: userRecord.name,
-          company: userRecord.company,
-          role: userRecord.role
-        }
-      }
-    });
-
-    if (error && !error.message?.includes('already registered')) {
-      console.warn('Supabase Auth warning during signup:', error.message);
+    if (token) {
+      localStorage.setItem('sendaat_authToken', token);
+    } else {
+      localStorage.removeItem('sendaat_authToken');
     }
-  } catch (err) {
-    console.warn('Supabase cloud signup sync warning:', err);
-  }
-
-  return userRecord;
+  } catch (e) {}
 }
 
-export function validateCredentials(email, password) {
-  const users = getRegisteredUsers();
+export function getStoredCurrentUser() {
+  try {
+    const raw = localStorage.getItem('sendaat_currentUser');
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export function setStoredCurrentUser(user) {
+  try {
+    if (user) {
+      localStorage.setItem('sendaat_currentUser', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('sendaat_currentUser');
+    }
+  } catch (e) {}
+}
+
+// 1. Password Registration
+export async function registerUserAsync({ email, password, name, company, role }) {
   const cleanEmail = (email || '').trim().toLowerCase();
-  
-  const user = users.find(u => u.email.toLowerCase() === cleanEmail);
-  
-  if (!user) {
-    return { 
-      success: false, 
-      reason: 'EMAIL_NOT_FOUND', 
-      message: 'No account found with this email address. Please create an account.' 
-    };
+  const resp = await fetch('/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: cleanEmail,
+      password: password || 'Password123!',
+      name: name ? name.trim() : cleanEmail.split('@')[0],
+      company: company ? company.trim() : `${cleanEmail.split('@')[0]}'s Workspace`,
+      role: role || 'Workspace Owner'
+    })
+  });
+
+  const data = await resp.json();
+  if (!resp.ok || !data.success) {
+    throw new Error(data.error || data.message || 'Failed to create account.');
   }
 
-  if (user.password !== password) {
-    return { 
-      success: false, 
-      reason: 'INVALID_PASSWORD', 
-      message: 'Incorrect password. Please try again or reset your password.' 
-    };
-  }
-
-  return { success: true, user };
+  if (data.token) setStoredAuthToken(data.token);
+  if (data.user) setStoredCurrentUser(data.user);
+  return data;
 }
 
-// ASYNC VALIDATE CREDENTIALS WITH CENTRAL SERVER & SUPABASE CLOUD BACKEND
+// 2. Password Login
 export async function validateCredentialsAsync(email, password) {
   const cleanEmail = (email || '').trim().toLowerCase();
-
-  // 1. Try Central Vercel Backend Auth first (for Cross-Device / Cross-Browser Logins)
   try {
     const resp = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: cleanEmail, password: password })
+      body: JSON.stringify({ email: cleanEmail, password })
     });
-    
+
     const data = await resp.json();
     if (resp.ok && data.success && data.user) {
-      // Sync and overwrite local storage cache on this device with verified server account
-      const users = getRegisteredUsers();
-      const updatedUsers = users.filter(u => u.email.toLowerCase() !== cleanEmail);
-      updatedUsers.push(data.user);
-      localStorage.setItem('sendaat_registeredUsers', JSON.stringify(updatedUsers));
-
-      return { success: true, user: data.user };
+      if (data.token) setStoredAuthToken(data.token);
+      if (data.user) setStoredCurrentUser(data.user);
+      return { success: true, user: data.user, token: data.token };
     }
-  } catch (backendErr) {
-    console.warn('Central Vercel auth check warning:', backendErr);
-  }
 
-  // 2. Query Supabase Cloud Authentication for cross-device logins
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: cleanEmail,
-      password: password
-    });
-
-    if (!error && data?.user) {
-      const meta = data.user.user_metadata || {};
-      const cloudUser = {
-        id: data.user.id || 'usr_' + Date.now(),
-        email: cleanEmail,
-        password: password,
-        name: meta.name || cleanEmail.split('@')[0],
-        company: meta.company || `${cleanEmail.split('@')[0]}'s Workspace`,
-        role: meta.role || 'Workspace Owner',
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
-        onboardingCompleted: false,
-        isEmailVerified: true,
-        twoFactorEnabled: false
-      };
-
-      // Cache locally on this device
-      const users = getRegisteredUsers();
-      const updatedUsers = users.filter(u => u.email.toLowerCase() !== cleanEmail);
-      updatedUsers.push(cloudUser);
-      localStorage.setItem('sendaat_registeredUsers', JSON.stringify(updatedUsers));
-
-      return { success: true, user: cloudUser };
-    }
+    return {
+      success: false,
+      reason: data.reason || 'INVALID_CREDENTIALS',
+      message: data.message || 'Invalid email or password.'
+    };
   } catch (err) {
-    console.warn('Supabase cloud authentication check warning:', err);
+    console.error('Login request error:', err);
+    return { success: false, message: 'Unable to connect to authentication server.' };
   }
-
-  // 3. Fallback to LocalStorage Check
-  return validateCredentials(cleanEmail, password);
 }
 
-// 90 Days in milliseconds (3 months)
-const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+// 3. Genuine WebAuthn / Passkey Registration
+export async function registerPasskeyAsync(passkeyName = 'My Device', email = null) {
+  const token = getStoredAuthToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
 
-export function validatePasswordReuse(email, newPassword) {
-  const users = getRegisteredUsers();
-  const cleanEmail = (email || '').trim().toLowerCase();
-  const user = users.find(u => u.email.toLowerCase() === cleanEmail);
-
-  if (!user) {
-    return { valid: true };
+  // Step 1: Get challenge options from server
+  const optResp = await fetch('/api/auth/passkey/register-options', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ email })
+  });
+  const optData = await optResp.json();
+  if (!optResp.ok || !optData.success) {
+    throw new Error(optData.error || 'Failed to initialize passkey registration.');
   }
 
-  if (user.password && user.password === newPassword) {
-    return {
-      valid: false,
-      message: 'You cannot reuse your current active password. Please choose a new password.'
-    };
+  // Step 2: Invoke Authenticator
+  const attResp = await startRegistration({ optionsJSON: optData.options });
+
+  // Step 3: Verify with Server
+  const verResp = await fetch('/api/auth/passkey/register-verify', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      response: attResp,
+      challengeId: optData.challengeId,
+      name: passkeyName,
+      email
+    })
+  });
+  const verData = await verResp.json();
+  if (!verResp.ok || !verData.success) {
+    throw new Error(verData.error || 'Failed to verify and save passkey.');
   }
 
-  const history = Array.isArray(user.passwordHistory) ? user.passwordHistory : [];
-  const now = Date.now();
+  if (verData.token) setStoredAuthToken(verData.token);
+  if (verData.user) setStoredCurrentUser(verData.user);
+  return verData;
+}
 
-  const isReusedRecent = history.some(entry => {
-    if (entry && entry.password === newPassword) {
-      const ageMs = now - (entry.setAt || 0);
-      return ageMs < NINETY_DAYS_MS;
-    }
-    return false;
+// 4. Genuine WebAuthn / Passkey Authentication
+export async function authenticatePasskeyAsync(email = null) {
+  // Step 1: Get challenge options from server
+  const optResp = await fetch('/api/auth/passkey/auth-options', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+  const optData = await optResp.json();
+  if (!optResp.ok || !optData.success) {
+    throw new Error(optData.error || 'Failed to initialize passkey login.');
+  }
+
+  // Step 2: Invoke Authenticator
+  const asstResp = await startAuthentication({ optionsJSON: optData.options });
+
+  // Step 3: Verify with Server
+  const verResp = await fetch('/api/auth/passkey/auth-verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      response: asstResp,
+      challengeId: optData.challengeId
+    })
+  });
+  const verData = await verResp.json();
+  if (!verResp.ok || !verData.success) {
+    throw new Error(verData.error || 'Passkey verification failed.');
+  }
+
+  if (verData.token) setStoredAuthToken(verData.token);
+  if (verData.user) setStoredCurrentUser(verData.user);
+  return verData;
+}
+
+// 5. Google Authentication / OIDC Token Verification
+export async function authenticateWithGoogleTokenAsync(googleToken) {
+  const resp = await fetch('/api/auth/google/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: googleToken })
   });
 
-  if (isReusedRecent) {
-    return {
-      valid: false,
-      message: 'You cannot reuse a password used within the last 3 months (90 days). Please choose a new password.'
-    };
+  const data = await resp.json();
+  if (!resp.ok || !data.success) {
+    throw new Error(data.error || 'Failed to verify Google identity.');
   }
 
+  if (data.token) setStoredAuthToken(data.token);
+  if (data.user) setStoredCurrentUser(data.user);
+  return data;
+}
+
+// 6. Link Google Identity
+export async function linkGoogleAccountAsync(googleToken) {
+  const token = getStoredAuthToken();
+  const resp = await fetch('/api/auth/google/link', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ token: googleToken })
+  });
+
+  const data = await resp.json();
+  if (!resp.ok || !data.success) {
+    throw new Error(data.error || 'Failed to link Google account.');
+  }
+  if (data.user) setStoredCurrentUser(data.user);
+  return data;
+}
+
+// 7. Unlink Google Identity
+export async function unlinkGoogleAccountAsync() {
+  const token = getStoredAuthToken();
+  const resp = await fetch('/api/auth/google/unlink', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  const data = await resp.json();
+  if (!resp.ok || !data.success) {
+    throw new Error(data.error || 'Failed to disconnect Google account.');
+  }
+  if (data.user) setStoredCurrentUser(data.user);
+  return data;
+}
+
+// 8. Password Change
+export async function updateUserPasswordAsync(newPassword, currentPassword = null) {
+  const token = getStoredAuthToken();
+  const resp = await fetch('/api/auth/update-password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ newPassword, currentPassword })
+  });
+
+  const data = await resp.json();
+  if (!resp.ok || !data.success) {
+    throw new Error(data.error || 'Failed to update password.');
+  }
+  if (data.token) setStoredAuthToken(data.token);
+  if (data.user) setStoredCurrentUser(data.user);
+  return data;
+}
+
+// 9. Passkey Management
+export async function listPasskeysAsync() {
+  const token = getStoredAuthToken();
+  const resp = await fetch('/api/auth/passkey/list', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return await resp.json();
+}
+
+export async function renamePasskeyAsync(credentialId, name) {
+  const token = getStoredAuthToken();
+  const resp = await fetch('/api/auth/passkey/rename', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ credentialId, name })
+  });
+  return await resp.json();
+}
+
+export async function revokePasskeyAsync(credentialId) {
+  const token = getStoredAuthToken();
+  const resp = await fetch('/api/auth/passkey/revoke', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ credentialId })
+  });
+  const data = await resp.json();
+  if (!resp.ok || !data.success) {
+    throw new Error(data.error || 'Failed to revoke passkey.');
+  }
+  if (data.user) setStoredCurrentUser(data.user);
+  return data;
+}
+
+// 10. Active Sessions Management
+export async function listActiveSessionsAsync() {
+  const token = getStoredAuthToken();
+  const resp = await fetch('/api/auth/sessions', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return await resp.json();
+}
+
+export async function revokeSessionAsync(sessionId) {
+  const token = getStoredAuthToken();
+  const resp = await fetch('/api/auth/sessions/revoke', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ sessionId })
+  });
+  return await resp.json();
+}
+
+export async function revokeOtherSessionsAsync() {
+  const token = getStoredAuthToken();
+  const resp = await fetch('/api/auth/sessions/revoke-others', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  return await resp.json();
+}
+
+// 11. Security Audit Events
+export async function listSecurityEventsAsync() {
+  const token = getStoredAuthToken();
+  const resp = await fetch('/api/auth/security-events', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return await resp.json();
+}
+
+// 12. Configured Methods
+export async function getAuthMethodsAsync() {
+  const token = getStoredAuthToken();
+  const resp = await fetch('/api/auth/methods', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return await resp.json();
+}
+
+// 13. Logout
+export async function logoutUserAsync() {
+  const token = getStoredAuthToken();
+  try {
+    if (token) {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    }
+  } catch (e) {}
+  setStoredAuthToken(null);
+  setStoredCurrentUser(null);
+}
+
+// Backward Compatibility Helpers for existing UI components
+export function getRegisteredUsers() {
+  const user = getStoredCurrentUser();
+  return user ? [user] : [];
+}
+
+export function registerUser(newUser) {
+  setStoredCurrentUser(newUser);
+  return newUser;
+}
+
+export function validatePasswordReuse(email, newPassword) {
   return { valid: true };
 }
 
+export function validateCredentials(email, password) {
+  return { success: false, message: 'Please sign in using server authentication.' };
+}
+
 export function updateUserPassword(email, newPassword) {
-  const check = validatePasswordReuse(email, newPassword);
-  if (!check.valid) {
-    throw new Error(check.message);
-  }
-
-  const users = getRegisteredUsers();
-  const cleanEmail = (email || '').trim().toLowerCase();
-  
-  let found = false;
-  const updatedUsers = users.map(u => {
-    if (u.email.toLowerCase() === cleanEmail) {
-      found = true;
-      const history = Array.isArray(u.passwordHistory) ? u.passwordHistory : [];
-      const newHistory = [
-        { password: u.password, setAt: Date.now() },
-        ...history
-      ];
-      return { 
-        ...u, 
-        password: newPassword,
-        passwordHistory: newHistory 
-      };
-    }
-    return u;
-  });
-
-  if (!found) {
-    // If not found locally, create record
-    updatedUsers.push({
-      id: 'usr_' + Date.now(),
-      email: cleanEmail,
-      password: newPassword,
-      name: cleanEmail.split('@')[0],
-      company: `${cleanEmail.split('@')[0]}'s Workspace`,
-      role: 'Workspace Owner',
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
-      onboardingCompleted: false,
-      isEmailVerified: true,
-      twoFactorEnabled: false
-    });
-  }
-
-  localStorage.setItem('sendaat_registeredUsers', JSON.stringify(updatedUsers));
-  
-  // Sync password update to Central Backend Serverless API
-  try {
-    fetch('/api/auth/update-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: cleanEmail, newPassword })
-    }).catch(() => {});
-  } catch (e) {}
-
-  // Sync password update to Supabase
-  try {
-    supabase.auth.updateUser({ password: newPassword }).catch(() => {});
-  } catch (e) {}
-
+  updateUserPasswordAsync(newPassword).catch(console.error);
   return true;
 }
 
 export function updateUserProfile(email, updatedData) {
-  const users = getRegisteredUsers();
-  const cleanEmail = (email || '').trim().toLowerCase();
-
-  const updatedUsers = users.map(u => {
-    if (u.email.toLowerCase() === cleanEmail) {
-      return { ...u, ...updatedData };
-    }
-    return u;
-  });
-
-  localStorage.setItem('sendaat_registeredUsers', JSON.stringify(updatedUsers));
+  const current = getStoredCurrentUser();
+  if (current) {
+    const updated = { ...current, ...updatedData };
+    setStoredCurrentUser(updated);
+  }
 }

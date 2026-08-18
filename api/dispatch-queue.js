@@ -2,8 +2,8 @@ import { createDynamicTransporter } from '../lib/smtpHelper.js';
 import { supabase } from '../lib/authStore.js';
 
 const SYSTEM_SMTP = {
-  user: process.env.SMTP_USER || 'shaptsevjkonikevich@gmail.com',
-  pass: process.env.SMTP_PASS || 'smjpsmbbqhjvovcp'
+  user: process.env.SMTP_USER || 'user@sendaat.io',
+  pass: process.env.SMTP_PASS || ''
 };
 
 function parseRequestBody(req) {
