@@ -3,7 +3,7 @@ import {
   X, User, Mail, Building2, Shield, LogOut, RefreshCw, 
   CheckCircle2, ShieldCheck, QrCode, Lock, Check, Key, 
   ExternalLink, Eye, EyeOff, Sparkles, HelpCircle, Server, Globe, ChevronDown, AlertCircle,
-  Fingerprint, Smartphone, Laptop, Trash2, Plus, Monitor, ShieldAlert, Cpu
+  Fingerprint, Smartphone, Laptop, Trash2, Plus, Monitor, ShieldAlert, Cpu, CheckCircle
 } from 'lucide-react';
 import { 
   updateUserProfile,
@@ -18,7 +18,8 @@ import {
   linkGoogleAccountAsync,
   unlinkGoogleAccountAsync,
   getAuthMethodsAsync,
-  ensureAuthTokenAsync
+  ensureAuthTokenAsync,
+  getAutoDetectedDeviceInfo
 } from '../../utils/userStore';
 import syncEngine from '../../utils/syncEngine';
 
@@ -32,13 +33,16 @@ export default function UserProfileModal({
   smtpConfig = {},
   setSmtpConfig
 }) {
-  const [activeTab, setActiveTab] = useState('security'); // Default to 'security' or 'profile'
+  const [activeTab, setActiveTab] = useState('security'); // Default to 'security'
 
   // User Profile Form State
   const [name, setName] = useState(currentUser?.name || '');
   const [email, setEmail] = useState(currentUser?.email || '');
   const [company, setCompany] = useState(currentUser?.company || '');
   const [role, setRole] = useState(currentUser?.role || 'Workspace Owner');
+
+  // Auto-Detected Device State
+  const [detectedDev, setDetectedDev] = useState(() => getAutoDetectedDeviceInfo());
 
   // Security & Authentication State (Real-Time Reactive)
   const [methodsStatus, setMethodsStatus] = useState({
@@ -58,7 +62,6 @@ export default function UserProfileModal({
   
   // Passkey Add Modal / Interactive Dialog State
   const [showAddPasskeyModal, setShowAddPasskeyModal] = useState(false);
-  const [selectedDevicePreset, setSelectedDevicePreset] = useState('MacBook Pro (Touch ID)');
   const [customPasskeyName, setCustomPasskeyName] = useState('');
   const [isAddingPasskey, setIsAddingPasskey] = useState(false);
 
@@ -101,9 +104,12 @@ export default function UserProfileModal({
     }
   }, [currentUser]);
 
-  // Load Real-Time Security Data on open or tab change
+  // Refresh auto-detected device information on open
   useEffect(() => {
     if (isOpen) {
+      const dev = getAutoDetectedDeviceInfo();
+      setDetectedDev(dev);
+      setCustomPasskeyName(dev.defaultPasskeyLabel);
       loadSecurityDetails();
     }
   }, [isOpen, activeTab]);
@@ -127,14 +133,14 @@ export default function UserProfileModal({
       if (sessionsData?.sessions && sessionsData.sessions.length > 0) {
         setSessionsList(sessionsData.sessions);
       } else {
-        // Fallback realistic current device session
+        const dev = getAutoDetectedDeviceInfo();
         setSessionsList([
           {
             sessionId: 'ses_current',
-            deviceName: 'Windows 11 • Chrome Browser',
-            browser: 'Chrome',
-            os: 'Windows',
-            deviceCategory: 'desktop',
+            deviceName: `${dev.hardwareName} • ${dev.browser}`,
+            browser: dev.browser,
+            os: dev.os,
+            deviceCategory: dev.deviceType,
             ip: '127.0.0.1',
             createdAt: new Date().toISOString(),
             lastActiveAt: new Date().toISOString(),
@@ -190,23 +196,22 @@ export default function UserProfileModal({
     }
   };
 
-  // 2. Add New Passkey (WebAuthn)
+  // 2. Add New Passkey (WebAuthn with Auto-Recognized Device)
   const handleExecuteAddPasskey = async () => {
     setErrorMsg('');
     setIsAddingPasskey(true);
-    const passkeyLabel = customPasskeyName.trim() || selectedDevicePreset;
+    const passkeyLabel = customPasskeyName.trim() || detectedDev.defaultPasskeyLabel;
 
     try {
       const result = await registerPasskeyAsync(passkeyLabel, email || currentUser.email);
       setIsAddingPasskey(false);
       setShowAddPasskeyModal(false);
-      setCustomPasskeyName('');
 
       // Update UI in real-time
       const newPasskeyItem = result.credential || {
         credentialId: `cred_${Date.now()}`,
         name: passkeyLabel,
-        deviceType: 'multiDevice',
+        deviceType: detectedDev.deviceType || 'multiDevice',
         createdAt: new Date().toISOString(),
         lastUsedAt: new Date().toISOString()
       };
@@ -270,7 +275,7 @@ export default function UserProfileModal({
     setIsLinkingGoogle(true);
 
     try {
-      const userGoogleEmail = email || currentUser.email || 'm4verickjack@gmail.com';
+      const userGoogleEmail = email || currentUser.email || 'user.google@skillbridge.io';
       const mockGoogleToken = `mock_google_:google_sub_linked_${Date.now()}:${userGoogleEmail}`;
       const result = await linkGoogleAccountAsync(mockGoogleToken);
       setIsLinkingGoogle(false);
@@ -365,14 +370,6 @@ export default function UserProfileModal({
     }, 1200);
   };
 
-  const devicePresets = [
-    'MacBook Pro (Touch ID)',
-    'iPhone / iPad (Face ID)',
-    'Windows Hello / Surface',
-    'YubiKey 5C NFC Security Key',
-    'Google Password Manager (Android)'
-  ];
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fade-in font-sans select-none">
       <div className="relative w-full max-w-2xl bg-[#121212] rounded-[24px] shadow-2xl border border-zinc-800 overflow-hidden text-white flex flex-col max-h-[90vh]">
@@ -446,9 +443,14 @@ export default function UserProfileModal({
 
         {/* Feedback Alerts */}
         {errorMsg && (
-          <div className="mx-6 mt-3 px-3.5 py-2.5 bg-rose-950/40 border border-rose-800/40 text-rose-400 text-xs rounded-xl font-medium flex items-center gap-2 animate-fade-in">
-            <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
-            <span>{errorMsg}</span>
+          <div className="mx-6 mt-3 px-3.5 py-2.5 bg-rose-950/40 border border-rose-800/40 text-rose-400 text-xs rounded-xl font-medium flex items-center justify-between gap-2 animate-fade-in">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+            <button onClick={() => setErrorMsg('')} className="text-rose-400/80 hover:text-rose-300">
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         )}
 
@@ -466,7 +468,7 @@ export default function UserProfileModal({
           {activeTab === 'security' && (
             <div className="space-y-6">
               
-              {/* 1. Configured Authentication Methods (Exact Photo 1 Styling) */}
+              {/* 1. Configured Authentication Methods */}
               <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-2xl space-y-3">
                 <h4 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
@@ -598,7 +600,7 @@ export default function UserProfileModal({
                 )}
               </div>
 
-              {/* 2. Registered WebAuthn Passkeys (Exact Photo 1 Styling) */}
+              {/* 2. Registered WebAuthn Passkeys with Auto Device Recognition */}
               <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
@@ -607,13 +609,18 @@ export default function UserProfileModal({
                       <span>FIDO2 / WebAuthn Passkeys</span>
                     </h4>
                     <p className="text-[11px] text-zinc-400 mt-0.5">
-                      Hardware keys, TouchID, FaceID, or synced password manager passkeys.
+                      Hardware keys, Windows Hello, TouchID, FaceID, or synced password manager passkeys.
                     </p>
                   </div>
 
                   <button
                     type="button"
-                    onClick={() => setShowAddPasskeyModal(true)}
+                    onClick={() => {
+                      const dev = getAutoDetectedDeviceInfo();
+                      setDetectedDev(dev);
+                      setCustomPasskeyName(dev.defaultPasskeyLabel);
+                      setShowAddPasskeyModal(true);
+                    }}
                     className="px-3 py-1.5 bg-white text-black hover:bg-zinc-200 rounded-xl font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -621,48 +628,52 @@ export default function UserProfileModal({
                   </button>
                 </div>
 
-                {/* Add Passkey Selection Dialog */}
+                {/* Auto Device Recognition Passkey Registration Card */}
                 {showAddPasskeyModal && (
-                  <div className="p-4 bg-black border border-zinc-700/80 rounded-xl space-y-3 animate-fade-in shadow-xl">
+                  <div className="p-4 bg-black border border-zinc-700/80 rounded-xl space-y-3.5 animate-fade-in shadow-xl">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-white text-xs">Register Passkey for this Device</span>
+                      <div className="flex items-center gap-2 font-semibold text-white text-xs">
+                        <Fingerprint className="w-4 h-4 text-emerald-400" />
+                        <span>Register Passkey for this Device</span>
+                      </div>
                       <button
                         type="button"
                         onClick={() => setShowAddPasskeyModal(false)}
-                        className="text-zinc-400 hover:text-white"
+                        className="text-zinc-400 hover:text-white cursor-pointer"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="block text-[10px] text-zinc-400">Choose Device Type / Preset:</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {devicePresets.map((preset) => (
-                          <button
-                            key={preset}
-                            type="button"
-                            onClick={() => {
-                              setSelectedDevicePreset(preset);
-                              setCustomPasskeyName(preset);
-                            }}
-                            className={`p-2 rounded-lg text-left text-xs border transition-all cursor-pointer ${
-                              selectedDevicePreset === preset
-                                ? 'bg-zinc-800 border-white text-white font-medium'
-                                : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700'
-                            }`}
-                          >
-                            {preset}
-                          </button>
-                        ))}
+                    {/* Auto-Recognized Device Banner */}
+                    <div className="p-3 bg-zinc-900/90 border border-emerald-800/40 rounded-xl flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-emerald-950/80 border border-emerald-700/50 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+                        {detectedDev.deviceType === 'smartphone' ? (
+                          <Smartphone className="w-4 h-4" />
+                        ) : (
+                          <Laptop className="w-4 h-4" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-950 px-1.5 py-0.2 rounded border border-emerald-800/50">
+                            Auto-Recognized
+                          </span>
+                          <span className="font-semibold text-white text-xs truncate">
+                            {detectedDev.authenticatorName}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-zinc-400 mt-0.5 truncate">
+                          {detectedDev.hardwareName} • {detectedDev.browser} on {detectedDev.os}
+                        </p>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-[10px] text-zinc-400 mb-1">Custom Passkey Label:</label>
+                      <label className="block text-[10px] text-zinc-400 mb-1">Passkey Device Label:</label>
                       <input
                         type="text"
-                        placeholder="e.g. Work MacBook Pro"
+                        placeholder="e.g. Work PC"
                         value={customPasskeyName}
                         onChange={(e) => setCustomPasskeyName(e.target.value)}
                         className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs outline-none focus:border-zinc-500"
@@ -684,7 +695,7 @@ export default function UserProfileModal({
                         className="px-4 py-1.5 bg-white text-black font-semibold rounded-lg hover:bg-zinc-200 cursor-pointer disabled:opacity-50 shadow-xs flex items-center gap-1.5"
                       >
                         <Fingerprint className="w-3.5 h-3.5" />
-                        <span>{isAddingPasskey ? 'Registering...' : 'Register Passkey'}</span>
+                        <span>{isAddingPasskey ? 'Registering with Authenticator...' : 'Register Passkey for this Device'}</span>
                       </button>
                     </div>
                   </div>
@@ -802,10 +813,10 @@ export default function UserProfileModal({
                   </h4>
                   <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
                     {securityEventsList.slice(0, 8).map((evt) => (
-                      <div key={evt.id} className="p-2 bg-black border border-zinc-900 rounded-lg flex items-center justify-between text-[11px]">
+                      <div key={evt.id || Math.random()} className="p-2 bg-black border border-zinc-900 rounded-lg flex items-center justify-between text-[11px]">
                         <span className="text-zinc-300 font-mono">{evt.event}</span>
                         <span className="text-zinc-500 text-[10px]">
-                          {new Date(evt.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          {new Date(evt.timestamp || Date.now()).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     ))}

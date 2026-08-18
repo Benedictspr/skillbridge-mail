@@ -32,7 +32,7 @@ import { verifyGoogleToken } from '../lib/googleAuthHelper.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader('Access-Control-Allow-Origin', req.headers?.origin || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
@@ -93,7 +93,7 @@ async function handleLogin(req, res, body) {
         user.passwordCredential.algorithm = 'argon2id';
         saveUserToStore(user);
       }
-      const { token } = createSession(user, req, { deviceId: req.headers['x-device-id'] });
+      const { token } = createSession(user, req, { deviceId: req.headers?.['x-device-id'] });
       return res.status(200).json({ success: true, user: sanitizeUser(user), token });
     }
   }
@@ -143,7 +143,7 @@ async function handleRegister(req, res, body) {
   };
 
   saveUserToStore(newUser);
-  const { token } = createSession(newUser, req, { deviceId: req.headers['x-device-id'] });
+  const { token } = createSession(newUser, req, { deviceId: req.headers?.['x-device-id'] });
   return res.status(200).json({ success: true, user: sanitizeUser(newUser), token });
 }
 
@@ -169,7 +169,7 @@ async function handleUpdatePassword(req, res, body) {
   };
 
   saveUserToStore(user);
-  const { token } = createSession(user, req, { deviceId: req.headers['x-device-id'] });
+  const { token } = createSession(user, req, { deviceId: req.headers?.['x-device-id'] });
   return res.status(200).json({ success: true, message: 'Password updated successfully across all devices.', user: sanitizeUser(user), token });
 }
 
@@ -207,7 +207,7 @@ async function handleGoogleVerify(req, res, body) {
   }
 
   saveUserToStore(user);
-  const { token } = createSession(user, req, { deviceId: req.headers['x-device-id'] });
+  const { token } = createSession(user, req, { deviceId: req.headers?.['x-device-id'] });
   return res.status(200).json({ success: true, user: sanitizeUser(user), token });
 }
 
@@ -261,7 +261,7 @@ async function handlePasskeyRegVerify(req, res, body) {
   user.passkeys.push(passkeyRecord);
   saveUserToStore(user);
 
-  const { token } = createSession(user, req, { deviceId: req.headers['x-device-id'] });
+  const { token } = createSession(user, req, { deviceId: req.headers?.['x-device-id'] });
   return res.json({ success: true, user: sanitizeUser(user), credential: passkeyRecord, token });
 }
 
