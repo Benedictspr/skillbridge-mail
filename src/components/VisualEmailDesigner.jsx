@@ -8,6 +8,7 @@ import DesignerPreviewModal from './designer/DesignerPreviewModal';
 import { TEMPLATES_LIST } from './designer/templatesData';
 import { exportToHtml } from './designer/htmlExporter';
 import { Send, Check, X, Code, Sparkles, FileText, CheckCircle2, Bookmark, Download, Menu, Sliders, PanelLeftOpen, PanelRightOpen, AlertCircle } from 'lucide-react';
+import syncEngine from '../utils/syncEngine';
 
 export default function VisualEmailDesigner({
   campaignConfig = {},
@@ -87,6 +88,22 @@ export default function VisualEmailDesigner({
     }
   };
 
+  // Listen for remote updates from other devices for email design
+  useEffect(() => {
+    const unsubscribe = syncEngine.subscribe((eventType, data) => {
+      if (eventType === 'REMOTE_UPDATE' && data.delta) {
+        if (data.delta.emailDesignerData) {
+          isUndoRedoAction.current = true;
+          setEmailData(data.delta.emailDesignerData);
+        }
+        if (data.delta.mySavedTemplates) {
+          setMySavedTemplates(data.delta.mySavedTemplates);
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Synchronize history & persistence when emailData changes
   useEffect(() => {
     if (isUndoRedoAction.current) {
@@ -103,6 +120,7 @@ export default function VisualEmailDesigner({
     const timer = setTimeout(() => {
       try {
         localStorage.setItem('sendaat_email_designer_data', JSON.stringify(emailData));
+        syncEngine.pushState({ emailDesignerData: emailData });
         if (setCampaignConfig) {
           startTransition(() => {
             setCampaignConfig(prev => ({
@@ -458,6 +476,7 @@ export default function VisualEmailDesigner({
     const updated = [newTmpl, ...mySavedTemplates];
     setMySavedTemplates(updated);
     localStorage.setItem('sendaat_my_saved_templates', JSON.stringify(updated));
+    syncEngine.pushState({ mySavedTemplates: updated });
     showToast(`Template "${templateName.trim()}" saved to "Saved" tab!`);
   };
 
@@ -465,6 +484,7 @@ export default function VisualEmailDesigner({
     const updated = mySavedTemplates.filter((st, idx) => (st.id || idx) !== id);
     setMySavedTemplates(updated);
     localStorage.setItem('sendaat_my_saved_templates', JSON.stringify(updated));
+    syncEngine.pushState({ mySavedTemplates: updated });
     showToast('Template deleted');
   };
 
@@ -476,6 +496,7 @@ export default function VisualEmailDesigner({
     });
     setMySavedTemplates(updated);
     localStorage.setItem('sendaat_my_saved_templates', JSON.stringify(updated));
+    syncEngine.pushState({ mySavedTemplates: updated });
     showToast('Template renamed');
   };
 
@@ -491,6 +512,7 @@ export default function VisualEmailDesigner({
     const updated = [dup, ...mySavedTemplates];
     setMySavedTemplates(updated);
     localStorage.setItem('sendaat_my_saved_templates', JSON.stringify(updated));
+    syncEngine.pushState({ mySavedTemplates: updated });
     showToast('Template duplicated');
   };
 

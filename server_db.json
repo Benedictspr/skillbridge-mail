@@ -4027,5 +4027,389 @@
       "onboardingCompleted": true,
       "twoFactorEnabled": false
     }
-  ]
+  ],
+  "userSyncStore": {
+    "usr_test_sync_101": {
+      "version": 16,
+      "lastUpdated": "2026-08-18T14:41:07.881Z",
+      "lastUpdatedByDevice": "dev_laptop_macbook_pro_01",
+      "userProfile": {
+        "id": "usr_test_sync_101",
+        "email": "user@sendaat.io",
+        "name": "user",
+        "company": "user's Workspace",
+        "role": "Workspace Owner",
+        "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=user%40sendaat.io",
+        "onboardingCompleted": true,
+        "twoFactorEnabled": false
+      },
+      "currentOrg": {
+        "id": "org_sendaat_1001",
+        "name": "Sendaat Enterprise",
+        "domain": "sendaat.io",
+        "role": "Workspace Owner",
+        "plan": "Enterprise Scale",
+        "verified": true
+      },
+      "theme": "dark",
+      "activeTab": "recipients",
+      "activeSuite": "mail",
+      "activeInboxTab": "primary",
+      "isSidebarCollapsed": true,
+      "campaignConfig": {
+        "subject": "Elevating Communication Workflows - Sendaat Enterprise",
+        "bodyText": "Hi {{first_name}},\n\nWe noticed your recent activity on Sendaat Enterprise. Our multi-tenant communication platform helps modern teams scale their email deliverability with 1-by-1 humanized pacing, real-time sync, and enterprise security.\n\nWould you be open for a quick demo this week?\n\nBest regards,\n{{sender_name}}",
+        "intervalSeconds": 5,
+        "useJitter": true,
+        "headerLogoText": "SENDAAT",
+        "buttonText": "Schedule 15-min Demo",
+        "buttonUrl": "https://sendaat.io",
+        "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+        "senderEmail": "m4verickjack@gmail.com",
+        "senderName": "Maverick Jack",
+        "htmlContent": ""
+      },
+      "smtpConfig": {
+        "mode": "gmail",
+        "user": "shaptsevjkonikevich@gmail.com",
+        "pass": "smjpsmbbqhjvovcp"
+      },
+      "recipients": [
+        {
+          "id": "rec-sync-1",
+          "firstName": "Elena",
+          "email": "elena@mit.edu",
+          "status": "Ready"
+        },
+        {
+          "id": "rec-sync-2",
+          "firstName": "Marcus",
+          "email": "marcus@oxford.ac.uk",
+          "status": "Ready"
+        }
+      ],
+      "suppressionList": [
+        {
+          "id": "sup-off-1",
+          "email": "bad@domain.com"
+        }
+      ],
+      "savedTemplates": [
+        {
+          "id": "tmpl-b1",
+          "name": "Mobile Follow-up Template",
+          "savedAt": "2026-08-18T14:41:07.843Z"
+        }
+      ],
+      "mySavedTemplates": [],
+      "emailDesignerData": null,
+      "apiKeys": [
+        {
+          "id": "key_default",
+          "name": "Default Production Key",
+          "key": "sk_live_sendaat_1001_99a4x28190c",
+          "createdAt": "2026-08-01",
+          "scope": "Full Access (read/write)",
+          "lastUsed": "Just now"
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj_default_campaign",
+          "name": "Enterprise Outreach Campaign",
+          "type": "email_builder",
+          "updatedAt": "2026-08-18T14:34:33.638Z",
+          "version": 1,
+          "thumbnail": "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=400",
+          "summary": "Primary email campaign for talent acquisition and outreach"
+        }
+      ]
+    },
+    "usr_isolated_user_202": {
+      "version": 1,
+      "lastUpdated": "2026-08-18T14:34:34.034Z",
+      "lastUpdatedByDevice": "system_init",
+      "userProfile": {
+        "id": "usr_isolated_user_202",
+        "email": "user@sendaat.io",
+        "name": "user",
+        "company": "user's Workspace",
+        "role": "Workspace Owner",
+        "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=user%40sendaat.io",
+        "onboardingCompleted": true,
+        "twoFactorEnabled": false
+      },
+      "currentOrg": {
+        "id": "org_sendaat_1001",
+        "name": "Sendaat Enterprise",
+        "domain": "sendaat.io",
+        "role": "Workspace Owner",
+        "plan": "Enterprise Scale",
+        "verified": true
+      },
+      "theme": "dark",
+      "activeTab": "dashboard",
+      "activeSuite": "mail",
+      "activeInboxTab": "primary",
+      "isSidebarCollapsed": true,
+      "campaignConfig": {
+        "subject": "Elevating Communication Workflows - Sendaat Enterprise",
+        "bodyText": "Hi {{first_name}},\n\nWe noticed your recent activity on Sendaat Enterprise. Our multi-tenant communication platform helps modern teams scale their email deliverability with 1-by-1 humanized pacing, real-time sync, and enterprise security.\n\nWould you be open for a quick demo this week?\n\nBest regards,\n{{sender_name}}",
+        "intervalSeconds": 5,
+        "useJitter": true,
+        "headerLogoText": "SENDAAT",
+        "buttonText": "Schedule 15-min Demo",
+        "buttonUrl": "https://sendaat.io",
+        "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+        "senderEmail": "m4verickjack@gmail.com",
+        "senderName": "Maverick Jack",
+        "htmlContent": ""
+      },
+      "smtpConfig": {
+        "mode": "gmail",
+        "user": "shaptsevjkonikevich@gmail.com",
+        "pass": "smjpsmbbqhjvovcp"
+      },
+      "recipients": [
+        {
+          "id": "rec-1",
+          "firstName": "Maverick",
+          "lastName": "Jack",
+          "email": "m4verickjack@gmail.com",
+          "company": "Sendaat Enterprise",
+          "role": "Platform Admin",
+          "status": "Ready",
+          "organization_id": "org_sendaat_1001"
+        },
+        {
+          "id": "rec-2",
+          "firstName": "Alex",
+          "lastName": "Rivera",
+          "email": "alex.rivera@stanford.edu",
+          "company": "Stanford University",
+          "role": "Graduate Researcher",
+          "status": "Ready",
+          "organization_id": "org_sendaat_1001"
+        },
+        {
+          "id": "rec-3",
+          "firstName": "Elena",
+          "lastName": "Rostova",
+          "email": "elena.rostova@mit.edu",
+          "company": "MIT Media Lab",
+          "role": "AI Specialist",
+          "status": "Ready",
+          "organization_id": "org_sendaat_1001"
+        },
+        {
+          "id": "rec-4",
+          "firstName": "Marcus",
+          "lastName": "Vance",
+          "email": "marcus.vance@oxford.ac.uk",
+          "company": "Oxford University",
+          "role": "Senior Fellow",
+          "status": "Ready",
+          "organization_id": "org_sendaat_1001"
+        }
+      ],
+      "suppressionList": [
+        {
+          "id": "sup-1",
+          "email": "spam-trap@competitor.com",
+          "reason": "Spam Trap Detected",
+          "addedAt": "2026-08-01"
+        },
+        {
+          "id": "sup-2",
+          "email": "bounced-hard@olddomain.net",
+          "reason": "Hard Bounce 550 Mailbox Not Found",
+          "addedAt": "2026-08-02"
+        }
+      ],
+      "savedTemplates": [],
+      "mySavedTemplates": [],
+      "emailDesignerData": null,
+      "apiKeys": [
+        {
+          "id": "key_default",
+          "name": "Default Production Key",
+          "key": "sk_live_sendaat_1001_99a4x28190c",
+          "createdAt": "2026-08-01",
+          "scope": "Full Access (read/write)",
+          "lastUsed": "Just now"
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj_default_campaign",
+          "name": "Enterprise Outreach Campaign",
+          "type": "email_builder",
+          "updatedAt": "2026-08-18T14:34:34.034Z",
+          "version": 1,
+          "thumbnail": "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=400",
+          "summary": "Primary email campaign for talent acquisition and outreach"
+        }
+      ]
+    }
+  },
+  "projectVersionStore": {
+    "proj_default_campaign": [
+      {
+        "version": 13,
+        "timestamp": "2026-08-18T14:41:07.861Z",
+        "deviceId": "dev_laptop_macbook_pro_01",
+        "userEmail": "user@sendaat.io",
+        "snapshot": {
+          "campaignConfig": {
+            "subject": "Global Talent Pipeline Q3 - Cross-Device Verified",
+            "bodyText": "Hello {{first_name}},\n\nYour portfolio is impressive! Let us connect.",
+            "intervalSeconds": 8,
+            "useJitter": true,
+            "headerLogoText": "SENDAAT",
+            "buttonText": "Schedule 15-min Demo",
+            "buttonUrl": "https://sendaat.io",
+            "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+            "senderEmail": "m4verickjack@gmail.com",
+            "senderName": "Alex Sync",
+            "htmlContent": ""
+          },
+          "emailDesignerData": {
+            "templateId": "custom-pro-hero",
+            "headerText": "SkillBridge Enterprise Talent",
+            "accentColor": "#10B981"
+          },
+          "recipientsCount": 2,
+          "theme": "dark"
+        }
+      },
+      {
+        "version": 11,
+        "timestamp": "2026-08-18T14:41:07.831Z",
+        "deviceId": "dev_laptop_macbook_pro_01",
+        "userEmail": "user@sendaat.io",
+        "snapshot": {
+          "campaignConfig": {
+            "subject": "Elevating Communication Workflows - Sendaat Enterprise",
+            "bodyText": "Hi {{first_name}},\n\nWe noticed your recent activity on Sendaat Enterprise. Our multi-tenant communication platform helps modern teams scale their email deliverability with 1-by-1 humanized pacing, real-time sync, and enterprise security.\n\nWould you be open for a quick demo this week?\n\nBest regards,\n{{sender_name}}",
+            "intervalSeconds": 5,
+            "useJitter": true,
+            "headerLogoText": "SENDAAT",
+            "buttonText": "Schedule 15-min Demo",
+            "buttonUrl": "https://sendaat.io",
+            "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+            "senderEmail": "m4verickjack@gmail.com",
+            "senderName": "Maverick Jack",
+            "htmlContent": ""
+          },
+          "emailDesignerData": null,
+          "recipientsCount": 2,
+          "theme": "dark"
+        }
+      },
+      {
+        "version": 8,
+        "timestamp": "2026-08-18T14:35:57.991Z",
+        "deviceId": "dev_laptop_macbook_pro_01",
+        "userEmail": "user@sendaat.io",
+        "snapshot": {
+          "campaignConfig": {
+            "subject": "Global Talent Pipeline Q3 - Cross-Device Verified",
+            "bodyText": "Hello {{first_name}},\n\nYour portfolio is impressive! Let us connect.",
+            "intervalSeconds": 8,
+            "useJitter": true,
+            "headerLogoText": "SENDAAT",
+            "buttonText": "Schedule 15-min Demo",
+            "buttonUrl": "https://sendaat.io",
+            "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+            "senderEmail": "m4verickjack@gmail.com",
+            "senderName": "Alex Sync",
+            "htmlContent": ""
+          },
+          "emailDesignerData": {
+            "templateId": "custom-pro-hero",
+            "headerText": "SkillBridge Enterprise Talent",
+            "accentColor": "#10B981"
+          },
+          "recipientsCount": 2,
+          "theme": "dark"
+        }
+      },
+      {
+        "version": 6,
+        "timestamp": "2026-08-18T14:35:57.958Z",
+        "deviceId": "dev_laptop_macbook_pro_01",
+        "userEmail": "user@sendaat.io",
+        "snapshot": {
+          "campaignConfig": {
+            "subject": "Elevating Communication Workflows - Sendaat Enterprise",
+            "bodyText": "Hi {{first_name}},\n\nWe noticed your recent activity on Sendaat Enterprise. Our multi-tenant communication platform helps modern teams scale their email deliverability with 1-by-1 humanized pacing, real-time sync, and enterprise security.\n\nWould you be open for a quick demo this week?\n\nBest regards,\n{{sender_name}}",
+            "intervalSeconds": 5,
+            "useJitter": true,
+            "headerLogoText": "SENDAAT",
+            "buttonText": "Schedule 15-min Demo",
+            "buttonUrl": "https://sendaat.io",
+            "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+            "senderEmail": "m4verickjack@gmail.com",
+            "senderName": "Maverick Jack",
+            "htmlContent": ""
+          },
+          "emailDesignerData": null,
+          "recipientsCount": 2,
+          "theme": "dark"
+        }
+      },
+      {
+        "version": 3,
+        "timestamp": "2026-08-18T14:34:34.005Z",
+        "deviceId": "dev_laptop_macbook_pro_01",
+        "userEmail": "user@sendaat.io",
+        "snapshot": {
+          "campaignConfig": {
+            "subject": "Global Talent Pipeline Q3 - Cross-Device Verified",
+            "bodyText": "Hello {{first_name}},\n\nYour portfolio is impressive! Let us connect.",
+            "intervalSeconds": 8,
+            "useJitter": true,
+            "headerLogoText": "SENDAAT",
+            "buttonText": "Schedule 15-min Demo",
+            "buttonUrl": "https://sendaat.io",
+            "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+            "senderEmail": "m4verickjack@gmail.com",
+            "senderName": "Alex Sync",
+            "htmlContent": ""
+          },
+          "emailDesignerData": {
+            "templateId": "custom-pro-hero",
+            "headerText": "SkillBridge Enterprise Talent",
+            "accentColor": "#10B981"
+          },
+          "recipientsCount": 2,
+          "theme": "dark"
+        }
+      },
+      {
+        "version": 1,
+        "timestamp": "2026-08-18T14:34:33.972Z",
+        "deviceId": "dev_laptop_macbook_pro_01",
+        "userEmail": "user@sendaat.io",
+        "snapshot": {
+          "campaignConfig": {
+            "subject": "Elevating Communication Workflows - Sendaat Enterprise",
+            "bodyText": "Hi {{first_name}},\n\nWe noticed your recent activity on Sendaat Enterprise. Our multi-tenant communication platform helps modern teams scale their email deliverability with 1-by-1 humanized pacing, real-time sync, and enterprise security.\n\nWould you be open for a quick demo this week?\n\nBest regards,\n{{sender_name}}",
+            "intervalSeconds": 5,
+            "useJitter": true,
+            "headerLogoText": "SENDAAT",
+            "buttonText": "Schedule 15-min Demo",
+            "buttonUrl": "https://sendaat.io",
+            "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+            "senderEmail": "m4verickjack@gmail.com",
+            "senderName": "Maverick Jack",
+            "htmlContent": ""
+          },
+          "emailDesignerData": null,
+          "recipientsCount": 4,
+          "theme": "dark"
+        }
+      }
+    ]
+  }
 }

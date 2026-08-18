@@ -18,6 +18,7 @@ import GmailComposeModal from './components/GmailComposeModal';
 import AuthPage from './components/auth/AuthPage';
 import OnboardingWizard from './components/auth/OnboardingWizard';
 import UserProfileModal from './components/auth/UserProfileModal';
+import VersionHistoryModal from './components/VersionHistoryModal';
 import { 
   INITIAL_RECIPIENTS, 
   INITIAL_CAMPAIGN, 
@@ -27,8 +28,10 @@ import {
 } from './mockData';
 import { extractFirstNameFromEmail } from './utils/nameParser';
 import { getRegisteredUsers, registerUser } from './utils/userStore';
+import syncEngine from './utils/syncEngine';
 
 export default function App() {
+  const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
   // 0. User Authentication & Onboarding State
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -244,41 +247,85 @@ export default function App() {
   useEffect(() => { campaignConfigRef.current = campaignConfig; }, [campaignConfig]);
   useEffect(() => { campaignStatusRef.current = campaignStatus; }, [campaignStatus]);
 
-  // Synchronize state with localStorage (Debounced to prevent blocking main thread / input delay)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try { localStorage.setItem('sendaat_currentOrg', JSON.stringify(currentOrg)); } catch (e) {}
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [currentOrg]);
+  const isRemoteUpdatingRef = useRef(false);
 
+  // 1. Hydrate authoritative cloud memory & listen for real-time remote updates from other devices/tabs
   useEffect(() => {
-    const timer = setTimeout(() => {
-      try { localStorage.setItem('sendaat_suppressionList', JSON.stringify(suppressionList)); } catch (e) {}
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [suppressionList]);
+    if (!currentUser?.id) return;
+    syncEngine.initUser(currentUser);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try { localStorage.setItem('sendaat_smtpConfig', JSON.stringify(smtpConfig)); } catch (e) {}
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [smtpConfig]);
+    let isMounted = true;
+    syncEngine.hydrate(currentUser.id).then(cloudState => {
+      if (!isMounted || !cloudState) return;
+      isRemoteUpdatingRef.current = true;
+      if (cloudState.theme) setTheme(cloudState.theme);
+      if (cloudState.currentOrg) setCurrentOrg(cloudState.currentOrg);
+      if (cloudState.suppressionList) setSuppressionList(cloudState.suppressionList);
+      if (cloudState.smtpConfig) setSmtpConfig(cloudState.smtpConfig);
+      if (Array.isArray(cloudState.recipients) && cloudState.recipients.length > 0) setRecipients(cloudState.recipients);
+      if (cloudState.campaignConfig) setCampaignConfig(cloudState.campaignConfig);
+      if (cloudState.activeTab) setActiveTab(cloudState.activeTab);
+      if (cloudState.activeSuite) setActiveSuite(cloudState.activeSuite);
+      setTimeout(() => { isRemoteUpdatingRef.current = false; }, 200);
+    });
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try { localStorage.setItem('sendaat_recipients', JSON.stringify(recipients)); } catch (e) {}
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [recipients]);
+    const unsubscribe = syncEngine.subscribe((eventType, data) => {
+      if (eventType === 'REMOTE_UPDATE' && data.delta) {
+        isRemoteUpdatingRef.current = true;
+        const d = data.delta;
+        if (d.theme !== undefined) setTheme(d.theme);
+        if (d.currentOrg !== undefined) setCurrentOrg(d.currentOrg);
+        if (d.suppressionList !== undefined) setSuppressionList(d.suppressionList);
+        if (d.smtpConfig !== undefined) setSmtpConfig(d.smtpConfig);
+        if (d.recipients !== undefined) setRecipients(d.recipients);
+        if (d.campaignConfig !== undefined) setCampaignConfig(d.campaignConfig);
+        if (d.activeTab !== undefined) setActiveTab(d.activeTab);
+        if (d.activeSuite !== undefined) setActiveSuite(d.activeSuite);
+        if (d.userProfile) setCurrentUser(prev => prev ? ({ ...prev, ...d.userProfile }) : prev);
+        setTimeout(() => { isRemoteUpdatingRef.current = false; }, 200);
+      }
+      if (eventType === 'VERSION_RESTORED' && data.state) {
+        isRemoteUpdatingRef.current = true;
+        const s = data.state;
+        if (s.theme) setTheme(s.theme);
+        if (s.campaignConfig) setCampaignConfig(s.campaignConfig);
+        if (s.recipients) setRecipients(s.recipients);
+        setTimeout(() => { isRemoteUpdatingRef.current = false; }, 200);
+      }
+    });
 
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [currentUser?.id]);
+
+  // 2. Debounced Cloud Synchronization & Local Storage Cache
   useEffect(() => {
-    const timer = setTimeout(() => {
-      try { localStorage.setItem('sendaat_campaignConfig', JSON.stringify(campaignConfig)); } catch (e) {}
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [campaignConfig]);
+    if (!currentUser?.id || isRemoteUpdatingRef.current) return;
+
+    // Cache locally
+    try {
+      localStorage.setItem('sendaat_currentOrg', JSON.stringify(currentOrg));
+      localStorage.setItem('sendaat_suppressionList', JSON.stringify(suppressionList));
+      localStorage.setItem('sendaat_smtpConfig', JSON.stringify(smtpConfig));
+      localStorage.setItem('sendaat_recipients', JSON.stringify(recipients));
+      localStorage.setItem('sendaat_campaignConfig', JSON.stringify(campaignConfig));
+      localStorage.setItem('sendaat_theme', theme);
+    } catch (e) {}
+
+    // Push to single authoritative cloud backend
+    syncEngine.pushState({
+      currentOrg,
+      suppressionList,
+      smtpConfig,
+      recipients,
+      campaignConfig,
+      theme,
+      activeTab,
+      activeSuite
+    });
+  }, [currentOrg, suppressionList, smtpConfig, recipients, campaignConfig, theme, activeTab, activeSuite, currentUser?.id]);
 
   const addLog = (message, type = 'info') => {
     const timeStr = new Date().toLocaleTimeString();
@@ -597,6 +644,7 @@ export default function App() {
         }}
         onSignOut={handleSignOut}
         recipients={recipients}
+        onOpenVersionHistory={() => setIsVersionHistoryOpen(true)}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -783,6 +831,15 @@ export default function App() {
         onRestartOnboarding={() => setIsOnboardingWizardOpen(true)}
         smtpConfig={smtpConfig}
         setSmtpConfig={setSmtpConfig}
+      />
+
+      <VersionHistoryModal
+        isOpen={isVersionHistoryOpen}
+        onClose={() => setIsVersionHistoryOpen(false)}
+        onRestoreComplete={(restoredState) => {
+          if (restoredState.campaignConfig) setCampaignConfig(restoredState.campaignConfig);
+          if (restoredState.theme) setTheme(restoredState.theme);
+        }}
       />
     </div>
   );

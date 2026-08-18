@@ -14,6 +14,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DB_FILE = path.join(__dirname, 'server_db.json');
 
+import { 
+  userSyncStore, 
+  projectVersionStore, 
+  getUserSyncData, 
+  updateUserSyncData, 
+  registerSseClient, 
+  broadcastToUser 
+} from './lib/syncStore.js';
+
 const app = express();
 const PORT = 3001;
 
@@ -168,6 +177,163 @@ function saveDatabase() {
 }
 
 loadDatabase();
+
+// --- Real-Time Cross-Device Synchronization & Persistent Cloud Memory Endpoints ---
+
+// 1. Real-time SSE Live Event Stream for instantaneous device-to-device synchronization
+app.get('/api/sync/stream', (req, res) => {
+  const userId = req.query.userId || req.headers['x-user-id'] || 'usr_maverick';
+  const deviceId = req.query.deviceId || req.headers['x-device-id'] || `device_${Date.now()}`;
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*'
+  });
+
+  const initMsg = JSON.stringify({
+    type: 'INIT_CONNECTED',
+    userId: userId,
+    deviceId: deviceId,
+    timestamp: new Date().toISOString()
+  });
+  res.write(`data: ${initMsg}\n\n`);
+
+  registerSseClient(userId, deviceId, res);
+
+  const keepAliveInterval = setInterval(() => {
+    try {
+      res.write(`:keep-alive\n\n`);
+    } catch (e) {
+      clearInterval(keepAliveInterval);
+    }
+  }, 15000);
+
+  req.on('close', () => {
+    clearInterval(keepAliveInterval);
+  });
+});
+
+// 2. Hydrate complete authoritative state for user on any device/browser
+app.get('/api/sync/hydrate', (req, res) => {
+  const userId = req.query.userId || req.headers['x-user-id'] || 'usr_maverick';
+  const userState = getUserSyncData(userId);
+  return res.json({
+    success: true,
+    userId: userId,
+    state: userState
+  });
+});
+
+// 3. Push state delta / updates with Optimistic Concurrency Control & Auto-Snapshotting
+app.post('/api/sync/push', (req, res) => {
+  const { userId, delta, deviceId, clientVersion } = req.body;
+  const targetUserId = userId || req.headers['x-user-id'] || 'usr_maverick';
+
+  try {
+    const result = updateUserSyncData(
+      targetUserId,
+      delta || req.body,
+      deviceId || req.headers['x-device-id'] || 'unknown_device',
+      clientVersion
+    );
+    return res.json(result);
+  } catch (err) {
+    return res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// 4. Projects Listing & Auto-Saving
+app.get('/api/sync/projects', (req, res) => {
+  const userId = req.query.userId || req.headers['x-user-id'] || 'usr_maverick';
+  const userState = getUserSyncData(userId);
+  return res.json({
+    success: true,
+    projects: userState?.projects || []
+  });
+});
+
+app.post('/api/sync/projects', (req, res) => {
+  const userId = req.body.userId || req.headers['x-user-id'] || 'usr_maverick';
+  const deviceId = req.body.deviceId || req.headers['x-device-id'] || 'unknown_device';
+  const userState = getUserSyncData(userId);
+
+  const newProj = {
+    id: req.body.id || `proj_${Date.now()}`,
+    name: req.body.name || 'Untitled Project',
+    type: req.body.type || 'email_builder',
+    updatedAt: new Date().toISOString(),
+    version: 1,
+    thumbnail: req.body.thumbnail || '',
+    data: req.body.data || {}
+  };
+
+  const projects = [...(userState.projects || []).filter(p => p.id !== newProj.id), newProj];
+  const updated = updateUserSyncData(userId, { projects, activeProjectId: newProj.id }, deviceId);
+  return res.json({ success: true, project: newProj, version: updated.version });
+});
+
+// 5. Version History Listing
+app.get('/api/sync/versions', (req, res) => {
+  const projectId = req.query.projectId || 'proj_default_campaign';
+  const versions = projectVersionStore[projectId] || [];
+  return res.json({
+    success: true,
+    projectId,
+    versions
+  });
+});
+
+// 6. Restore Version Snapshot
+app.post('/api/sync/restore', (req, res) => {
+  const { userId, projectId = 'proj_default_campaign', version, deviceId } = req.body;
+  const targetUserId = userId || req.headers['x-user-id'] || 'usr_maverick';
+
+  const list = projectVersionStore[projectId] || [];
+  const targetSnapshot = list.find(v => v.version === Number(version));
+
+  if (!targetSnapshot) {
+    return res.status(404).json({ success: false, error: `Version ${version} not found in history.` });
+  }
+
+  const delta = {
+    campaignConfig: targetSnapshot.snapshot.campaignConfig,
+    emailDesignerData: targetSnapshot.snapshot.emailDesignerData,
+    theme: targetSnapshot.snapshot.theme || 'dark'
+  };
+
+  const updated = updateUserSyncData(targetUserId, delta, deviceId || 'restore_device');
+  return res.json({
+    success: true,
+    message: `Restored snapshot v${version} successfully.`,
+    state: updated.state
+  });
+});
+
+// 7. Offline Mutation Queue Batch Flush
+app.post('/api/sync/batch', (req, res) => {
+  const { userId, mutations = [], deviceId } = req.body;
+  const targetUserId = userId || req.headers['x-user-id'] || 'usr_maverick';
+
+  let lastResult = null;
+  for (const mut of mutations) {
+    if (mut && mut.delta) {
+      lastResult = updateUserSyncData(
+        targetUserId,
+        mut.delta,
+        mut.deviceId || deviceId,
+        mut.clientVersion
+      );
+    }
+  }
+
+  return res.json({
+    success: true,
+    processedCount: mutations.length,
+    latestState: lastResult ? lastResult.state : getUserSyncData(targetUserId)
+  });
+});
 
 // --- Production Database User Authentication Endpoints ---
 

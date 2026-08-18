@@ -3,6 +3,7 @@ import {
   Key, Code, ShieldCheck, Copy, Check, Terminal, Zap, Globe, Layers, 
   Play, RefreshCw, Send, Server, FileText, CheckCircle2, AlertCircle, Cpu, Code2, Plus, Trash2, Shield, Eye, EyeOff
 } from 'lucide-react';
+import syncEngine from '../utils/syncEngine';
 
 export default function SkillBridgeApiView({ currentOrg }) {
   const [copiedKeyId, setCopiedKeyId] = useState(null);
@@ -27,6 +28,16 @@ export default function SkillBridgeApiView({ currentOrg }) {
     ];
   });
 
+  // Listen for remote updates for API keys
+  useEffect(() => {
+    const unsubscribe = syncEngine.subscribe((eventType, data) => {
+      if (eventType === 'REMOTE_UPDATE' && data.delta?.apiKeys) {
+        setApiKeys(data.delta.apiKeys);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   const [isCreateKeyModalOpen, setIsCreateKeyModalOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [newKeyScope, setNewKeyScope] = useState('Full Access (read/write)');
@@ -39,10 +50,11 @@ export default function SkillBridgeApiView({ currentOrg }) {
   };
   const apiKey = activeKeyObj.key;
 
-  // Persist API Keys
+  // Persist API Keys to Cloud and Local Cache
   useEffect(() => {
     try {
       localStorage.setItem('sendaat_apiKeys', JSON.stringify(apiKeys));
+      syncEngine.pushState({ apiKeys });
     } catch (e) {}
   }, [apiKeys]);
 

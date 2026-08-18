@@ -3,6 +3,7 @@ import {
   Search, SlidersHorizontal, Settings, RefreshCw, 
   ShieldCheck, X, Send, Check, User, LogOut, Shield, ChevronDown
 } from 'lucide-react';
+import SyncStatusBadge from './SyncStatusBadge';
 
 export default function AppHeader({ 
   searchTerm, 
@@ -18,7 +19,8 @@ export default function AppHeader({
   currentUser,
   onOpenProfile,
   onSignOut,
-  recipients = []
+  recipients = [],
+  onOpenVersionHistory
 }) {
   const [showToast, setShowToast] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -88,6 +90,9 @@ export default function AppHeader({
               <span>Sendaat deliverability metrics refreshed!</span>
             </div>
           )}
+
+          {/* Cross-Device Cloud Sync Status Badge */}
+          <SyncStatusBadge onOpenVersionHistory={onOpenVersionHistory} />
 
           {/* Real-Time Dynamic Sender Score */}
           <div 

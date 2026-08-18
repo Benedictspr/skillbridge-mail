@@ -34,6 +34,26 @@
       "destination": "/api/2fa?action=verify"
     },
     {
+      "source": "/api/sync/(.*)",
+      "destination": "/api/sync?action=$1"
+    },
+    {
+      "source": "/api/send-signup-otp",
+      "destination": "/api/send-email?action=send-signup-otp"
+    },
+    {
+      "source": "/api/send-reset-otp",
+      "destination": "/api/send-email?action=send-reset-otp"
+    },
+    {
+      "source": "/api/send-welcome-email",
+      "destination": "/api/send-email?action=send-welcome-email"
+    },
+    {
+      "source": "/api/test-gmail",
+      "destination": "/api/send-email?action=test-gmail"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },

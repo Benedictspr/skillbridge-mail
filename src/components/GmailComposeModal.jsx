@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Minus, Maximize2, Paperclip, Link, Trash2, ChevronDown, Save, Check, Plus, Bookmark } from 'lucide-react';
 import { EMAIL_TEMPLATES } from '../mockData';
+import syncEngine from '../utils/syncEngine';
 
 export default function GmailComposeModal({ 
   isOpen, 
@@ -17,7 +18,7 @@ export default function GmailComposeModal({
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
   const fileInputRef = useRef(null);
 
-  // Custom Saved Templates State (Persisted in localStorage)
+  // Custom Saved Templates State (Persisted in Cloud & LocalStorage)
   const [savedTemplates, setSavedTemplates] = useState(() => {
     try {
       const saved = localStorage.getItem('sendaat_savedTemplates');
@@ -39,9 +40,20 @@ export default function GmailComposeModal({
     return [];
   });
 
+  // Listen for remote updates
+  useEffect(() => {
+    const unsubscribe = syncEngine.subscribe((eventType, data) => {
+      if (eventType === 'REMOTE_UPDATE' && data.delta?.savedTemplates) {
+        setSavedTemplates(data.delta.savedTemplates);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   useEffect(() => {
     try {
       localStorage.setItem('sendaat_savedTemplates', JSON.stringify(savedTemplates));
+      syncEngine.pushState({ savedTemplates });
     } catch (e) {}
   }, [savedTemplates]);
 
