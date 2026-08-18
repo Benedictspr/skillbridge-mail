@@ -83,37 +83,37 @@ export default function SyncStatusBadge({ onOpenVersionHistory }) {
   const getStatusBadgeUI = () => {
     if (!syncState.isOnline || syncState.status === 'offline') {
       return {
-        bg: 'bg-rose-500/10 border-rose-500/30 text-rose-300',
+        bg: 'bg-rose-500/10 border-rose-500/30 text-rose-300 hover:bg-rose-500/20',
         dot: 'bg-rose-400',
         icon: <WifiOff className="w-3.5 h-3.5 text-rose-400" />,
-        text: syncState.pendingCount > 0 ? `Offline (${syncState.pendingCount} pending)` : 'Offline (Cached)'
+        tooltip: syncState.pendingCount > 0 ? `Offline (${syncState.pendingCount} pending)` : 'Offline (Cached)'
       };
     }
 
     if (syncState.status === 'saving' || syncState.status === 'syncing' || isManualSyncing) {
       return {
-        bg: 'bg-blue-500/10 border-blue-500/30 text-blue-300',
+        bg: 'bg-blue-500/10 border-blue-500/30 text-blue-300 hover:bg-blue-500/20',
         dot: 'bg-blue-400 animate-ping',
         icon: <RefreshCw className="w-3.5 h-3.5 text-blue-400 animate-spin" />,
-        text: 'Syncing...'
+        tooltip: 'Syncing changes...'
       };
     }
 
     if (syncState.status === 'changes_pending' || syncState.pendingCount > 0) {
       return {
-        bg: 'bg-amber-500/10 border-amber-500/30 text-amber-300',
+        bg: 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20',
         dot: 'bg-amber-400 animate-pulse',
         icon: <Clock className="w-3.5 h-3.5 text-amber-400" />,
-        text: `Changes pending (${syncState.pendingCount})`
+        tooltip: `Changes pending (${syncState.pendingCount})`
       };
     }
 
     // Default: Synced
     return {
-      bg: 'bg-emerald-500/10 border-emerald-500/25 text-emerald-300 hover:border-emerald-500/50',
+      bg: 'bg-emerald-500/10 border-emerald-500/25 text-emerald-300 hover:border-emerald-500/50 hover:bg-emerald-500/20',
       dot: 'bg-emerald-400',
       icon: <Cloud className="w-3.5 h-3.5 text-emerald-400" />,
-      text: 'Synced'
+      tooltip: `Cloud Synced (${relativeTime})`
     };
   };
 
@@ -121,22 +121,28 @@ export default function SyncStatusBadge({ onOpenVersionHistory }) {
 
   return (
     <div className="relative inline-block" ref={dropdownRef}>
+      {/* PHOTO 3: Icon-Only Status Badge Button */}
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className={`flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium border transition-all duration-200 cursor-pointer select-none backdrop-blur-sm ${badgeUI.bg}`}
-        title="Cross-Device Cloud Sync Status"
+        className={`flex items-center justify-center p-2 rounded-full border transition-all duration-200 cursor-pointer select-none backdrop-blur-sm shadow-xs ${badgeUI.bg}`}
+        title={badgeUI.tooltip}
+        aria-label="Cloud Sync Status"
       >
-        <span className="relative flex h-2 w-2">
+        <span className="relative flex h-2 w-2 mr-1">
           <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${badgeUI.dot}`} />
           <span className={`relative inline-flex rounded-full h-2 w-2 ${badgeUI.dot.split(' ')[0]}`} />
         </span>
         {badgeUI.icon}
-        <span className="hidden sm:inline font-mono tracking-tight">{badgeUI.text}</span>
-        <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''} text-zinc-400`} />
+        {syncState.pendingCount > 0 && (
+          <span className="ml-1 px-1 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/30 text-amber-300 border border-amber-500/40">
+            {syncState.pendingCount}
+          </span>
+        )}
       </button>
 
+      {/* Sync Dropdown Menu */}
       {isDropdownOpen && (
-        <div className="absolute right-0 mt-2 w-72 bg-[#121212] border border-zinc-800 rounded-xl shadow-2xl p-3.5 z-50 text-white animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-xl">
+        <div className="absolute right-0 mt-2 w-64 bg-[#121212] border border-zinc-800 rounded-2xl shadow-2xl p-3.5 z-50 text-white animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-xl">
           {/* Header */}
           <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-zinc-800/80">
             <div className="flex items-center gap-2">
@@ -172,27 +178,17 @@ export default function SyncStatusBadge({ onOpenVersionHistory }) {
                 {syncState.isOnline ? 'Live Real-Time SSE' : 'Offline Storage Queue'}
               </span>
             </div>
-
-            <div className="flex items-center justify-between py-1 px-2 rounded-lg bg-zinc-900/60 border border-zinc-800/50">
-              <span className="text-zinc-400 flex items-center gap-1.5 text-[11px]">
-                <Laptop className="w-3 h-3 text-zinc-500" />
-                Device ID
-              </span>
-              <span className="text-zinc-400 font-mono text-[10px] truncate max-w-[120px]" title={syncState.deviceId}>
-                {syncState.deviceId.split('_').slice(0, 2).join('_')}
-              </span>
-            </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="mt-3 pt-2.5 border-t border-zinc-800/80 grid grid-cols-2 gap-2">
+          {/* PHOTO 2: Icon-Only Action Buttons */}
+          <div className="mt-3 pt-2.5 border-t border-zinc-800/80 flex items-center justify-center gap-2">
             <button
               onClick={handleForceSync}
               disabled={isManualSyncing || !syncState.isOnline}
-              className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-900 text-xs font-medium text-zinc-200 border border-zinc-700 transition-colors disabled:opacity-50"
+              title="Sync Now"
+              className="flex-1 py-2 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-900 text-zinc-200 border border-zinc-700 transition-colors disabled:opacity-50 flex items-center justify-center cursor-pointer shadow-xs"
             >
-              <RefreshCw className={`w-3 h-3 ${isManualSyncing ? 'animate-spin' : ''}`} />
-              Sync Now
+              <RefreshCw className={`w-4 h-4 ${isManualSyncing ? 'animate-spin' : ''}`} />
             </button>
 
             {onOpenVersionHistory && (
@@ -201,10 +197,10 @@ export default function SyncStatusBadge({ onOpenVersionHistory }) {
                   setIsDropdownOpen(false);
                   onOpenVersionHistory();
                 }}
-                className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/5 text-xs font-medium text-white border border-white/10 transition-colors"
+                title="Version History Snapshots"
+                className="flex-1 py-2 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-900 text-zinc-200 border border-zinc-700 transition-colors flex items-center justify-center cursor-pointer shadow-xs"
               >
-                <History className="w-3 h-3" />
-                History
+                <History className="w-4 h-4" />
               </button>
             )}
           </div>

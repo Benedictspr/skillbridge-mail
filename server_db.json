@@ -4436,6 +4436,293 @@
       "passwordResetTokens": [],
       "createdAt": "2026-08-18T16:22:09.399Z",
       "updatedAt": "2026-08-18T16:22:09.412Z"
+    },
+    {
+      "id": "usr_1787073566488_f0007a70",
+      "email": "test.user.1787073565985@skillbridge.io",
+      "name": "Alex Hardening",
+      "company": "SkillBridge Core",
+      "role": "Workspace Owner",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=test.user.1787073565985%40skillbridge.io",
+      "onboardingCompleted": false,
+      "isEmailVerified": true,
+      "twoFactorEnabled": false,
+      "twoFactorSecret": null,
+      "identities": [
+        {
+          "provider": "google",
+          "sub": "google_sub_alex_1787073566679",
+          "email": "test.user.1787073565985@skillbridge.io",
+          "linkedAt": "2026-08-18T17:19:26.683Z"
+        }
+      ],
+      "passwordCredential": {
+        "hash": "$argon2id$v=19$m=19456,t=2,p=1$Gcd6tZvSK4oBuCewG2YOhg$vh9ZorColaRNVXc14O8a3givgIlhgkNYJuhGOz2IpV0",
+        "algorithm": "argon2id",
+        "createdAt": "2026-08-18T17:19:26.490Z",
+        "updatedAt": "2026-08-18T17:19:26.606Z"
+      },
+      "passkeys": [],
+      "sessions": [
+        {
+          "sessionId": "ses_1c8adaa523a1a51013e71c2f0ec01f7b",
+          "tokenHash": "987f0388a924f0878381d00eb91147dce1ce1e0f76549acf806fe46598b49b71",
+          "deviceId": "dev_1787073566500",
+          "deviceName": "Unknown OS • Unknown Browser",
+          "browser": "Unknown Browser",
+          "os": "Unknown OS",
+          "deviceCategory": "desktop",
+          "ip": "::1",
+          "createdAt": "2026-08-18T17:19:26.501Z",
+          "lastActiveAt": "2026-08-18T17:19:26.581Z",
+          "expiresAt": "2026-09-17T17:19:26.000Z",
+          "revoked": true
+        },
+        {
+          "sessionId": "ses_617af0662ef00cf7a934d19f77c608c4",
+          "tokenHash": "c2a5ab199881896331b81047e64e2f5e6a52dc3c06e9c9d12c8c85f4f42498dd",
+          "deviceId": "dev_1787073566612",
+          "deviceName": "Unknown OS • Unknown Browser",
+          "browser": "Unknown Browser",
+          "os": "Unknown OS",
+          "deviceCategory": "desktop",
+          "ip": "::1",
+          "createdAt": "2026-08-18T17:19:26.612Z",
+          "lastActiveAt": "2026-08-18T17:19:26.828Z",
+          "expiresAt": "2026-09-17T17:19:26.000Z",
+          "revoked": true
+        },
+        {
+          "sessionId": "ses_23be072cb90e5990057e17619cc0e1e1",
+          "tokenHash": "838c70fb8f413814376db6c3abac3a1c747fa75268b20f51486e3ca63009bb9a",
+          "deviceId": "dev_1787073566672",
+          "deviceName": "Unknown OS • Unknown Browser",
+          "browser": "Unknown Browser",
+          "os": "Unknown OS",
+          "deviceCategory": "desktop",
+          "ip": "::1",
+          "createdAt": "2026-08-18T17:19:26.672Z",
+          "lastActiveAt": "2026-08-18T17:19:26.672Z",
+          "expiresAt": "2026-09-17T17:19:26.000Z",
+          "revoked": true
+        },
+        {
+          "sessionId": "ses_220b98bf2a939c83270225aa150f23f1",
+          "tokenHash": "baf13b438ddb1ae74223d7550514a4786dff80f6c4c852a6ff36bb6ab492452a",
+          "deviceId": "dev_1787073566688",
+          "deviceName": "Unknown OS • Unknown Browser",
+          "browser": "Unknown Browser",
+          "os": "Unknown OS",
+          "deviceCategory": "desktop",
+          "ip": "::1",
+          "createdAt": "2026-08-18T17:19:26.688Z",
+          "lastActiveAt": "2026-08-18T17:19:26.688Z",
+          "expiresAt": "2026-09-17T17:19:26.000Z",
+          "revoked": true
+        },
+        {
+          "sessionId": "ses_17ea11ff7ce01d62815e3b5c2b066c4f",
+          "tokenHash": "55437aadd94095a14b0f9170a059f35ce57fa4c88e08942afa39324bfc9c7b68",
+          "deviceId": "dev_macbook_pro_audit",
+          "deviceName": "macOS • Unknown Browser",
+          "browser": "Unknown Browser",
+          "os": "macOS",
+          "deviceCategory": "desktop",
+          "ip": "::1",
+          "createdAt": "2026-08-18T17:19:26.854Z",
+          "lastActiveAt": "2026-08-18T17:19:26.854Z",
+          "expiresAt": "2026-09-17T17:19:26.000Z",
+          "revoked": true
+        },
+        {
+          "sessionId": "ses_78da08e7719dd11481d6928a5f3921d2",
+          "tokenHash": "80d5400e59b7fd6d393f166887d58edf012ee5ba2bacb6a77888ec69443bd73d",
+          "deviceId": "dev_iphone_audit",
+          "deviceName": "iOS • Unknown Browser",
+          "browser": "Unknown Browser",
+          "os": "iOS",
+          "deviceCategory": "mobile",
+          "ip": "::1",
+          "createdAt": "2026-08-18T17:19:26.888Z",
+          "lastActiveAt": "2026-08-18T17:19:26.910Z",
+          "expiresAt": "2026-09-17T17:19:26.000Z",
+          "revoked": false
+        }
+      ],
+      "securityEvents": [
+        {
+          "id": "evt_1787073566922_2rggf",
+          "event": "GOOGLE_LOGIN_SUCCESS",
+          "details": {
+            "googleSub": "google_sub_alex_1787073566679"
+          },
+          "ip": "::1",
+          "userAgent": "Direct API",
+          "timestamp": "2026-08-18T17:19:26.922Z"
+        },
+        {
+          "id": "evt_1787073566898_0da1j",
+          "event": "OTHER_SESSIONS_REVOKED",
+          "details": {
+            "countRevoked": 5
+          },
+          "ip": "127.0.0.1",
+          "userAgent": "Direct API",
+          "timestamp": "2026-08-18T17:19:26.898Z"
+        },
+        {
+          "id": "evt_1787073566888_cdjt8",
+          "event": "PASSWORD_LOGIN_SUCCESS",
+          "details": {},
+          "ip": "::1",
+          "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)",
+          "timestamp": "2026-08-18T17:19:26.888Z"
+        },
+        {
+          "id": "evt_1787073566854_zonyg",
+          "event": "PASSWORD_LOGIN_SUCCESS",
+          "details": {},
+          "ip": "::1",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+          "timestamp": "2026-08-18T17:19:26.854Z"
+        },
+        {
+          "id": "evt_1787073566683_c5017",
+          "event": "GOOGLE_LOGIN_SUCCESS",
+          "details": {
+            "googleSub": "google_sub_alex_1787073566679"
+          },
+          "ip": "::1",
+          "userAgent": "Direct API",
+          "timestamp": "2026-08-18T17:19:26.683Z"
+        },
+        {
+          "id": "evt_1787073566672_0j0pg",
+          "event": "PASSWORD_LOGIN_SUCCESS",
+          "details": {},
+          "ip": "::1",
+          "userAgent": "Direct API",
+          "timestamp": "2026-08-18T17:19:26.672Z"
+        },
+        {
+          "id": "evt_1787073566643_hfrq3",
+          "event": "PASSWORD_LOGIN_FAILED",
+          "details": {
+            "reason": "INVALID_CREDENTIALS"
+          },
+          "ip": "::1",
+          "userAgent": "Direct API",
+          "timestamp": "2026-08-18T17:19:26.643Z"
+        },
+        {
+          "id": "evt_1787073566607_8vikk",
+          "event": "PASSWORD_CHANGED",
+          "details": {},
+          "ip": "::1",
+          "userAgent": "Direct API",
+          "timestamp": "2026-08-18T17:19:26.607Z"
+        },
+        {
+          "id": "evt_1787073566574_m5vds",
+          "event": "PASSWORD_LOGIN_FAILED",
+          "details": {
+            "reason": "INVALID_CREDENTIALS"
+          },
+          "ip": "::1",
+          "userAgent": "Direct API",
+          "timestamp": "2026-08-18T17:19:26.574Z"
+        },
+        {
+          "id": "evt_1787073566539_ed7u4",
+          "event": "PASSWORD_LOGIN_SUCCESS",
+          "details": {},
+          "ip": "::1",
+          "userAgent": "Direct API",
+          "timestamp": "2026-08-18T17:19:26.539Z"
+        },
+        {
+          "id": "evt_1787073566490_g81t4",
+          "event": "ACCOUNT_REGISTERED_PASSWORD",
+          "details": {
+            "email": "test.user.1787073565985@skillbridge.io"
+          },
+          "ip": "::1",
+          "userAgent": "Direct API",
+          "timestamp": "2026-08-18T17:19:26.490Z"
+        }
+      ],
+      "recoveryMethods": [],
+      "passwordResetTokens": [],
+      "createdAt": "2026-08-18T17:19:26.490Z",
+      "updatedAt": "2026-08-18T17:19:26.922Z"
+    },
+    {
+      "id": "usr_1787073566692_09fd691d",
+      "email": "google.new.1787073566690@gmail.com",
+      "name": "google.new.1787073566690",
+      "company": "google.new.1787073566690's Workspace",
+      "role": "Workspace Owner",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=google.new.1787073566690%40gmail.com",
+      "onboardingCompleted": false,
+      "isEmailVerified": true,
+      "twoFactorEnabled": false,
+      "twoFactorSecret": null,
+      "identities": [
+        {
+          "provider": "google",
+          "sub": "google_sub_new_user_1787073566690",
+          "email": "google.new.1787073566690@gmail.com",
+          "linkedAt": "2026-08-18T17:19:26.692Z"
+        }
+      ],
+      "passwordCredential": null,
+      "passkeys": [],
+      "sessions": [
+        {
+          "sessionId": "ses_192fbc315e1bb9fe15a1284fb8fe16ba",
+          "tokenHash": "22dea22ab4ff040025757d28174e76e332545d21450f9f845dfa39dc875bf15d",
+          "deviceId": "dev_1787073566696",
+          "deviceName": "Unknown OS • Unknown Browser",
+          "browser": "Unknown Browser",
+          "os": "Unknown OS",
+          "deviceCategory": "desktop",
+          "ip": "::1",
+          "createdAt": "2026-08-18T17:19:26.696Z",
+          "lastActiveAt": "2026-08-18T17:19:26.696Z",
+          "expiresAt": "2026-09-17T17:19:26.000Z",
+          "revoked": false
+        },
+        {
+          "sessionId": "ses_77aeb3b47cc8d2903427da3166e828fb",
+          "tokenHash": "3a6cb2547f258b7303e94a52687d8958c483172e244d2c4b1ff2ae1f1681e270",
+          "deviceId": "dev_1787073566704",
+          "deviceName": "Unknown OS • Unknown Browser",
+          "browser": "Unknown Browser",
+          "os": "Unknown OS",
+          "deviceCategory": "desktop",
+          "ip": "::1",
+          "createdAt": "2026-08-18T17:19:26.704Z",
+          "lastActiveAt": "2026-08-18T17:19:26.704Z",
+          "expiresAt": "2026-09-17T17:19:26.000Z",
+          "revoked": false
+        }
+      ],
+      "securityEvents": [
+        {
+          "id": "evt_1787073566700_paodj",
+          "event": "GOOGLE_LOGIN_SUCCESS",
+          "details": {
+            "googleSub": "google_sub_new_user_1787073566690"
+          },
+          "ip": "::1",
+          "userAgent": "Direct API",
+          "timestamp": "2026-08-18T17:19:26.700Z"
+        }
+      ],
+      "recoveryMethods": [],
+      "passwordResetTokens": [],
+      "createdAt": "2026-08-18T17:19:26.692Z",
+      "updatedAt": "2026-08-18T17:19:26.704Z"
     }
   ],
   "userSyncStore": {
@@ -4566,8 +4853,8 @@
       ]
     },
     "usr_audit_alex_101": {
-      "version": 9,
-      "lastUpdated": "2026-08-18T16:42:27.092Z",
+      "version": 17,
+      "lastUpdated": "2026-08-18T17:19:45.132Z",
       "lastUpdatedByDevice": "unknown_device",
       "userProfile": {
         "id": "usr_audit_alex_101",
@@ -4662,9 +4949,18 @@
           "version": 1,
           "thumbnail": "",
           "data": {}
+        },
+        {
+          "id": "proj_1787073585037",
+          "name": "Audit Q3 Project",
+          "type": "email_builder",
+          "updatedAt": "2026-08-18T17:19:45.037Z",
+          "version": 1,
+          "thumbnail": "",
+          "data": {}
         }
       ],
-      "activeProjectId": "proj_1787071346962"
+      "activeProjectId": "proj_1787073585037"
     },
     "usr_audit_victim_202": {
       "version": 1,
@@ -4793,8 +5089,8 @@
       ]
     },
     "usr_test_sync_101": {
-      "version": 6,
-      "lastUpdated": "2026-08-18T16:44:14.223Z",
+      "version": 11,
+      "lastUpdated": "2026-08-18T17:20:31.520Z",
       "lastUpdatedByDevice": "dev_laptop_macbook_pro_01",
       "userProfile": {
         "id": "usr_test_sync_101",
@@ -4828,8 +5124,8 @@
         "buttonText": "Schedule 15-min Demo",
         "buttonUrl": "https://sendaat.io",
         "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
-        "senderEmail": "alex.sync@sendaat.io",
-        "senderName": "Alex Sync",
+        "senderEmail": "test.user.1787073565985@skillbridge.io",
+        "senderName": "Alex Hardening",
         "htmlContent": ""
       },
       "smtpConfig": {
@@ -4861,7 +5157,7 @@
         {
           "id": "tmpl-b1",
           "name": "Mobile Follow-up Template",
-          "savedAt": "2026-08-18T16:44:14.176Z"
+          "savedAt": "2026-08-18T17:20:31.478Z"
         }
       ],
       "mySavedTemplates": [],
@@ -5013,10 +5309,260 @@
           "summary": "Primary email campaign for talent acquisition and outreach"
         }
       ]
+    },
+    "usr_1787073566488_f0007a70": {
+      "version": 2,
+      "lastUpdated": "2026-08-18T17:19:26.911Z",
+      "lastUpdatedByDevice": "unknown_device",
+      "userProfile": {
+        "id": "usr_1787073566488_f0007a70",
+        "email": "test.user.1787073565985@skillbridge.io",
+        "name": "Alex Hardening",
+        "company": "SkillBridge Core",
+        "role": "Workspace Owner",
+        "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=test.user.1787073565985%40skillbridge.io",
+        "onboardingCompleted": false,
+        "twoFactorEnabled": false
+      },
+      "currentOrg": {
+        "id": "org_sendaat_1001",
+        "name": "Sendaat Enterprise",
+        "domain": "sendaat.io",
+        "role": "Workspace Owner",
+        "plan": "Enterprise Scale",
+        "verified": true
+      },
+      "theme": "dark",
+      "activeTab": "dashboard",
+      "activeSuite": "mail",
+      "activeInboxTab": "primary",
+      "isSidebarCollapsed": true,
+      "campaignConfig": {
+        "subject": "Cross-Device Multi-Method Security Hardened Campaign 2026",
+        "bodyText": "Verified across Google, Password, and Passkey logins.",
+        "intervalSeconds": 5,
+        "useJitter": true,
+        "headerLogoText": "SENDAAT",
+        "buttonText": "Schedule 15-min Demo",
+        "buttonUrl": "https://sendaat.io",
+        "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+        "senderEmail": "test.user.1787073565985@skillbridge.io",
+        "senderName": "Alex Hardening",
+        "htmlContent": ""
+      },
+      "smtpConfig": {
+        "mode": "gmail",
+        "user": "user@sendaat.io",
+        "configured": false
+      },
+      "recipients": [
+        {
+          "id": "rec-1",
+          "firstName": "Maverick",
+          "lastName": "Jack",
+          "email": "m4verickjack@gmail.com",
+          "company": "Sendaat Enterprise",
+          "role": "Platform Admin",
+          "status": "Ready",
+          "organization_id": "org_sendaat_1001"
+        },
+        {
+          "id": "rec-2",
+          "firstName": "Alex",
+          "lastName": "Rivera",
+          "email": "alex.rivera@stanford.edu",
+          "company": "Stanford University",
+          "role": "Graduate Researcher",
+          "status": "Ready",
+          "organization_id": "org_sendaat_1001"
+        },
+        {
+          "id": "rec-3",
+          "firstName": "Elena",
+          "lastName": "Rostova",
+          "email": "elena.rostova@mit.edu",
+          "company": "MIT Media Lab",
+          "role": "AI Specialist",
+          "status": "Ready",
+          "organization_id": "org_sendaat_1001"
+        },
+        {
+          "id": "rec-4",
+          "firstName": "Marcus",
+          "lastName": "Vance",
+          "email": "marcus.vance@oxford.ac.uk",
+          "company": "Oxford University",
+          "role": "Senior Fellow",
+          "status": "Ready",
+          "organization_id": "org_sendaat_1001"
+        }
+      ],
+      "suppressionList": [
+        {
+          "id": "sup-1",
+          "email": "spam-trap@competitor.com",
+          "reason": "Spam Trap Detected",
+          "addedAt": "2026-08-01"
+        },
+        {
+          "id": "sup-2",
+          "email": "bounced-hard@olddomain.net",
+          "reason": "Hard Bounce 550 Mailbox Not Found",
+          "addedAt": "2026-08-02"
+        }
+      ],
+      "savedTemplates": [],
+      "mySavedTemplates": [],
+      "emailDesignerData": null,
+      "apiKeys": [
+        {
+          "id": "key_default",
+          "name": "Default Production Key",
+          "key": "sk_live_sendaat_1001_fqxs0n4b",
+          "createdAt": "2026-08-01",
+          "scope": "Full Access (read/write)",
+          "lastUsed": "Just now"
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj_default_campaign",
+          "name": "Enterprise Outreach Campaign",
+          "type": "email_builder",
+          "updatedAt": "2026-08-18T17:19:26.719Z",
+          "version": 1,
+          "thumbnail": "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=400",
+          "summary": "Primary email campaign for talent acquisition and outreach"
+        }
+      ]
     }
   },
   "projectVersionStore": {
     "proj_default_campaign": [
+      {
+        "version": 8,
+        "timestamp": "2026-08-18T17:20:31.497Z",
+        "deviceId": "dev_laptop_macbook_pro_01",
+        "userEmail": "alex.sync@sendaat.io",
+        "snapshot": {
+          "campaignConfig": {
+            "subject": "Global Talent Pipeline Q3 - Cross-Device Verified",
+            "bodyText": "Hello {{first_name}},\n\nYour portfolio is impressive! Let us connect.",
+            "intervalSeconds": 8,
+            "useJitter": true,
+            "headerLogoText": "SENDAAT",
+            "buttonText": "Schedule 15-min Demo",
+            "buttonUrl": "https://sendaat.io",
+            "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+            "senderEmail": "alex.sync@sendaat.io",
+            "senderName": "Alex Sync",
+            "htmlContent": ""
+          },
+          "emailDesignerData": {
+            "templateId": "custom-pro-hero",
+            "headerText": "SkillBridge Enterprise Talent",
+            "accentColor": "#10B981"
+          },
+          "recipientsCount": 2,
+          "theme": "dark"
+        }
+      },
+      {
+        "version": 6,
+        "timestamp": "2026-08-18T17:20:31.462Z",
+        "deviceId": "dev_laptop_macbook_pro_01",
+        "userEmail": "alex.sync@sendaat.io",
+        "snapshot": {
+          "campaignConfig": {
+            "subject": "Elevating Communication Workflows - Sendaat Enterprise",
+            "bodyText": "Hi {{first_name}},\n\nWe noticed your recent activity on Sendaat Enterprise. Our multi-tenant communication platform helps modern teams scale their email deliverability with 1-by-1 humanized pacing, real-time sync, and enterprise security.\n\nWould you be open for a quick demo this week?\n\nBest regards,\n{{sender_name}}",
+            "intervalSeconds": 5,
+            "useJitter": true,
+            "headerLogoText": "SENDAAT",
+            "buttonText": "Schedule 15-min Demo",
+            "buttonUrl": "https://sendaat.io",
+            "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+            "senderEmail": "alex.sync@sendaat.io",
+            "senderName": "Alex Sync",
+            "htmlContent": ""
+          },
+          "emailDesignerData": null,
+          "recipientsCount": 2,
+          "theme": "dark"
+        }
+      },
+      {
+        "version": 16,
+        "timestamp": "2026-08-18T17:19:45.132Z",
+        "deviceId": "unknown_device",
+        "userEmail": "alex.audit@sendaat.io",
+        "snapshot": {
+          "campaignConfig": {
+            "subject": "Audit Subject Verified",
+            "bodyText": "Hi {{first_name}},\n\nWe noticed your recent activity on Sendaat Enterprise. Our multi-tenant communication platform helps modern teams scale their email deliverability with 1-by-1 humanized pacing, real-time sync, and enterprise security.\n\nWould you be open for a quick demo this week?\n\nBest regards,\n{{sender_name}}",
+            "intervalSeconds": 5,
+            "useJitter": true,
+            "headerLogoText": "SENDAAT",
+            "buttonText": "Schedule 15-min Demo",
+            "buttonUrl": "https://sendaat.io",
+            "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+            "senderEmail": "alex.audit@sendaat.io",
+            "senderName": "Alex Audit",
+            "htmlContent": ""
+          },
+          "emailDesignerData": null,
+          "recipientsCount": 1,
+          "theme": "light"
+        }
+      },
+      {
+        "version": 9,
+        "timestamp": "2026-08-18T17:19:45.016Z",
+        "deviceId": "unknown_device",
+        "userEmail": "alex.audit@sendaat.io",
+        "snapshot": {
+          "campaignConfig": {
+            "subject": "Confidential Enterprise Deal Q4 - User A Exclusive",
+            "bodyText": "Hi {{first_name}},\n\nWe noticed your recent activity on Sendaat Enterprise. Our multi-tenant communication platform helps modern teams scale their email deliverability with 1-by-1 humanized pacing, real-time sync, and enterprise security.\n\nWould you be open for a quick demo this week?\n\nBest regards,\n{{sender_name}}",
+            "intervalSeconds": 5,
+            "useJitter": true,
+            "headerLogoText": "SENDAAT",
+            "buttonText": "Schedule 15-min Demo",
+            "buttonUrl": "https://sendaat.io",
+            "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+            "senderEmail": "alex.audit@sendaat.io",
+            "senderName": "Alex Audit",
+            "htmlContent": ""
+          },
+          "emailDesignerData": null,
+          "recipientsCount": 1,
+          "theme": "light"
+        }
+      },
+      {
+        "version": 1,
+        "timestamp": "2026-08-18T17:19:26.911Z",
+        "deviceId": "unknown_device",
+        "userEmail": "test.user.1787073565985@skillbridge.io",
+        "snapshot": {
+          "campaignConfig": {
+            "subject": "Elevating Communication Workflows - Sendaat Enterprise",
+            "bodyText": "Hi {{first_name}},\n\nWe noticed your recent activity on Sendaat Enterprise. Our multi-tenant communication platform helps modern teams scale their email deliverability with 1-by-1 humanized pacing, real-time sync, and enterprise security.\n\nWould you be open for a quick demo this week?\n\nBest regards,\n{{sender_name}}",
+            "intervalSeconds": 5,
+            "useJitter": true,
+            "headerLogoText": "SENDAAT",
+            "buttonText": "Schedule 15-min Demo",
+            "buttonUrl": "https://sendaat.io",
+            "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+            "senderEmail": "test.user.1787073565985@skillbridge.io",
+            "senderName": "Alex Hardening",
+            "htmlContent": ""
+          },
+          "emailDesignerData": null,
+          "recipientsCount": 4,
+          "theme": "dark"
+        }
+      },
       {
         "version": 3,
         "timestamp": "2026-08-18T16:44:14.198Z",
@@ -5164,6 +5710,32 @@
           },
           "emailDesignerData": null,
           "recipientsCount": 4,
+          "theme": "dark"
+        }
+      }
+    ],
+    "proj_1787073585037": [
+      {
+        "version": 10,
+        "timestamp": "2026-08-18T17:19:45.037Z",
+        "deviceId": "unknown_device",
+        "userEmail": "alex.audit@sendaat.io",
+        "snapshot": {
+          "campaignConfig": {
+            "subject": "Audit Subject Verified",
+            "bodyText": "Hi {{first_name}},\n\nWe noticed your recent activity on Sendaat Enterprise. Our multi-tenant communication platform helps modern teams scale their email deliverability with 1-by-1 humanized pacing, real-time sync, and enterprise security.\n\nWould you be open for a quick demo this week?\n\nBest regards,\n{{sender_name}}",
+            "intervalSeconds": 5,
+            "useJitter": true,
+            "headerLogoText": "SENDAAT",
+            "buttonText": "Schedule 15-min Demo",
+            "buttonUrl": "https://sendaat.io",
+            "signatureText": "Best regards,\nMaverick Jack\nWorkspace Owner, Sendaat Enterprise",
+            "senderEmail": "alex.audit@sendaat.io",
+            "senderName": "Alex Audit",
+            "htmlContent": ""
+          },
+          "emailDesignerData": null,
+          "recipientsCount": 1,
           "theme": "dark"
         }
       }

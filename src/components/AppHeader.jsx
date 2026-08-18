@@ -25,12 +25,12 @@ export default function AppHeader({
   const [showToast, setShowToast] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
 
-  // Compute Real-Time Deliverability Sender Score
+  // Compute Real-Time Deliverability Sender Score (Unified across Header and Deliverability Center)
   const safeRecipients = Array.isArray(recipients) ? recipients : [];
   const totalCount = safeRecipients.length;
   const bouncedCount = safeRecipients.filter(r => r?.status === 'Bounced' || r?.status === 'Suppressed').length;
   const realTimeScore = totalCount > 0 
-    ? Math.max(78, Math.round(100 - (bouncedCount / totalCount) * 25)) 
+    ? Math.max(72, Math.min(100, Math.round(99 - ((bouncedCount / totalCount) * 35)))) 
     : (currentOrg?.reputationScore || 99);
 
   return (
